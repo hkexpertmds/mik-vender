@@ -384,7 +384,7 @@ def get_opening_balance():
     year = int(request.args.get('year'))
 
     # Fetch all transactions to avoid string comparison issues with dates
-    transactions_res = supabase.table('sys_trans').select('date, item, total').eq('cust', cust_name).eq('company', company).execute()
+    transactions_res = supabase.table('sys_trans').select('date, item, total, shift').eq('cust', cust_name).eq('company', company).neq('shift', 'General Bill').execute()
     transactions_all = transactions_res.data if transactions_res.data else []
 
     opening_balance = 0
