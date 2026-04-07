@@ -136,7 +136,7 @@
     <!-- PROFILE DROPDOWN MENU -->
     <div id="profile-dropdown" class="hidden" style="position: fixed; top: 60px; left: 20px; background: var(--card); border: 1px solid #475569; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 1000; overflow: hidden; display: flex; flex-direction: column; min-width: 180px;">
         <button onclick="showView('profile-view'); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">👤 1. Profile</button>
-        <button onclick="changeLanguage(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🌐 2. Language</button>
+        <button id="lang-btn" onclick="changeLanguage(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🌐 2. Language (हिंदी)</button>
         <button onclick="logout()" style="background: transparent; color: var(--danger); padding: 12px 20px; text-align: left; border-radius: 0; width: 100%; border: none;">🚪 3. Logout</button>
     </div>
 
@@ -181,7 +181,7 @@
         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
             <input type="text" id="regName" placeholder="Full Name" required>
             <input type="text" id="regCompany" placeholder="Dairy / Company Name" required>
-            <input type="number" id="regMobile" placeholder="Mobile Number" required>
+            <input type="text" id="regMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
             <input type="text" id="regEmail" placeholder="Email ID">
             <input type="text" id="regAddr" placeholder="Address">
             <input type="text" id="regUsername" placeholder="Create Login Username" required>
@@ -250,6 +250,7 @@
             <button id="btn-req" class="btn-save box-btn" style="background:#ea580c" onclick="showView('request-master')"><span style="font-size:28px; margin-bottom:8px;">📝</span>Customer Requests</button>
             <button id="btn-acc" class="btn-save box-btn" style="background:#1e40af" onclick="showView('accounts-user')"><span style="font-size:28px; margin-bottom:8px;">💰</span>Accounts Summary</button>
             <button id="btn-owner-master" class="btn-save box-btn" style="background:#6d28d9" onclick="showView('owner-master')"><span style="font-size:28px; margin-bottom:8px;">👑</span>Manage Owners</button>
+            <button id="btn-manual-bill" class="btn-save box-btn hidden" style="background:#0284c7" onclick="showView('general-bill-view')"><span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill</button>
             
             <button id="btn-self" class="btn-save box-btn" style="grid-column: 1 / -1; background:var(--primary); min-height:60px; flex-direction:row; gap:10px; font-size:16px;" onclick="showView('customer-self-view')"><span style="font-size:24px; margin:0;">📈</span>View Detailed My Report</button>
         </div>
@@ -259,9 +260,9 @@
     <div id="profile-view" class="container hidden">
         <h2>👤 My Profile</h2>
         <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
-            <img id="profPicPreview" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); margin-bottom:10px;">
+            <img id="profPicPreview" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('profPicInput').click()" title="Click to change picture">
             <input type="file" id="profPicInput" accept="image/*" style="display:none;" onchange="handleProfPic(event)">
-            <button id="btnChangePic" class="badge hidden" style="background:var(--primary); font-size: 14px; padding: 6px 12px;" onclick="document.getElementById('profPicInput').click()">📷 Change Picture</button>
+            <button id="btnChangePic" class="badge" style="background:var(--primary); font-size: 14px; padding: 6px 12px; margin-bottom: 10px;" onclick="document.getElementById('profPicInput').click()">📷 Change Picture</button>
         </div>
         <div id="owner-qr-section" class="hidden" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align:center;">
              <h3 style="margin-top:0; margin-bottom:10px; font-size: 16px;">💳 Payment QR Code</h3>
@@ -277,7 +278,7 @@
                 <input type="password" id="profPass" placeholder="New Password (leave blank to keep current)" style="margin:0; padding-right:35px;">
                 <span onclick="togglePasswordVisibility('profPass', 'profEye')" id="profEye" style="position:absolute; right:12px; top:10px; cursor:pointer;">👁️</span>
             </div>
-            <input type="text" id="profMobile" placeholder="Mobile / Phone" required>
+            <input type="text" id="profMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
             <input type="email" id="profEmail" placeholder="Email ID">
             <input type="text" id="profAddr" placeholder="Address">
         </div>
@@ -293,7 +294,7 @@
             <input type="text" id="uId" placeholder="System ID (Auto)" readonly style="opacity:0.7">
             <input type="text" id="uUsername" placeholder="Create Login Username (Optional)">
             <input type="text" id="uName" placeholder="Milk Man Name" required>
-            <input type="text" id="uMobile" placeholder="Mobile Number" required>
+            <input type="text" id="uMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
             <select id="uRoute" required>
                 <option value="">-- Select Route --</option>
             </select>
@@ -315,20 +316,20 @@
             <div class="grid-form">
                 <input type="hidden" id="editCustIdx">
                 <select id="cMilkMan" onchange="autoFillCustRoute()" required><option value="">-- Assign Milk Man --</option></select>
-                <div id="cSeqContainer" style="display: none; grid-column: 1 / -1; gap: 10px; width: 100%;">
+                <div id="cSeqContainer" style="display: flex; grid-column: 1 / -1; gap: 10px; width: 100%;">
                     <input type="number" id="cSeq" placeholder="Morning Seq No" style="flex: 1;">
                     <input type="number" id="cSeqEve" placeholder="Evening Seq No" style="flex: 1;">
                 </div>
                 <input type="text" id="cId" placeholder="System ID (Auto)" readonly style="opacity:0.7">
                 <input type="text" id="cUsername" placeholder="Create Login Username (Optional)">
                 <input type="text" id="cName" placeholder="Name" required>
-                <input type="text" id="cRoute" placeholder="Route / Area" tabindex="-1" required>
+                <input type="text" id="cRoute" placeholder="Route / Area" tabindex="-1" required readonly style="opacity:0.6; cursor:not-allowed; background:rgba(0,0,0,0.3);">
                 <select id="cShift" required><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option><option value="Both">🌅+🌃 Both</option></select>
                 <div style="position: relative; grid-column: 1 / -1;">
                     <input type="password" id="cPass" placeholder="Set Customer Password" style="margin: 0; padding-right: 35px;">
                     <span onclick="togglePasswordVisibility('cPass', 'cPassEyeIcon')" id="cPassEyeIcon" title="Show/Hide Password" style="position: absolute; right: 12px; top: 10px; cursor: pointer; user-select: none; font-size: 16px;">👁️</span>
                 </div>
-            <input type="text" id="cMobile" placeholder="Mobile Number" required>
+                <input type="text" id="cMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
                 <input type="text" id="cAddr" placeholder="Address">
                 <div style="grid-column: 1 / -1; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #475569;">
                     <h4 style="margin-top:0; margin-bottom:10px; color:var(--primary); font-size:14px;">Assign Items & Fixed Rates</h4>
@@ -380,13 +381,52 @@
                 <input type="date" id="feedCustomDate" onchange="setFeedDateCustom(this.value)" style="width:auto; padding:8px; margin:0;">
             </div>
 
+            <!-- FINAL DAILY REPORT (OUTSIDE SCROLL) -->
+            <div id="daily-feed-report" style="margin-bottom: 15px;"></div>
+
             <!-- NEW DAILY FEED VIEW -->
-            <div id="daily-feed-view" style="margin-bottom: 20px; max-height: 60vh; overflow-y: auto; padding-right: 10px;"></div>
+            <div id="daily-feed-view" style="margin-bottom: 20px; max-height: 45vh; overflow-y: auto; padding-right: 10px;"></div>
             </div>
             
             <div id="trans-tab-all" class="hidden">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0;">All Transactions</h3>
+                </div>
                 <table><thead><tr><th>Date</th><th>Customer</th><th>Item</th><th>Total</th><th>Actions</th></tr></thead><tbody id="transTableBody"></tbody></table>
             </div>
+        </div>
+    </div>
+
+    <!-- GENERAL BILL VIEW -->
+    <div id="general-bill-view" class="container hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>🧾 General Bills</h2>
+            <div><button id="tabGbNew" class="btn-tab active-tab" onclick="switchGbTab('new')">➕ New Bill</button><button id="tabGbOld" class="btn-tab" onclick="switchGbTab('old')">📋 Old Bills</button></div>
+        </div>
+
+        <div id="gb-tab-new">
+            <div class="grid-form">
+                <input type="date" id="gbDate" required>
+                <input type="text" id="gbCustName" placeholder="Customer Name" required>
+                <input type="text" id="gbMobile" placeholder="Mobile Number (Optional)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <select id="gbItemAdd" onchange="autoFillGbRate()" required><option value="">-- Select Product --</option></select>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="gbQtyAdd" placeholder="Qty" oninput="calcGbTotal()" required style="flex:1;">
+                    <input type="number" id="gbRateAdd" placeholder="Rate (₹)" oninput="calcGbTotal()" required style="flex:1;">
+                </div>
+            </div>
+            <div id="gbTotalDisplay" style="font-weight:bold; color:var(--success); margin-top:5px; font-size:18px; text-align:right;">Total: ₹0</div>
+            <button class="btn-save" style="margin-top:15px; font-size: 16px; padding: 12px;" onclick="saveGeneralBill()">Generate & Print Bill</button>
+        </div>
+
+        <div id="gb-tab-old" class="hidden">
+            <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; flex-wrap:wrap;">
+                <label style="font-size:14px; font-weight:bold; color:var(--primary);">📅 Filter by Date:</label>
+                <input type="date" id="gbFilterDate" onchange="renderGeneralBills()" style="width:auto; padding:8px; margin:0;">
+                <button class="btn-save" style="width:auto; padding:8px 15px; background:var(--warning); color:black;" onclick="document.getElementById('gbFilterDate').value=''; renderGeneralBills();">Clear Filter</button>
+            </div>
+            <div id="gbSummary" style="margin-bottom:15px; font-size:18px; font-weight:bold; color:var(--success); text-align:right;"></div>
+            <div style="overflow-x:auto;"><table><thead><tr><th>Bill No & Date</th><th>Customer</th><th>Item</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="gbTableBody"></tbody></table></div>
         </div>
     </div>
 
@@ -611,7 +651,7 @@
     <!-- Cropping Modal -->
     <div id="qrCropModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10001; display:flex; justify-content:center; align-items:center; padding:20px;">
         <div class="modal-box" style="background:var(--card); width:100%; max-width:600px; padding:20px; border-radius:12px; max-height:90vh; display:flex; flex-direction:column; border:1px solid #475569;">
-            <h3 style="margin-top:0;">Crop QR Code</h3>
+            <h3 id="cropModalTitle" style="margin-top:0;">Crop Image</h3>
             <div style="flex:1; overflow:hidden; display:flex; justify-content:center; align-items:center; margin-bottom:15px;">
                 <img id="qrCropImage" style="max-width:100%; max-height:100%; display:block;">
             </div>
@@ -647,11 +687,9 @@
 
         // 🚀 SPEED FIX: Hardcoded 'RICK-PC' se local network me DNS resolution me 2-3 seconds lagte hain.
         // Ab dynamic base URL use hoga (0 delay).
-        //const API_BASE = (window.location.hostname === '' || window.location.protocol === 'file:') 
-                         //? 'http://127.0.0.1:5000/api' 
-                         //: window.location.origin + '/api';
         const API_BASE = (window.location.hostname === '' || window.location.protocol === 'file:') 
-                         ? 'http://rick-pc:5000/api' 
+                         ? 'http://rick-pc:5000/api'
+                        // ? 'http://127.0.0.1:5000/api' 
                          : window.location.origin + '/api';
         let currentUser = null;
         let currentLoginRole = '';
@@ -822,8 +860,82 @@
             }
         }
 
+        const translations = {
+            'en': {
+                'btn-route': '<span style="font-size:28px; margin-bottom:8px;">🗺️</span>Manage Routes',
+                'btn-um': '<span style="font-size:28px; margin-bottom:8px;">🛵</span>Manage Milk Men',
+                'btn-prod': '<span style="font-size:28px; margin-bottom:8px;">📦</span>Manage Products',
+                'btn-lm-owner': '<span style="font-size:28px; margin-bottom:8px;">📖</span>Customer Ledger',
+                'btn-lm-mm': '<span style="font-size:28px; margin-bottom:8px;">📝</span>Customers & Entries',
+                'btn-req': '<span style="font-size:28px; margin-bottom:8px;">📝</span>Customer Requests',
+                'btn-acc': '<span style="font-size:28px; margin-bottom:8px;">💰</span>Accounts Summary',
+                'btn-owner-master': '<span style="font-size:28px; margin-bottom:8px;">👑</span>Manage Owners',
+                'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill',
+                'btn-self': '<span style="font-size:24px; margin:0;">📈</span>View Detailed My Report',
+                'tabCust': 'Customers', 'tabTrans': 'Entries',
+                'tabTransFeed': '🗓️ Daily Feed', 'tabTransAll': '📊 All Transactions',
+                'btnShiftM': '🌅 Morning', 'btnShiftE': '🌃 Evening',
+                'tabSelfStatement': '📊 Statement', 'tabSelfOrder': '🛒 My Order', 'tabSelfReq': '💬 Requests', 'tabSelfPay': '💸 Payment',
+                'langBtn': '🌐 2. Language (हिंदी)'
+            },
+            'hi': {
+                'btn-route': '<span style="font-size:28px; margin-bottom:8px;">🗺️</span>रूट (Routes)',
+                'btn-um': '<span style="font-size:28px; margin-bottom:8px;">🛵</span>दूध वाले (Milk Men)',
+                'btn-prod': '<span style="font-size:28px; margin-bottom:8px;">📦</span>प्रोडक्ट और रेट',
+                'btn-lm-owner': '<span style="font-size:28px; margin-bottom:8px;">📖</span>कस्टमर खाता',
+                'btn-lm-mm': '<span style="font-size:28px; margin-bottom:8px;">📝</span>कस्टमर और एंट्री',
+                'btn-req': '<span style="font-size:28px; margin-bottom:8px;">📝</span>कस्टमर रिक्वेस्ट',
+                'btn-acc': '<span style="font-size:28px; margin-bottom:8px;">💰</span>हिसाब और रिपोर्ट',
+                'btn-owner-master': '<span style="font-size:28px; margin-bottom:8px;">👑</span>ओनर मैनेज करें',
+                'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>जनरल बिल',
+                'btn-self': '<span style="font-size:24px; margin:0;">📈</span>मेरी रिपोर्ट देखें',
+                'tabCust': 'कस्टमर्स', 'tabTrans': 'एंट्री',
+                'tabTransFeed': '🗓️ डेली एंट्री', 'tabTransAll': '📊 सभी एंट्री',
+                'btnShiftM': '🌅 सुबह', 'btnShiftE': '🌃 शाम',
+                'tabSelfStatement': '📊 मेरा खाता', 'tabSelfOrder': '🛒 मेरा ऑर्डर', 'tabSelfReq': '💬 मैसेज', 'tabSelfPay': '💸 पेमेंट',
+                'langBtn': '🌐 2. Language (English)'
+            }
+        };
+
+        let currentLang = localStorage.getItem('appLang') || 'en';
+
         function changeLanguage() {
-            alert("Language change feature coming soon! (Hindi / English)");
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            localStorage.setItem('appLang', currentLang);
+            applyTranslations();
+        }
+
+        function applyTranslations() {
+            const dict = translations[currentLang];
+            if(!dict) return;
+            
+            const setHtml = (id, html) => { let el = document.getElementById(id); if(el) el.innerHTML = html; };
+            
+            setHtml('btn-route', dict['btn-route']);
+            setHtml('btn-um', dict['btn-um']);
+            setHtml('btn-prod', dict['btn-prod']);
+            if(currentUser && currentUser.type === 'Milk Man') setHtml('btn-lm', dict['btn-lm-mm']);
+            else setHtml('btn-lm', dict['btn-lm-owner']);
+            setHtml('btn-req', dict['btn-req']);
+            setHtml('btn-acc', dict['btn-acc']);
+            setHtml('btn-owner-master', dict['btn-owner-master']);
+            setHtml('btn-manual-bill', dict['btn-manual-bill']);
+            setHtml('btn-self', dict['btn-self']);
+            
+            setHtml('tabCust', dict['tabCust']);
+            setHtml('tabTrans', dict['tabTrans']);
+            setHtml('tabTransFeed', dict['tabTransFeed']);
+            setHtml('tabTransAll', dict['tabTransAll']);
+            setHtml('btnShiftM', dict['btnShiftM']);
+            setHtml('btnShiftE', dict['btnShiftE']);
+            
+            setHtml('tabSelfStatement', dict['tabSelfStatement']);
+            setHtml('tabSelfOrder', dict['tabSelfOrder']);
+            setHtml('tabSelfReq', dict['tabSelfReq']);
+            setHtml('tabSelfPay', dict['tabSelfPay']);
+
+            let langBtn = document.getElementById('lang-btn');
+            if(langBtn) langBtn.innerHTML = dict['langBtn'];
         }
 
         // Close dropdown when clicking outside
@@ -846,16 +958,22 @@
         let cropper; // Global variable for Cropper instance
         let currentProfilePicBase64 = "";
         let currentQrCodeBase64 = "";
+        let currentCropTarget = "qr";
 
         function handleProfPic(e) {
             const file = e.target.files[0];
             if(!file) return;
             const reader = new FileReader();
             reader.onload = function(evt) {
-                currentProfilePicBase64 = evt.target.result;
-                document.getElementById('profPicPreview').src = currentProfilePicBase64;
+                currentCropTarget = "profile";
+                document.getElementById('cropModalTitle').innerText = "Crop Profile Picture";
+                document.getElementById('qrCropImage').src = evt.target.result;
+                document.getElementById('qrCropModal').classList.remove('hidden');
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(document.getElementById('qrCropImage'), { aspectRatio: 1, viewMode: 1, autoCropArea: 0.8, background: false });
             };
             reader.readAsDataURL(file);
+            e.target.value = '';
         }
 
         function handleQrCodePic(e) {
@@ -865,8 +983,8 @@
 
             const reader = new FileReader();
             reader.onload = function(evt) {
-                currentQrCodeBase64 = evt.target.result;
-                document.getElementById('qrCodePreview').src = currentQrCodeBase64;
+                currentCropTarget = "qr";
+                document.getElementById('cropModalTitle').innerText = "Crop QR Code";
                 const qrCropImage = document.getElementById('qrCropImage');
                 qrCropImage.src = evt.target.result;
 
@@ -885,13 +1003,22 @@
                 });
             };
             reader.readAsDataURL(file);
+            e.target.value = '';
         }
 
         function cropQrCode() {
             if (cropper) {
                 const croppedCanvas = cropper.getCroppedCanvas({ width: 200, height: 200, fillColor: '#fff' });
-                currentQrCodeBase64 = croppedCanvas.toDataURL('image/png');
-                document.getElementById('qrCodePreview').src = currentQrCodeBase64;
+                const croppedBase64 = croppedCanvas.toDataURL('image/png');
+                if (currentCropTarget === 'profile') {
+                    currentProfilePicBase64 = croppedBase64;
+                    document.getElementById('profPicPreview').src = currentProfilePicBase64;
+                } else {
+                    currentQrCodeBase64 = croppedBase64;
+                    document.getElementById('qrCodePreview').src = currentQrCodeBase64;
+                }
+                document.getElementById('btnSaveProfile').classList.remove('hidden');
+                document.getElementById('btnEditProfile').classList.add('hidden');
                 closeQrCropModal();
             }
         }
@@ -914,6 +1041,12 @@
             data.name = document.getElementById('profName').value;
             data.profile_pic = currentProfilePicBase64;
             data.mobile = document.getElementById('profMobile').value;
+            
+            if (data.mobile && data.mobile.length !== 10) {
+                alert("Mobile Number must be exactly 10 digits!");
+                btn.innerText = "Update Profile";
+                return;
+            }
             
             let table = 'users';
             if (currentUser.type === 'Customer') {
@@ -952,6 +1085,15 @@
                     if (custIndex > -1) customers[custIndex] = finalObject;
                 }
                 currentUser = finalObject;
+                
+                // Fix for Login Error: Update cached session with immutable ID instead of old mobile/username
+                let sessionAuth = JSON.parse(localStorage.getItem('sessionAuth'));
+                if (sessionAuth) {
+                    sessionAuth.login_id = currentUser.login_id || currentUser.cid;
+                    localStorage.setItem('sessionAuth', JSON.stringify(sessionAuth));
+                }
+                localStorage.setItem('sessionUser', JSON.stringify(currentUser));
+                
                 alert("Profile Updated Successfully!");
                 setupUI(); showView('main-menu');
                 setupUI(); showView('profile-view');
@@ -1064,6 +1206,7 @@
                 mobile: document.getElementById('regMobile').value
             };
             if(!data.name || !data.username || !data.city || data.city.length !== 2 || !data.pass || !data.company || !data.mobile) return alert("Please fill all required fields and select a State / District!");
+            if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             
             const res = await fetch(`${API_BASE}/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             const result = await res.json();
@@ -1205,7 +1348,6 @@
             const isMilkMan = currentUser.type === 'Milk Man';
             
             document.getElementById('btn-um').classList.toggle('hidden', isCust || isMilkMan);
-            document.getElementById('btn-lm').innerHTML = isMilkMan ? '<span style="font-size:28px; margin-bottom:8px;">📝</span>Customers & Entries' : '<span style="font-size:28px; margin-bottom:8px;">📖</span>Customer Ledger';
             document.getElementById('btn-lm').classList.toggle('hidden', isCust);
             document.getElementById('btn-acc').classList.toggle('hidden', isCust || isMilkMan);
             document.getElementById('btn-self').classList.toggle('hidden', !isCust);
@@ -1213,6 +1355,9 @@
             document.getElementById('btn-req').classList.toggle('hidden', isCust);
             document.getElementById('btn-route').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
             document.getElementById('btn-owner-master').classList.toggle('hidden', currentUser.type !== 'Admin'); // Only Admin can see this
+            if(document.getElementById('btn-manual-bill')) document.getElementById('btn-manual-bill').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
+            
+            applyTranslations();
         }
 
         function showView(id) {
@@ -1265,9 +1410,8 @@
                     }
                 });
                 document.getElementById('profPassWrapper').classList.add('hidden');
-                document.getElementById('btnChangePic').classList.add('hidden');
                 if (document.getElementById('profPassWrapper')) document.getElementById('profPassWrapper').classList.add('hidden');
-                if (document.getElementById('btnChangePic')) document.getElementById('btnChangePic').classList.add('hidden');
+                if (document.getElementById('btnChangePic')) document.getElementById('btnChangePic').classList.remove('hidden');
                 if (document.getElementById('btnChangeQr')) document.getElementById('btnChangeQr').classList.add('hidden');
                 document.getElementById('btnSaveProfile').classList.add('hidden');
                 document.getElementById('btnEditProfile').classList.remove('hidden');
@@ -1323,6 +1467,23 @@
             if(id === 'request-master') { renderOwnerRequests(); }
             if(id === 'route-master') { resetForm('route'); renderRoutes(); } // This was missing from the previous diff, adding it back.
             if(id === 'owner-master') { renderOwners(); }
+            
+            if(id === 'general-bill-view') {
+                switchGbTab('new');
+                const dObj = new Date();
+                document.getElementById('gbDate').value = dObj.toISOString().split('T')[0];
+                document.getElementById('gbCustName').value = '';
+                document.getElementById('gbMobile').value = '';
+                document.getElementById('gbQtyAdd').value = '';
+                document.getElementById('gbRateAdd').value = '';
+                document.getElementById('gbTotalDisplay').innerText = 'Total: ₹0';
+                
+                let itemSelect = document.getElementById('gbItemAdd');
+                itemSelect.innerHTML = '<option value="">-- Select Product --</option>';
+                products.forEach(p => { itemSelect.innerHTML += `<option value="${p.item_name}" data-rate="${p.rate}">${p.item_name} (${p.unit || '-'})</option>`; });
+                
+                renderGeneralBills();
+            }
         }
 
         // Check if user is Operator
@@ -1369,6 +1530,7 @@
             };
             
             if(!data.name || !data.mobile) return alert("Name and Mobile are required!");
+            if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             if(idx === "" && !data.pass) return alert("Password is required for new Milk Man!");
             if(!data.route) return alert("Route is mandatory! Please assign a Route.");
             
@@ -1415,6 +1577,7 @@
             };
             
             if(!data.name || !data.route || !data.shift || !data.mobile) return alert("Name, Mobile, Route and Shift are mandatory!");
+            if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             
             let parsedSeq = parseInt(document.getElementById('cSeq').value);
             let parsedSeqEve = parseInt(document.getElementById('cSeqEve').value);
@@ -1485,6 +1648,145 @@
                 closeEditTransModal();
             } catch(e) { alert("Network error!"); }
             btn.innerText = "Update Entry";
+        }
+
+        // --- GENERAL BILLS LOGIC (REPLACES MANUAL ENTRY) ---
+        function switchGbTab(tab) {
+            ['new', 'old'].forEach(t => {
+                document.getElementById('gb-tab-' + t).classList.add('hidden');
+                document.getElementById('tabGb' + t.charAt(0).toUpperCase() + t.slice(1)).classList.remove('active-tab');
+            });
+            document.getElementById('gb-tab-' + tab).classList.remove('hidden');
+            document.getElementById('tabGb' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active-tab');
+            if(tab === 'old') renderGeneralBills();
+        }
+
+        function autoFillGbRate() {
+            const select = document.getElementById('gbItemAdd');
+            const opt = select.options[select.selectedIndex];
+            if(opt && opt.dataset.rate) document.getElementById('gbRateAdd').value = opt.dataset.rate;
+            else document.getElementById('gbRateAdd').value = '';
+            calcGbTotal();
+        }
+
+        function calcGbTotal() {
+            let q = parseFloat(document.getElementById('gbQtyAdd').value) || 0;
+            let r = parseFloat(document.getElementById('gbRateAdd').value) || 0;
+            document.getElementById('gbTotalDisplay').innerText = `Total: ₹${(q * r).toFixed(2)}`;
+        }
+        
+        function renderGeneralBills() {
+            const tbody = document.getElementById('gbTableBody');
+            const filterDateVal = document.getElementById('gbFilterDate').value;
+            let filterDateStr = filterDateVal ? new Date(filterDateVal).toLocaleDateString() : null;
+            
+            let html = '';
+            let totalAmt = 0;
+            
+            transactions.slice().reverse().forEach((t, i) => {
+                if (t.shift !== 'General Bill') return;
+                if (filterDateStr && t.date !== filterDateStr) return;
+                
+                const realIdx = transactions.length - 1 - i;
+                totalAmt += parseFloat(t.total || 0);
+                
+                let displayItem = formatItemDisplay(t.item);
+                
+                html += `<tr>
+                    <td><b>GB-${t.id}</b><br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
+                    <td>${t.cust}</td>
+                    <td>${displayItem}</td>
+                    <td style="color:var(--success); font-weight:bold;">₹${t.total}</td>
+                    <td>
+                        <button class="badge" style="background:#4f46e5; color:white" onclick="reprintGb(${realIdx})">Print</button>
+                        <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
+                    </td>
+                </tr>`;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">No bills found.</td></tr>';
+            document.getElementById('gbSummary').innerText = `Total Collection: ₹${totalAmt.toFixed(2)}`;
+        }
+        
+        function reprintGb(idx) {
+            const t = transactions[idx];
+            let itemText = '', qtyText = '', rateText = '';
+            try {
+                let items = JSON.parse(t.item);
+                itemText = items[0].item; qtyText = items[0].qty; rateText = items[0].rate;
+            } catch(e) {
+                itemText = t.item; qtyText = t.qty; rateText = t.rate;
+            }
+            printBillHTML(t.id, t.date, t.cust, "", itemText, qtyText, rateText, parseFloat(t.total));
+        }
+
+        async function saveGeneralBill() {
+            if(!validateForm('gb-tab-new')) return;
+            
+            const dateVal = document.getElementById('gbDate').value;
+            if(!dateVal) return alert("Please select a date!");
+            
+            const dateStr = new Date(dateVal).toLocaleDateString();
+            const custName = document.getElementById('gbCustName').value.trim();
+            const mobileNum = document.getElementById('gbMobile').value.trim();
+            const shift = 'General Bill'; // STRICT SHIFT FLAG FOR ISOLATION
+            const item = document.getElementById('gbItemAdd').value;
+            const qty = parseFloat(document.getElementById('gbQtyAdd').value) || 0;
+            const rate = parseFloat(document.getElementById('gbRateAdd').value) || 0;
+            
+            if(!custName || !item || qty <= 0) return alert("Please fill all details correctly.");
+            
+            let total = qty * rate;
+            let itemArr = [{ item: item, qty: qty, rate: rate, total: total }];
+
+            let data = { date: dateStr, cust: custName, item: JSON.stringify(itemArr), qty: '-', rate: total, total: total, company: currentUser.company, shift: shift };
+
+            const btn = event.target; btn.innerText = "Saving...";
+            try {
+                const res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                const savedData = await res.json();
+                transactions.push(savedData);
+                renderGeneralBills(); 
+                alert("General Bill Created Successfully!");
+                
+                printBillHTML(savedData.id, dateStr, custName, mobileNum, item, qty, rate, total);
+                switchGbTab('old'); // Switch to old bills tab automatically
+            } catch(e) { alert("Network Error!"); }
+            btn.innerText = "Generate & Print Bill";
+        }
+        
+        function printBillHTML(billId, dateStr, custName, mobileNum, item, qty, rate, total) {
+            let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
+                let printHtml = `<html><head><title>Cash Memo</title><style>
+                    body { font-family: sans-serif; padding: 20px; color: black; max-width: 400px; margin: auto; }
+                    h2, h4 { text-align: center; margin: 5px 0; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+                    .total { text-align: right; font-size: 18px; margin-top: 15px; }
+                    @media print { .no-print { display: none; } }
+                </style></head><body>
+                    <div class="no-print" style="text-align:right; margin-bottom:10px;">
+                        <button onclick="window.print()" style="padding:8px 15px; background:#4f46e5; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer;">🖨️ Print Receipt</button>
+                    </div>
+                    <h2>${companyName.toUpperCase()}</h2>
+                    <h4>General Bill / Cash Memo</h4>
+                    <hr>
+                <p style="margin:5px 0; font-size:14px;"><b>Bill No:</b> GB-${billId}</p>
+                    <p style="margin:5px 0; font-size:14px;"><b>Date:</b> ${dateStr}</p>
+                    <p style="margin:5px 0; font-size:14px;"><b>Customer:</b> ${custName}</p>
+                    ${mobileNum ? `<p style="margin:5px 0; font-size:14px;"><b>Mobile:</b> ${mobileNum}</p>` : ''}
+                    <table>
+                        <tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
+                        <tr><td>${item}</td><td>${qty}</td><td>₹${rate}</td><td>₹${total.toFixed(2)}</td></tr>
+                    </table>
+                    <div class="total"><b>Grand Total: ₹${total.toFixed(2)}</b></div>
+                    <hr style="margin-top:20px;">
+                    <p style="text-align:center; font-size:12px;">Thank you for your visit!</p>
+                </body></html>`;
+                const printWin = window.open('', '', 'width=400,height=600');
+                printWin.document.write(printHtml);
+                printWin.document.close();
+                printWin.focus();
         }
 
         // --- PRODUCTS ---
@@ -1829,6 +2131,7 @@
                 const realIdx = transactions.length - 1 - i;
                 
                 if (t.date !== currentFeedDateStr) return; // Only show currently selected date's entries
+                if (t.shift === 'General Bill') return; // Hide General Bills from main ledger
                 if (selectedMM) {
                     let cObj = customers.find(c => c.name === t.cust);
                     if (cObj && cObj.milkman_id !== selectedMM) return;
@@ -2092,10 +2395,16 @@
         }
 
         function autoFillCustRoute() {
+            if (isMilkMan()) {
+                document.getElementById('cRoute').value = currentUser.route || '';
+                return;
+            }
             const mmId = document.getElementById('cMilkMan').value;
             const mm = users.find(u => u.login_id === mmId);
             if(mm && mm.route) {
                 document.getElementById('cRoute').value = mm.route;
+            } else {
+                document.getElementById('cRoute').value = '';
             }
         }
 
@@ -2187,6 +2496,7 @@
 
             let doneToday = new Map();
             transactions.forEach(t => {
+                if (t.shift === 'General Bill') return; // Hide General Bills
                 if (t.date === currentFeedDateStr && t.company === currentUser.company && (t.shift === currentFeedShift || !t.shift)) {
                     doneToday.set(t.cust, t);
                 }
@@ -2298,24 +2608,9 @@
                 html += `</div>`;
             });
 
-            if (completed.length > 0) {
-                html += `<h4 style="margin-top:25px; color:var(--success); border-bottom:1px solid #334155; padding-bottom:5px;">✅ Completed Today</h4>`;
-                completed.forEach(obj => {
-                    html += `
-                    <div style="opacity:0.6; background:var(--input); padding: 12px 15px; border-radius:10px; border-left: 5px solid var(--success); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="width: 45px; text-align: center; background: rgba(0,0,0,0.1); padding: 4px; border-radius: 4px; border: 1px solid #475569; font-size: 12px;">Seq: #${getSeq(obj.c) !== 999 ? getSeq(obj.c) : '-'}</span>
-                            <strong style="font-size:15px; color:var(--text);">${obj.c.name}</strong>
-                        </div>
-                        <span style="font-size:12px; color:var(--success); font-weight:bold;">Done</span>
-                    </div>`;
-                });
-            }
-            
-            if(pending.length === 0 && completed.length > 0) html += `<p style="font-size:15px; color:var(--success); text-align:center; margin-top:20px;">All entries completed for today! 🎉</p>`;
-        
         let targetItems = {};
         let deliveredItems = {};
+        let deliveredAmount = {};
         let skippedCustomers = [];
 
         customers.forEach(c => {
@@ -2339,13 +2634,17 @@
                     if (Array.isArray(items)) {
                         items.forEach(it => {
                             if(!deliveredItems[it.item]) deliveredItems[it.item] = 0;
+                            if(!deliveredAmount[it.item]) deliveredAmount[it.item] = 0;
                             deliveredItems[it.item] += parseFloat(it.qty || 0);
+                            deliveredAmount[it.item] += parseFloat(it.total || (it.qty * it.rate) || 0);
                             cDelivered += parseFloat(it.qty || 0);
                         });
                     }
                 } catch(e) {
                     if(!deliveredItems[trans.item]) deliveredItems[trans.item] = 0;
+                    if(!deliveredAmount[trans.item]) deliveredAmount[trans.item] = 0;
                     deliveredItems[trans.item] += parseFloat(trans.qty || 0);
+                    deliveredAmount[trans.item] += parseFloat(trans.total || 0);
                     cDelivered += parseFloat(trans.qty || 0);
                 }
                 
@@ -2359,17 +2658,21 @@
             <h4 style="margin:0 0 10px 0; color:var(--primary); font-size:16px;">📊 Final Daily Report</h4>`;
             
         let allKeys = new Set([...Object.keys(targetItems), ...Object.keys(deliveredItems)]);
+        let grandTotalAmt = 0;
         if (allKeys.size > 0) {
             let rows = '';
             allKeys.forEach(k => {
                 let t = targetItems[k] || 0;
                 let d = deliveredItems[k] || 0;
+                let amt = deliveredAmount[k] || 0;
+                grandTotalAmt += amt;
                 let p = t - d;
                 rows += `<tr>
                     <td style="padding:6px 10px;">${k}</td>
-                    <td style="padding:6px 10px; text-align:center;">${t}</td>
-                    <td style="padding:6px 10px; text-align:center; color:var(--success); font-weight:bold;">${d}</td>
-                    <td style="padding:6px 10px; text-align:center; color:${p > 0 ? 'var(--danger)' : 'var(--text)'};">${p}</td>
+                        <td style="padding:6px 10px; text-align:center;">${Number(t.toFixed(2))}</td>
+                        <td style="padding:6px 10px; text-align:center; color:var(--success); font-weight:bold;">${Number(d.toFixed(2))}</td>
+                        <td style="padding:6px 10px; text-align:center; color:${p > 0 ? 'var(--danger)' : 'var(--text)'};">${Number(p.toFixed(2))}</td>
+                        <td style="padding:6px 10px; text-align:right; color:var(--success); font-weight:bold;">₹${Number(amt.toFixed(2))}</td>
                 </tr>`;
             });
             bottomSummaryHtml += `<table style="margin:0; font-size:13px; width:100%;">
@@ -2378,8 +2681,10 @@
                     <th style="padding:6px 10px; text-align:center; color:#94a3b8;">Target</th>
                     <th style="padding:6px 10px; text-align:center; color:#94a3b8;">Given</th>
                     <th style="padding:6px 10px; text-align:center; color:#94a3b8;">Left</th>
+                    <th style="padding:6px 10px; text-align:right; color:#94a3b8;">Amount</th>
                 </tr></thead>
                 <tbody>${rows}</tbody>
+                <tfoot><tr><td colspan="4" style="text-align:right; padding:6px 10px; font-weight:bold; border-top:1px solid #334155;">Total Value:</td><td style="text-align:right; padding:6px 10px; font-weight:bold; color:var(--success); border-top:1px solid #334155;">₹${Number(grandTotalAmt.toFixed(2))}</td></tr></tfoot>
             </table>`;
         } else {
             bottomSummaryHtml += `<p style="font-size:13px; color:#94a3b8; margin:0;">No active items assigned for this shift.</p>`;
@@ -2392,7 +2697,28 @@
         }
 
         bottomSummaryHtml += `</div>`;
-        feedDiv.innerHTML = html + bottomSummaryHtml;
+
+        const reportDiv = document.getElementById('daily-feed-report');
+        if (reportDiv) reportDiv.innerHTML = bottomSummaryHtml;
+
+            let completedHtml = '';
+            if (completed.length > 0) {
+                completedHtml += `<h4 style="margin-top:25px; color:var(--success); border-bottom:1px solid #334155; padding-bottom:5px;">✅ Completed Today</h4>`;
+                completed.forEach(obj => {
+                    completedHtml += `
+                    <div style="opacity:0.6; background:var(--input); padding: 12px 15px; border-radius:10px; border-left: 5px solid var(--success); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="width: 45px; text-align: center; background: rgba(0,0,0,0.1); padding: 4px; border-radius: 4px; border: 1px solid #475569; font-size: 12px;">Seq: #${getSeq(obj.c) !== 999 ? getSeq(obj.c) : '-'}</span>
+                            <strong style="font-size:15px; color:var(--text);">${obj.c.name}</strong>
+                        </div>
+                        <span style="font-size:12px; color:var(--success); font-weight:bold;">Done</span>
+                    </div>`;
+                });
+            }
+            
+            if(pending.length === 0 && completed.length > 0) completedHtml += `<p style="font-size:15px; color:var(--success); text-align:center; margin-top:20px;">All entries completed for today! 🎉</p>`;
+
+            feedDiv.innerHTML = html + completedHtml;
         }
 
         let currentSeqEditList = [];
@@ -2669,6 +2995,7 @@
             }
             
             let nextView = 'ledger-master';
+            if (sessionStorage.getItem('lastView') === 'general-bill-view') nextView = 'general-bill-view';
             if(type === 'user') nextView = 'user-master';
             else if(type === 'route') nextView = 'route-master';
             else if(type === 'product') nextView = 'product-master';
@@ -2725,7 +3052,7 @@
                     let p0 = parseInt(p[0]), p1 = parseInt(p[1]);
                     if(p0 > 12) return { year: parseInt(p[2]), month: p1 };
                     else if(p1 > 12) return { year: parseInt(p[2]), month: p0 };
-                    else return { year: parseInt(p[2]), month: p1 };
+                    else return { year: parseInt(p[2]), month: p0 };
                 } else return { year: parseInt(p[0]), month: parseInt(p[1]) };
             }
             let d = new Date(dStr);
@@ -2743,6 +3070,7 @@
             let tbIndex = 0;
 
             const currentMonthTransactions = transactions.filter(t => {
+                if (t.shift === 'General Bill') return false; // Hide General Bills from Statement
                 if(t.cust !== custName || t.company !== company) return false;
                 let dObj = parseDateToMonthYear(t.date);
                 return dObj.year === reportYear && dObj.month === reportMonth;
@@ -2755,7 +3083,7 @@
                 } else {
                     currentMonthPurchases += parseFloat(t.total);
                     let displayItem = formatItemDisplay(t.item);
-                    let dispQty = t.item.startsWith('[') ? 'Mix' : t.qty;
+                    let dispQty = String(t.item || '').startsWith('[') ? 'Mix' : (t.qty || '-');
                     monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${t.date}</td><td>${displayItem}</td><td>${dispQty}</td><td>-</td><td>₹${t.total}</td></tr>`;
                 }
             });
@@ -2923,6 +3251,7 @@
             const div = document.getElementById('monthlyReport');
             let summary = {};
             transactions.forEach(t => { 
+                if (t.shift === 'General Bill') return; // Hide General Bills from Accounts
                 if(currentUser.type !== 'Admin' && t.company !== currentUser.company) return;
                 if(!summary[t.cust]) summary[t.cust] = { purchases: 0, paid: 0 };
                     if(t.item === 'Payment') summary[t.cust].paid += Math.abs(parseFloat(t.total));
@@ -3018,23 +3347,6 @@
                         e.preventDefault();
                         focusable[index + 1].focus();
                     }
-                }
-            }
-            
-            if (e.key === 'Backspace') {
-                const el = document.activeElement;
-                const isInput = el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable;
-                const isSelect = el.tagName === 'SELECT';
-                
-                let shouldGoBack = false;
-                if (!isInput && !isSelect) shouldGoBack = true;
-                else if (isInput && el.value === '') shouldGoBack = true;
-                else if (isSelect) shouldGoBack = true;
-
-                if (shouldGoBack && document.getElementById('global-back-btn') && !document.getElementById('global-back-btn').classList.contains('hidden')) {
-                    e.preventDefault();
-                    el.blur();
-                    goBack();
                 }
             }
         });
