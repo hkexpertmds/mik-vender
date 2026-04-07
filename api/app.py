@@ -7,19 +7,21 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 
+load_dotenv()
+
 app = Flask(__name__)
 CORS(app)
 
-load_dotenv() 
-
-# Get Supabase URL and Key from environment variables (recommended practice)
-URL = os.getenv("SUPABASE_URL")
-KEY = os.getenv("SUPABASE_KEY")
-supabase: Client = create_client(URL, KEY)
 # ---------------------------------------------------------
 # Supabase Setup (Aapko yahan apni keys daalni padengi)
 # ---------------------------------------------------------
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("Missing Supabase URL or Key. Please set them in the .env file.")
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # ---------------------------------------------------------
 # ALPHANUMERIC ID GENERATOR ALGORITHM (Base-36 0-9 & A-Z)
