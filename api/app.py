@@ -5,25 +5,20 @@ from flask_cors import CORS
 from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
 from concurrent.futures import ThreadPoolExecutor
-from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
 
-# ---------------------------------------------------------
-# Supabase Setup (Aapko yahan apni keys daalni padengi)
-# ---------------------------------------------------------
-# SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://nngeqgnnawmrrnsushna.supabase.co")
-# SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5uZ2VxZ25uYXdtcnJuc3VzaG5hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NzAyNzksImV4cCI6MjA5MTA0NjI3OX0.sGU82wHuysiPPbt44apysEbQpAFBKCxu6Zsn1QhfVus")
-# supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-# Load environment variables from a .env file for security
 load_dotenv() 
 
 # Get Supabase URL and Key from environment variables (recommended practice)
 URL = os.getenv("SUPABASE_URL")
 KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(URL, KEY)
+# ---------------------------------------------------------
+# Supabase Setup (Aapko yahan apni keys daalni padengi)
+# ---------------------------------------------------------
+
 
 # ---------------------------------------------------------
 # ALPHANUMERIC ID GENERATOR ALGORITHM (Base-36 0-9 & A-Z)
