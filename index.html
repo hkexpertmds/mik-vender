@@ -152,8 +152,8 @@
 
         <!-- Contact Info Box -->
         <div style="margin-top: 30px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; font-size: 13px; text-align: center; border: 1px solid #475569;">
-            <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--warning);">For any Query / Sugeestion pleae Contact :</p>
-            <h1 style="margin: 0 0 8px 0; color: var(--primary);">Expert Computer Services</h1>
+            <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--warning);">Kisi bhi problem ke liye sampark karein:</p>
+            <h4 style="margin: 0 0 8px 0; color: var(--primary);">Expert Computer Services</h4>
             <p style="margin: 4px 0;">Rishi Bairagi: <a href="tel:6263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
             <p style="margin: 4px 0;">Harish Kumawat: <a href="tel:9425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
             <p style="margin: 4px 0;">Email: <a href="mailto:hkexpertmds@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: bold;">hkexpertmds@gmail.com</a></p>
@@ -1670,18 +1670,47 @@
             if(tab === 'old') renderGeneralBills();
         }
 
+        let currentGbItems = [];
+        
+        function renderGbItems() {
+            const ul = document.getElementById('gbItemList');
+            let html = '';
+            let grandTotal = 0;
+            currentGbItems.forEach((d, i) => {
+                grandTotal += d.total;
+                html += `<li style="margin-bottom:5px;"><b>${d.item}</b> : ${d.qty} x ₹${d.rate} = <b>₹${d.total.toFixed(2)}</b> 
+                <button type="button" class="badge" style="background:var(--danger); margin-left: 10px;" onclick="removeGbItem(${i})">X</button></li>`;
+            });
+            if(ul) ul.innerHTML = html;
+            document.getElementById('gbTotalDisplay').innerText = `Total: ₹${grandTotal.toFixed(2)}`;
+        }
+
+        function addGbItem() {
+            const item = document.getElementById('gbItemAdd').value;
+            const qty = parseFloat(document.getElementById('gbQtyAdd').value) || 0;
+            const rate = parseFloat(document.getElementById('gbRateAdd').value) || 0;
+            if(!item) return alert("Select an item!");
+            if(qty <= 0) return alert("Enter valid quantity!");
+            
+            currentGbItems = currentGbItems.filter(i => i.item !== item);
+            currentGbItems.push({ item: item, qty: qty, rate: rate, total: qty * rate });
+            renderGbItems();
+            
+            document.getElementById('gbQtyAdd').value = ''; 
+            document.getElementById('gbRateAdd').value = ''; 
+            document.getElementById('gbItemAdd').value = '';
+        }
+
+        function removeGbItem(i) {
+            currentGbItems.splice(i, 1);
+            renderGbItems();
+        }
+
         function autoFillGbRate() {
             const select = document.getElementById('gbItemAdd');
             const opt = select.options[select.selectedIndex];
             if(opt && opt.dataset.rate) document.getElementById('gbRateAdd').value = opt.dataset.rate;
             else document.getElementById('gbRateAdd').value = '';
-            calcGbTotal();
-        }
-
-        function calcGbTotal() {
-            let q = parseFloat(document.getElementById('gbQtyAdd').value) || 0;
-            let r = parseFloat(document.getElementById('gbRateAdd').value) || 0;
-            document.getElementById('gbTotalDisplay').innerText = `Total: ₹${(q * r).toFixed(2)}`;
         }
         
         function renderGeneralBills() {
@@ -1692,17 +1721,26 @@
             let html = '';
             let totalAmt = 0;
             
-            transactions.slice().reverse().forEach((t, i) => {
-                if (t.shift !== 'General Bill') return;
+            let gbDisplayList = [];
+            transactions.forEach((t, i) => {
+                if (t.shift === 'General Bill') {
+                    gbDisplayList.push({ t, realIdx: i });
+                }
+            });
+            
+            gbDisplayList.forEach((item, index) => {
+                item.serial = index + 1;
+            });
+            
+            gbDisplayList.reverse().forEach(({ t, realIdx, serial }) => {
                 if (filterDateStr && t.date !== filterDateStr) return;
                 
-                const realIdx = transactions.length - 1 - i;
                 totalAmt += parseFloat(t.total || 0);
                 
                 let displayItem = formatItemDisplay(t.item);
                 
                 html += `<tr>
-                    <td><b>GB-${t.id}</b><br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
+                    <td><b>GB-${serial}</b><br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
                     <td>${t.cust}</td>
                     <td>${displayItem}</td>
                     <td style="color:var(--success); font-weight:bold;">₹${t.total}</td>
@@ -1719,14 +1757,18 @@
         
         function reprintGb(idx) {
             const t = transactions[idx];
-            let itemText = '', qtyText = '', rateText = '';
+            let itemsArr = [];
             try {
-                let items = JSON.parse(t.item);
-                itemText = items[0].item; qtyText = items[0].qty; rateText = items[0].rate;
+                itemsArr = JSON.parse(t.item);
+                if (!Array.isArray(itemsArr)) throw new Error();
             } catch(e) {
-                itemText = t.item; qtyText = t.qty; rateText = t.rate;
+                itemsArr = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
             }
-            printBillHTML(t.id, t.date, t.cust, "", itemText, qtyText, rateText, parseFloat(t.total));
+            
+            let gbTransactions = transactions.filter(tx => tx.shift === 'General Bill');
+            let serialNo = gbTransactions.findIndex(tx => tx.id === t.id) + 1;
+
+            printBillHTML(serialNo, t.date, t.cust, "", itemsArr, parseFloat(t.total));
         }
 
         async function saveGeneralBill() {
@@ -1739,16 +1781,13 @@
             const custName = document.getElementById('gbCustName').value.trim();
             const mobileNum = document.getElementById('gbMobile').value.trim();
             const shift = 'General Bill'; // STRICT SHIFT FLAG FOR ISOLATION
-            const item = document.getElementById('gbItemAdd').value;
-            const qty = parseFloat(document.getElementById('gbQtyAdd').value) || 0;
-            const rate = parseFloat(document.getElementById('gbRateAdd').value) || 0;
             
-            if(!custName || !item || qty <= 0) return alert("Please fill all details correctly.");
+            if(!custName) return alert("Please fill customer name.");
+            if(currentGbItems.length === 0) return alert("Please add at least one item to the bill.");
             
-            let total = qty * rate;
-            let itemArr = [{ item: item, qty: qty, rate: rate, total: total }];
+            let grandTotal = currentGbItems.reduce((sum, i) => sum + i.total, 0);
 
-            let data = { date: dateStr, cust: custName, item: JSON.stringify(itemArr), qty: '-', rate: total, total: total, company: currentUser.company, shift: shift };
+            let data = { date: dateStr, cust: custName, item: JSON.stringify(currentGbItems), qty: '-', rate: grandTotal, total: grandTotal, company: currentUser.company, shift: shift };
 
             const btn = event.target; btn.innerText = "Saving...";
             try {
@@ -1758,13 +1797,16 @@
                 renderGeneralBills(); 
                 alert("General Bill Created Successfully!");
                 
-                printBillHTML(savedData.id, dateStr, custName, mobileNum, item, qty, rate, total);
+                let gbTransactions = transactions.filter(t => t.shift === 'General Bill');
+                let serialNo = gbTransactions.length;
+                
+                printBillHTML(serialNo, dateStr, custName, mobileNum, currentGbItems, grandTotal);
                 switchGbTab('old'); // Switch to old bills tab automatically
             } catch(e) { alert("Network Error!"); }
             btn.innerText = "Generate & Print Bill";
         }
         
-        function printBillHTML(billId, dateStr, custName, mobileNum, item, qty, rate, total) {
+        function printBillHTML(serialNo, dateStr, custName, mobileNum, itemsArr, total) {
             let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
                 let printHtml = `<html><head><title>Cash Memo</title><style>
                     body { font-family: sans-serif; padding: 20px; color: black; max-width: 400px; margin: auto; }
@@ -1780,13 +1822,13 @@
                     <h2>${companyName.toUpperCase()}</h2>
                     <h4>General Bill / Cash Memo</h4>
                     <hr>
-                <p style="margin:5px 0; font-size:14px;"><b>Bill No:</b> GB-${billId}</p>
+                <p style="margin:5px 0; font-size:14px;"><b>Bill No:</b> GB-${serialNo}</p>
                     <p style="margin:5px 0; font-size:14px;"><b>Date:</b> ${dateStr}</p>
                     <p style="margin:5px 0; font-size:14px;"><b>Customer:</b> ${custName}</p>
                     ${mobileNum ? `<p style="margin:5px 0; font-size:14px;"><b>Mobile:</b> ${mobileNum}</p>` : ''}
                     <table>
                         <tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
-                        <tr><td>${item}</td><td>${qty}</td><td>₹${rate}</td><td>₹${total.toFixed(2)}</td></tr>
+                        ${itemsArr.map(it => `<tr><td>${it.item}</td><td>${it.qty}</td><td>₹${it.rate}</td><td>₹${(it.total || (it.qty*it.rate)).toFixed(2)}</td></tr>`).join('')}
                     </table>
                     <div class="total"><b>Grand Total: ₹${total.toFixed(2)}</b></div>
                     <hr style="margin-top:20px;">
