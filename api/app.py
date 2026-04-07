@@ -5,6 +5,7 @@ from flask_cors import CORS
 from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
 from concurrent.futures import ThreadPoolExecutor
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
