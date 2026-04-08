@@ -418,14 +418,18 @@
                 <input type="date" id="gbDate" required>
                 <input type="text" id="gbCustName" placeholder="Customer Name" required>
                 <input type="text" id="gbMobile" placeholder="Mobile Number (Optional)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                <select id="gbItemAdd" onchange="autoFillGbRate()" required><option value="">-- Select Product --</option></select>
+                <select id="gbItemAdd" onchange="autoFillGbRate()"><option value="">-- Select Product --</option></select>
                 <div style="display:flex; gap:10px;">
-                    <input type="number" id="gbQtyAdd" placeholder="Qty" oninput="calcGbTotal()" required style="flex:1;">
-                    <input type="number" id="gbRateAdd" placeholder="Rate (₹)" oninput="calcGbTotal()" required style="flex:1;">
+                    <input type="number" id="gbQtyAdd" placeholder="Qty" style="flex:1;">
+                    <input type="number" id="gbRateAdd" placeholder="Rate (₹)" style="flex:1;">
+                    <button type="button" class="btn-save" style="width: auto; padding: 0 15px;" onclick="addGbItem()">Add</button>
                 </div>
-                <button onclick="addGbItem()">Add Item</button>
             </div>
-            <div id="gbTotalDisplay" style="font-weight:bold; color:var(--success); margin-top:5px; font-size:18px; text-align:right;">Total: ₹0</div>
+            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #475569; margin-top: 10px;">
+                <h4 style="margin-top:0; margin-bottom:10px; color:var(--primary); font-size:14px;">Added Items</h4>
+                <ul id="gbItemList" style="margin: 0; padding-left: 0; list-style-type: none; font-size: 13px; color: var(--text);"></ul>
+            </div>
+            <div id="gbTotalDisplay" style="font-weight:bold; color:var(--success); margin-top:10px; font-size:18px; text-align:right;">Total: ₹0</div>
             <button class="btn-save" style="margin-top:15px; font-size: 16px; padding: 12px;" onclick="saveGeneralBill()">Generate & Print Bill</button>
         </div>
 
