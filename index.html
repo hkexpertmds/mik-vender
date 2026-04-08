@@ -418,19 +418,21 @@
                 <input type="date" id="gbDate" required>
                 <input type="text" id="gbCustName" placeholder="Customer Name" required>
                 <input type="text" id="gbMobile" placeholder="Mobile Number (Optional)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                <select id="gbItemAdd" onchange="autoFillGbRate()"><option value="">-- Select Product --</option></select>
-                <div style="display:flex; gap:10px;">
-                    <input type="number" id="gbQtyAdd" placeholder="Qty" style="flex:1;">
-                    <input type="number" id="gbRateAdd" placeholder="Rate (₹)" style="flex:1;">
-                    <button type="button" class="btn-save" style="width: auto; padding: 0 15px;" onclick="addGbItem()">Add</button>
+            </div>
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid #475569; margin-top: 10px;">
+                <h4 style="margin-top:0; margin-bottom:15px; color:var(--primary); font-size:15px;">🛒 Add Items to Bill</h4>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+                    <select id="gbItemAdd" style="flex: 1; min-width: 150px; margin: 0;" onchange="autoFillGbRate()"><option value="">-- Select Product --</option></select>
+                    <input type="number" id="gbQtyAdd" placeholder="Qty" style="width: 80px; margin: 0;">
+                    <input type="number" id="gbRateAdd" placeholder="Rate (₹)" style="width: 100px; margin: 0;">
+                    <button type="button" class="btn-save" style="width: auto; padding: 12px 20px; margin-bottom: 2px;" onclick="addGbItem()">Add Item</button>
                 </div>
+                
+                <h4 style="margin-top:20px; margin-bottom:10px; color:var(--primary); font-size:14px; border-top: 1px dashed #475569; padding-top: 15px;">📋 Added Items</h4>
+                <ul id="gbItemList" style="margin: 0; padding-left: 0; list-style-type: none; font-size: 14px; color: var(--text);"></ul>
+                <div id="gbTotalDisplay" style="font-weight:bold; color:var(--success); margin-top:15px; font-size:18px; text-align:right;">Total: ₹0</div>
             </div>
-            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #475569; margin-top: 10px;">
-                <h4 style="margin-top:0; margin-bottom:10px; color:var(--primary); font-size:14px;">Added Items</h4>
-                <ul id="gbItemList" style="margin: 0; padding-left: 0; list-style-type: none; font-size: 13px; color: var(--text);"></ul>
-            </div>
-            <div id="gbTotalDisplay" style="font-weight:bold; color:var(--success); margin-top:10px; font-size:18px; text-align:right;">Total: ₹0</div>
-            <button class="btn-save" style="margin-top:15px; font-size: 16px; padding: 12px;" onclick="saveGeneralBill()">Generate & Print Bill</button>
+            <button class="btn-save" style="margin-top:20px; font-size: 16px; padding: 12px;" onclick="saveGeneralBill()">Generate & Print Bill</button>
         </div>
 
         <div id="gb-tab-old" class="hidden">
