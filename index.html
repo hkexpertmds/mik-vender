@@ -423,6 +423,7 @@
                     <input type="number" id="gbQtyAdd" placeholder="Qty" oninput="calcGbTotal()" required style="flex:1;">
                     <input type="number" id="gbRateAdd" placeholder="Rate (₹)" oninput="calcGbTotal()" required style="flex:1;">
                 </div>
+                <button onclick="addGbItem()">Add Item</button>
             </div>
             <div id="gbTotalDisplay" style="font-weight:bold; color:var(--success); margin-top:5px; font-size:18px; text-align:right;">Total: ₹0</div>
             <button class="btn-save" style="margin-top:15px; font-size: 16px; padding: 12px;" onclick="saveGeneralBill()">Generate & Print Bill</button>
