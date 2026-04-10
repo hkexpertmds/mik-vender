@@ -2864,11 +2864,11 @@
                 cTarget += parseFloat(di.qty || 0);
             });
             
-            let entry = doneToday.get(c.name);
-            if (entry && entry.itemsTrans) {
+            let trans = doneToday.get(c.name);
+            if (trans && trans.item !== 'Payment') {
                 let cDelivered = 0;
                 try {
-                    let items = JSON.parse(entry.itemsTrans.item);
+                    let items = JSON.parse(trans.item);
                     if (Array.isArray(items)) {
                         items.forEach(it => {
                             if(!deliveredItems[it.item]) deliveredItems[it.item] = 0;
@@ -2879,11 +2879,11 @@
                         });
                     }
                 } catch(e) {
-                    if(!deliveredItems[entry.itemsTrans.item]) deliveredItems[entry.itemsTrans.item] = 0;
-                    if(!deliveredAmount[entry.itemsTrans.item]) deliveredAmount[entry.itemsTrans.item] = 0;
-                    deliveredItems[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.qty || 0);
-                    deliveredAmount[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.total || 0);
-                    cDelivered += parseFloat(entry.itemsTrans.qty || 0);
+                        if(!deliveredItems[entry.itemsTrans.item]) deliveredItems[entry.itemsTrans.item] = 0;
+                        if(!deliveredAmount[entry.itemsTrans.item]) deliveredAmount[entry.itemsTrans.item] = 0;
+                        deliveredItems[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.qty || 0);
+                        deliveredAmount[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.total || 0);
+                        cDelivered += parseFloat(entry.itemsTrans.qty || 0);
                 }
                 
                 if (cTarget > 0 && cDelivered === 0) {
