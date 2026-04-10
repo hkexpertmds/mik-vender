@@ -88,9 +88,22 @@
         
         .menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
         @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 1.2rem; border-radius: 20px; }
             .menu-grid { grid-template-columns: repeat(2, 1fr); }
             .box-btn { min-height: 90px; padding: 15px 5px; font-size: 13px; }
             .box-btn span { font-size: 24px !important; margin-bottom: 5px !important; }
+            
+            /* SMART HEADER FIX FOR MOBILE */
+            #app-header { flex-wrap: wrap !important; padding: 10px 15px !important; gap: 5px 0 !important; }
+            #app-header > div:nth-child(1) { flex: 1 1 50% !important; justify-content: flex-start !important; }
+            #app-header > div:nth-child(3) { flex: 1 1 40% !important; justify-content: flex-end !important; padding-right: 0 !important; }
+            #header-company-name { position: static !important; transform: none !important; flex: 1 1 100% !important; text-align: left !important; font-size: 12px !important; color: #94a3b8 !important; margin-left: 45px !important; white-space: normal !important; overflow: visible !important; letter-spacing: normal !important; }
+            
+            /* RESPONSIVE TABLES & FORMS */
+            table { display: block; overflow-x: auto; white-space: nowrap; width: 100%; border-spacing: 0 4px; }
+            th, td { padding: 8px 10px; font-size: 12px; }
+            .grid-form { grid-template-columns: 1fr; gap: 10px; }
         }
         
         /* SPINNER ANIMATION */
@@ -111,6 +124,17 @@
         @keyframes modalPop { from { opacity: 0; transform: scale(0.85) translateY(20px); filter: blur(4px); } to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } }
         tbody tr { animation: fadeRow 0.4s ease-out backwards; }
         @keyframes fadeRow { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* FAQ Accordion Styles */
+        .faq-item { background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 10px; overflow: hidden; transition: all 0.3s; }
+        .faq-question { padding: 12px 15px; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center; color: var(--primary); font-size: 14px; }
+        .faq-question:hover { background: rgba(255,255,255,0.05); }
+        .faq-answer { padding: 0 15px; max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease-out; font-size: 13px; color: #94a3b8; }
+        .faq-item.active .faq-answer { padding: 12px 15px; max-height: 200px; opacity: 1; border-top: 1px solid rgba(255,255,255,0.05); }
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+        .faq-icon { transition: transform 0.3s; font-size: 12px; }
+        :root.light-mode .faq-item { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
+        :root.light-mode .faq-answer { color: #475569; }
     </style>
 </head>
 <body>
@@ -137,7 +161,8 @@
     <div id="profile-dropdown" class="hidden" style="position: fixed; top: 60px; left: 20px; background: var(--card); border: 1px solid #475569; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 1000; overflow: hidden; display: flex; flex-direction: column; min-width: 180px;">
         <button onclick="showView('profile-view'); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">👤 1. Profile</button>
         <button id="lang-btn" onclick="changeLanguage(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🌐 2. Language (हिंदी)</button>
-        <button onclick="logout()" style="background: transparent; color: var(--danger); padding: 12px 20px; text-align: left; border-radius: 0; width: 100%; border: none;">🚪 3. Logout</button>
+        <button onclick="openHelpModal(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🆘 3. Need Help?</button>
+        <button onclick="logout()" style="background: transparent; color: var(--danger); padding: 12px 20px; text-align: left; border-radius: 0; width: 100%; border: none;">🚪 4. Logout</button>
     </div>
 
     <!-- LANDING PAGE -->
@@ -150,13 +175,9 @@
             <div class="role-card" onclick="showLogin('Customer')"><h3>🥛</h3><h4>Customer</h4></div>
         </div>
 
-        <!-- Contact Info Box -->
-        <div style="margin-top: 30px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; font-size: 13px; text-align: center; border: 1px solid #475569;">
-            <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--warning);">Kisi bhi problem ke liye sampark karein:</p>
-            <h4 style="margin: 0 0 8px 0; color: var(--primary);">Expert Computer Services</h4>
-            <p style="margin: 4px 0;">Rishi Bairagi: <a href="tel:6263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
-            <p style="margin: 4px 0;">Harish Kumawat: <a href="tel:9425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
-            <p style="margin: 4px 0;">Email: <a href="mailto:hkexpertmds@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: bold;">hkexpertmds@gmail.com</a></p>
+        <!-- Help Option -->
+        <div style="margin-top: 30px; text-align: center;">
+            <button class="btn-save" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); width: auto; padding: 10px 25px;" onclick="openHelpModal()">🆘 Need Help?</button>
         </div>
     </div>
 
@@ -410,11 +431,12 @@
     <div id="general-bill-view" class="container hidden">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2>🧾 General Bills</h2>
-            <div><button id="tabGbNew" class="btn-tab active-tab" onclick="switchGbTab('new')">➕ New Bill</button><button id="tabGbOld" class="btn-tab" onclick="switchGbTab('old')">📋 Old Bills</button></div>
+            <div><button id="tabGbNew" class="btn-tab active-tab" onclick="clearGbForm(); switchGbTab('new')">➕ New Bill</button><button id="tabGbOld" class="btn-tab" onclick="switchGbTab('old')">📋 Old Bills</button></div>
         </div>
 
         <div id="gb-tab-new">
             <div class="grid-form">
+                <input type="hidden" id="editGbIdx">
                 <input type="date" id="gbDate" required>
                 <input type="text" id="gbCustName" placeholder="Customer Name" required>
                 <input type="text" id="gbMobile" placeholder="Mobile Number (Optional)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
@@ -429,10 +451,17 @@
                 </div>
                 
                 <h4 style="margin-top:20px; margin-bottom:10px; color:var(--primary); font-size:14px; border-top: 1px dashed #475569; padding-top: 15px;">📋 Added Items</h4>
-                <ul id="gbItemList" style="margin: 0; padding-left: 0; list-style-type: none; font-size: 14px; color: var(--text);"></ul>
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; text-align:left; font-size:13px; margin:0; border-collapse:collapse;">
+                        <thead><tr style="border-bottom:1px solid #475569; color:#94a3b8;">
+                            <th style="padding:5px;">Item</th><th style="padding:5px;">Qty</th><th style="padding:5px;">Rate (₹)</th><th style="padding:5px;">Total</th><th style="padding:5px;">Act</th>
+                        </tr></thead>
+                        <tbody id="gbItemList"></tbody>
+                    </table>
+                </div>
                 <div id="gbTotalDisplay" style="font-weight:bold; color:var(--success); margin-top:15px; font-size:18px; text-align:right;">Total: ₹0</div>
             </div>
-            <button class="btn-save" style="margin-top:20px; font-size: 16px; padding: 12px;" onclick="saveGeneralBill()">Generate & Print Bill</button>
+            <button id="btnSaveGbMain" class="btn-save" style="margin-top:20px; font-size: 16px; padding: 12px;" onclick="saveGeneralBill()">Generate & Print Bill</button>
         </div>
 
         <div id="gb-tab-old" class="hidden">
@@ -664,6 +693,79 @@
         </div>
     </div>
 
+    <!-- HELP & SUPPORT MODAL -->
+    <div id="helpModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10002; display:flex; justify-content:center; align-items:center; padding:20px;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; max-height:85vh; display:flex; flex-direction:column; border:1px solid #475569;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <h3 style="margin:0;">🆘 Help & Support</h3>
+                <button onclick="closeHelpModal()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            
+            <div style="overflow-y:auto; flex:1; padding-right:10px;">
+                <p style="color:var(--text); font-size: 14px; margin-top:0; margin-bottom: 15px;">Aam taur par aane wali problems ke solutions niche diye gaye hain. Kisi bhi error par click karein:</p>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>❌ Login Failed / Wrong ID Password?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">Kripya dhyan dein ki aapne sahi Role (Owner, Milk Man, Customer) select kiya hai. Apna ID aur Password check karein. Agar aap password bhool gaye hain, toh Owner se sampark karein.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>🌐 Connection Failed / Network Error?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">Apna internet connection check karein. Agar aap local computer par hain, toh ensure karein ki Backend server (Python) chalu hai aur screen par "Backend Chal Raha Hai..." likha aa raha hai.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>📅 Kal ka doodh band karna/badalna hai?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">Apne Customer dashboard mein jayein, "My Order" (🛒) tab select karein, wahan "One-Time Change" mein agle din ki date select karein aur quantity ko update/0 karke save kar dein.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>🔄 Data sync ya update nahi ho raha?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">Page ko refresh karein, ya logout karke dobara login karein. Agar phir bhi problem aaye toh ensure karein background data properly sync ho gaya hai.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>🔑 Password Reset/Change Kaise Karein?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">Owner apne dashboard se "Customers" ya "Milk Men" list mein jakar "Pass" button daba kar kisi ka bhi password reset kar sakte hain. Khud ka password badalne ke liye upar "Profile" menu me jayein.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>📦 Naya Product ya Rate kaise add karein?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">"Manage Products" (📦) menu mein jayein. Wahan aap doodh ke alawa naye items (jaise Ghee, Paneer) aur unka naya rate add ya update kar sakte hain.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>💸 Customer Online Payment kaise karein?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">Customer apne portal me "Payment" (💸) tab me jayen, "Online" select karein, Owner ka QR code scan karke payment karein aur screenshot upload karke submit kar dein.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>🔢 Delivery Sequence (Kram) kaise badlein?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">Owner ya Milk Man "Daily Feed" tab me "Edit Seq" button par click karke subah ya shaam ke hisaab se customers ko nayi sequence (1, 2, 3...) de sakte hain.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>🧾 Bina khate wale customer ka bill kaise banayein?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">"General Bill" (🧾) section ka use karein. Naye customer ka naam, mobile no. aur items daal kar turant invoice / receipt print kar sakte hain.</div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)"><span>💳 Apna QR Code ya Profile Photo kaise badlein?</span><span class="faq-icon">▼</span></div>
+                    <div class="faq-answer">Upar right corner mein User Profile (👤) par click karein. "Edit Profile" daba kar aap apni photo, details, aur Payment QR code update karke save kar sakte hain.</div>
+                </div>
+
+                <!-- Contact Info Box inside Modal -->
+                <div style="margin-top: 25px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; font-size: 13px; text-align: center; border: 1px solid #475569;">
+                    <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--warning);">Still facing issues? Contact Us:</p>
+                    <h4 style="margin: 0 0 8px 0; color: var(--primary);">Expert Computer Services</h4>
+                    <p style="margin: 4px 0;">Rishi Bairagi: <a href="tel:6263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
+                    <p style="margin: 4px 0;">Harish Kumawat: <a href="tel:9425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
+                    <p style="margin: 4px 0;">Email: <a href="mailto:hkexpertmds@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: bold;">hkexpertmds@gmail.com</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Cropping Modal -->
     <div id="qrCropModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10001; display:flex; justify-content:center; align-items:center; padding:20px;">
         <div class="modal-box" style="background:var(--card); width:100%; max-width:600px; padding:20px; border-radius:12px; max-height:90vh; display:flex; flex-direction:column; border:1px solid #475569;">
@@ -699,6 +801,16 @@
             
             setTimeout(() => { if(document.body.contains(toast)) { toast.classList.add('fadeOut'); setTimeout(() => toast.remove(), 300); } }, 4500);
         };
+         // --- GLOBAL DATE FORMATTER (Fixes Timezone/Locale Bugs) ---
+        function formatDate(d) {
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}/${d.getFullYear()}`;
+        }
+        function convertToDDMMYYYY(yyyy_mm_dd) {
+            if(!yyyy_mm_dd) return "";
+            let p = yyyy_mm_dd.split('-');
+            if(p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`;
+            return yyyy_mm_dd;
+        }
 
 
         // 🚀 SPEED FIX: Hardcoded 'RICK-PC' se local network me DNS resolution me 2-3 seconds lagte hain.
@@ -714,7 +826,7 @@
         let currentCustDefaults = [];
         let products = []; let requests = []; let routes = [];
         
-        let currentFeedDateStr = new Date().toLocaleDateString();
+        let currentFeedDateStr = formatDate(new Date());
         let currentFeedShift = 'Morning';
         let currentFeedOffset = 0;
 
@@ -860,6 +972,7 @@
             localStorage.removeItem('sessionAuth');
             localStorage.removeItem('sessionUser');
             sessionStorage.removeItem('lastView');
+            window.location.hash = ''; // Clear routing hash
             location.reload();
         }
 
@@ -963,11 +1076,32 @@
             }
         });
 
+        // --- BROWSER / PHONE BACK BUTTON LOGIC ---
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.view) {
+                showView(event.state.view, true);
+            } else {
+                let hash = window.location.hash.replace('#', '');
+                if (hash && document.getElementById(hash)) {
+                    showView(hash, true);
+                } else if (currentUser) {
+                    let homeId = currentUser.type === 'Milk Man' ? 'ledger-master' : (currentUser.type === 'Customer' ? 'customer-self-view' : 'main-menu');
+                    showView(homeId, true);
+                } else {
+                    showView('landing-page', true);
+                }
+            }
+        });
+
         function goBack() {
-            if (!currentUser) return showView('landing-page');
-            if (currentUser.type === 'Milk Man') showView('ledger-master');
-            else if (currentUser.type === 'Customer') showView('customer-self-view');
-            else showView('main-menu');
+            if (window.history.length > 1 && window.location.hash) {
+                history.back();
+            } else {
+                if (!currentUser) return showView('landing-page');
+                if (currentUser.type === 'Milk Man') showView('ledger-master');
+                else if (currentUser.type === 'Customer') showView('customer-self-view');
+                else showView('main-menu');
+            }
         }
 
         
@@ -995,7 +1129,6 @@
         function handleQrCodePic(e) {
             const file = e.target.files[0];
             if(!file) return;
-            if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(evt) {
@@ -1051,7 +1184,7 @@
 
         async function saveProfile() {
             if (!validateForm('profile-view')) return;
-            let btn = event.target; btn.innerText = "Updating...";
+            let btn = document.getElementById('btnSaveProfile'); if(btn) btn.innerText = "Updating...";
             let data = { ...currentUser };
             data.username = document.getElementById('profUsername').value.trim();
             data.name = document.getElementById('profName').value;
@@ -1112,9 +1245,8 @@
                 
                 alert("Profile Updated Successfully!");
                 setupUI(); showView('main-menu');
-                setupUI(); showView('profile-view');
             } catch(e) { alert("Error saving profile!"); }
-            btn.innerText = "Update Profile";
+            if(btn) btn.innerText = "Update Profile";
         }
 
         function enableProfileEdit() {
@@ -1376,7 +1508,11 @@
             applyTranslations();
         }
 
-        function showView(id) {
+        function showView(id, isBack = false) {
+            if (!isBack && window.location.hash !== `#${id}`) {
+                history.pushState({ view: id }, '', `#${id}`);
+            }
+
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             
@@ -1485,13 +1621,8 @@
             if(id === 'owner-master') { renderOwners(); }
             
             if(id === 'general-bill-view') {
+                clearGbForm();
                 switchGbTab('new');
-                const dObj = new Date();
-                document.getElementById('gbDate').value = dObj.toISOString().split('T')[0];
-                document.getElementById('gbCustName').value = '';
-                document.getElementById('gbMobile').value = '';
-                currentGbItems = [];
-                renderGbItems();
                 
                 let itemSelect = document.getElementById('gbItemAdd');
                 itemSelect.innerHTML = '<option value="">-- Select Product --</option>';
@@ -1676,18 +1807,34 @@
             if(tab === 'old') renderGeneralBills();
         }
 
+        function clearGbForm() {
+            if(document.getElementById('editGbIdx')) document.getElementById('editGbIdx').value = "";
+            if(document.getElementById('btnSaveGbMain')) document.getElementById('btnSaveGbMain').innerText = "Generate & Print Bill";
+            const dObj = new Date();
+            if(document.getElementById('gbDate')) document.getElementById('gbDate').value = dObj.toISOString().split('T')[0];
+            if(document.getElementById('gbCustName')) document.getElementById('gbCustName').value = '';
+            if(document.getElementById('gbMobile')) document.getElementById('gbMobile').value = '';
+            currentGbItems = [];
+            renderGbItems();
+        }
+
         let currentGbItems = [];
         
         function renderGbItems() {
-            const ul = document.getElementById('gbItemList');
+            const tbody = document.getElementById('gbItemList');
             let html = '';
             let grandTotal = 0;
             currentGbItems.forEach((d, i) => {
                 grandTotal += d.total;
-                html += `<li style="margin-bottom:5px;"><b>${d.item}</b> : ${d.qty} x ₹${d.rate} = <b>₹${d.total.toFixed(2)}</b> 
-                <button type="button" class="badge" style="background:var(--danger); margin-left: 10px;" onclick="removeGbItem(${i})">X</button></li>`;
+                html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <td style="padding:8px 5px;"><b>${d.item}</b></td>
+                    <td style="padding:8px 5px;">${d.qty}</td>
+                    <td style="padding:8px 5px;">₹${d.rate}</td>
+                    <td style="padding:8px 5px; color:var(--success); font-weight:bold;">₹${d.total.toFixed(2)}</td>
+                    <td style="padding:8px 5px;"><button type="button" class="badge" style="background:var(--danger);" onclick="removeGbItem(${i})">X</button></td>
+                </tr>`;
             });
-            if(ul) ul.innerHTML = html;
+            if(tbody) tbody.innerHTML = html;
             document.getElementById('gbTotalDisplay').innerText = `Total: ₹${grandTotal.toFixed(2)}`;
         }
 
@@ -1722,7 +1869,7 @@
         function renderGeneralBills() {
             const tbody = document.getElementById('gbTableBody');
             const filterDateVal = document.getElementById('gbFilterDate').value;
-            let filterDateStr = filterDateVal ? new Date(filterDateVal).toLocaleDateString() : null;
+            let filterDateStr = filterDateVal ? convertToDDMMYYYY(filterDateVal) : null;
             
             let html = '';
             let totalAmt = 0;
@@ -1734,23 +1881,21 @@
                 }
             });
             
-            gbDisplayList.forEach((item, index) => {
-                item.serial = index + 1;
-            });
-            
-            gbDisplayList.reverse().forEach(({ t, realIdx, serial }) => {
+            gbDisplayList.reverse().forEach(({ t, realIdx }) => {
                 if (filterDateStr && t.date !== filterDateStr) return;
                 
                 totalAmt += parseFloat(t.total || 0);
                 
                 let displayItem = formatItemDisplay(t.item);
+                let billNo = t.id || (realIdx + 1);
                 
                 html += `<tr>
-                    <td><b>GB-${serial}</b><br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
+                    <td><b>GB-${billNo}</b><br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
                     <td>${t.cust}</td>
                     <td>${displayItem}</td>
                     <td style="color:var(--success); font-weight:bold;">₹${t.total}</td>
                     <td>
+                        <button class="badge" style="background:var(--warning); color:black" onclick="editGb(${realIdx})">Edit</button>
                         <button class="badge" style="background:#4f46e5; color:white" onclick="reprintGb(${realIdx})">Print</button>
                         <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
                     </td>
@@ -1771,19 +1916,45 @@
                 itemsArr = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
             }
             
-            let gbTransactions = transactions.filter(tx => tx.shift === 'General Bill');
-            let serialNo = gbTransactions.findIndex(tx => tx.id === t.id) + 1;
+            let serialNo = t.id || (idx + 1);
+            let mobileNum = (t.qty !== '-' && t.qty) ? t.qty : '';
 
-            printBillHTML(serialNo, t.date, t.cust, "", itemsArr, parseFloat(t.total));
+            printBillHTML(serialNo, t.date, t.cust, mobileNum, itemsArr, parseFloat(t.total));
+        }
+
+        function editGb(idx) {
+            const t = transactions[idx];
+            document.getElementById('editGbIdx').value = idx;
+            
+            let dObj = new Date(t.date);
+            if (isNaN(dObj) && t.date.includes('/')) {
+                let p = t.date.split('/');
+                dObj = new Date(`${p[2]}-${p[1]}-${p[0]}`);
+            }
+            if(!isNaN(dObj)) document.getElementById('gbDate').value = dObj.toISOString().split('T')[0];
+            
+            document.getElementById('gbCustName').value = t.cust;
+            document.getElementById('gbMobile').value = (t.qty !== '-' && t.qty) ? t.qty : '';
+            
+            try {
+                currentGbItems = JSON.parse(t.item);
+            } catch(e) {
+                currentGbItems = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
+            }
+            
+            renderGbItems();
+            switchGbTab('new');
+            document.getElementById('btnSaveGbMain').innerText = "Update & Print Bill";
         }
 
         async function saveGeneralBill() {
             if(!validateForm('gb-tab-new')) return;
             
+            const editIdx = document.getElementById('editGbIdx').value;
             const dateVal = document.getElementById('gbDate').value;
             if(!dateVal) return alert("Please select a date!");
             
-            const dateStr = new Date(dateVal).toLocaleDateString();
+            const dateStr = convertToDDMMYYYY(dateVal);
             const custName = document.getElementById('gbCustName').value.trim();
             const mobileNum = document.getElementById('gbMobile').value.trim();
             const shift = 'General Bill'; // STRICT SHIFT FLAG FOR ISOLATION
@@ -1793,27 +1964,31 @@
             
             let grandTotal = currentGbItems.reduce((sum, i) => sum + i.total, 0);
 
-            let data = { date: dateStr, cust: custName, item: JSON.stringify(currentGbItems), qty: '-', rate: grandTotal, total: grandTotal, company: currentUser.company, shift: shift };
+            let data = { date: dateStr, cust: custName, item: JSON.stringify(currentGbItems), qty: mobileNum || '-', rate: grandTotal, total: grandTotal, company: currentUser.company, shift: shift };
+            if(editIdx !== "") data.id = transactions[editIdx].id;
 
-            const btn = event.target; btn.innerText = "Saving...";
+            const btn = document.getElementById('btnSaveGbMain'); btn.innerText = "Saving...";
             try {
                 const res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 const savedData = await res.json();
-                transactions.push(savedData);
+                if(editIdx !== "") { transactions[editIdx] = savedData; } else { transactions.push(savedData); }
                 renderGeneralBills(); 
-                alert("General Bill Created Successfully!");
+                alert(editIdx !== "" ? "General Bill Updated Successfully!" : "General Bill Created Successfully!");
                 
-                let gbTransactions = transactions.filter(t => t.shift === 'General Bill');
-                let serialNo = gbTransactions.length;
+                let serialNo = savedData.id || Math.floor(Math.random() * 9000 + 1000);
                 
                 printBillHTML(serialNo, dateStr, custName, mobileNum, currentGbItems, grandTotal);
+                clearGbForm();
+                
                 switchGbTab('old'); // Switch to old bills tab automatically
             } catch(e) { alert("Network Error!"); }
-            btn.innerText = "Generate & Print Bill";
+            btn.innerText = editIdx !== "" ? "Update & Print Bill" : "Generate & Print Bill";
         }
         
         function printBillHTML(serialNo, dateStr, custName, mobileNum, itemsArr, total) {
             let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
+            let ownerAddress = currentUser.address || currentUser.addr || '';
+            let ownerMobile = currentUser.mobile || '';
                 let printHtml = `<html><head><title>Cash Memo</title><style>
                     body { font-family: sans-serif; padding: 20px; color: black; max-width: 400px; margin: auto; }
                     h2, h4 { text-align: center; margin: 5px 0; }
@@ -1826,6 +2001,8 @@
                         <button onclick="window.print()" style="padding:8px 15px; background:#4f46e5; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer;">🖨️ Print Receipt</button>
                     </div>
                     <h2>${companyName.toUpperCase()}</h2>
+                    ${ownerAddress ? `<p style="text-align:center; margin:2px 0; font-size:12px;">${ownerAddress}</p>` : ''}
+                    ${ownerMobile ? `<p style="text-align:center; margin:2px 0 10px 0; font-size:12px;"><b>Mob:</b> ${ownerMobile}</p>` : ''}
                     <h4>General Bill / Cash Memo</h4>
                     <hr>
                 <p style="margin:5px 0; font-size:14px;"><b>Bill No:</b> GB-${serialNo}</p>
@@ -1895,18 +2072,18 @@
         // --- CUSTOMER REQUESTS ---
         async function saveRequest() {
             if (!document.getElementById('reqDate').reportValidity() || !document.getElementById('reqQty').reportValidity()) return;
-            const date = document.getElementById('reqDate').value;
+            const date = convertToDDMMYYYY(document.getElementById('reqDate').value);
             const qty = document.getElementById('reqQty').value;
             if(!date || !qty) return alert("Please enter Date and Requirement!");
             
-            const btn = event.target; btn.innerText = "Sending...";
+            const btn = window.event ? window.event.target : null; if(btn) btn.innerText = "Sending...";
             let data = {
                 cust_id: currentUser.login_id, cust_name: currentUser.name, req_date: date, req_qty: qty,
                 company: currentUser.company, milkman_id: customers.find(c => c.cid === currentUser.login_id)?.milkman_id || ''
             };
             const res = await fetch(`${API_BASE}/requests`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
             requests.push(await res.json());
-            document.getElementById('reqDate').value = ""; document.getElementById('reqQty').value = ""; btn.innerText = "Send Request";
+            document.getElementById('reqDate').value = ""; document.getElementById('reqQty').value = ""; if(btn) btn.innerText = "Send Request";
             renderCustomerRequests(); alert("Request sent successfully!");
         }
 
@@ -1926,7 +2103,7 @@
         async function submitPayment() {
             if (!document.getElementById('payAmount').reportValidity()) return;
             // Ensure the date for the request is in YYYY-MM-DD format for consistency
-            const requestDate = new Date().toISOString().split('T')[0];
+            const requestDate = formatDate(new Date());
             const amount = parseFloat(document.getElementById('payAmount').value);
             if (isNaN(amount) || amount <= 0) return alert("Please enter a valid payment amount.");
             const method = document.querySelector('input[name="payMethod"]:checked').value;
@@ -1941,7 +2118,8 @@
                 try { screenshotData = await toBase64(fileInput.files[0]); } catch (e) { return alert("Error reading screenshot file."); }
                 details.screenshot = screenshotData;
             }
-            const btn = event.target; btn.innerText = "Submitting..."; btn.disabled = true;
+            const btn = window.event ? window.event.target : null; 
+            if(btn) { btn.innerText = "Submitting..."; btn.disabled = true; }
             let data = { cust_id: currentUser.login_id, cust_name: currentUser.name, req_date: requestDate, req_qty: `Payment of ₹${amount} via ${method}`, type: 'Payment', details: JSON.stringify({ amount, method, ...details }), company: currentUser.company, milkman_id: customers.find(c => c.cid === currentUser.login_id)?.milkman_id || '' };
             try {
                 const res = await fetch(`${API_BASE}/requests`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
@@ -1950,7 +2128,7 @@
                 document.getElementById('payAmount').value = ''; document.getElementById('payCashTo').value = ''; document.getElementById('payScreenshot').value = '';
                 renderCustomerRequests();
             } catch (e) { alert("Error submitting payment. Please try again."); }
-            btn.innerText = "Submit Payment"; btn.disabled = false;
+            if(btn) { btn.innerText = "Submit Payment"; btn.disabled = false; }
         }
 
         function populateRouteDropdown(skipUserId = null) {
@@ -2176,9 +2354,9 @@
             let html = '';
             
             const dNow = new Date();
-            const today = dNow.toLocaleDateString();
-            const yest = new Date(dNow.setDate(dNow.getDate() - 1)).toLocaleDateString();
-            const tom = new Date(new Date().setDate(new Date().getDate() + 1)).toLocaleDateString();
+           const today = formatDate(dNow);
+            const yest = formatDate(new Date(new Date().setDate(new Date().getDate() - 1)));
+            const tom = formatDate(new Date(new Date().setDate(new Date().getDate() + 1)));
             const allowedDates = [today, yest, tom];
 
             let filterSel = document.getElementById('filterMilkMan');
@@ -2315,10 +2493,10 @@
             items.push({ item, qty, rate });
             
             custObj.defItem = JSON.stringify(items);
-            const btn = event.target; btn.innerText = "...";
+            const btn = window.event ? window.event.target : null; if(btn) btn.innerText = "...";
             await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
             document.getElementById('selfQtyAdd').value = ''; document.getElementById('selfItemAdd').value = ''; document.getElementById('selfRateAdd').value = '';
-            btn.innerText = "Add / Update";
+            if(btn) btn.innerText = "Add / Update";
             renderSelfCustItems();
         }
         
@@ -2353,7 +2531,7 @@
                 return;
             }
             
-            const dateStr = selectedDate.toLocaleDateString();
+            const dateStr = convertToDDMMYYYY(dateEl.value);
 
             const custObj = customers.find(c => c.cid === currentUser.login_id);
             if (!custObj) {
@@ -2407,7 +2585,7 @@
             btn.innerText = "Saving..."; btn.disabled = true;
             const dateEl = document.getElementById('tempChangeDate');
             const shift = document.getElementById('tempChangeShift').value;
-            const dateStr = new Date(dateEl.value).toLocaleDateString();
+            const dateStr = convertToDDMMYYYY(dateEl.value);
             const custObj = customers.find(c => c.cid === currentUser.login_id);
 
             let defItems = getCustItems(custObj);
@@ -2517,7 +2695,7 @@
         }
         function setFeedDate(offset) {
             let d = new Date(); d.setDate(d.getDate() + offset);
-            currentFeedDateStr = d.toLocaleDateString();
+            currentFeedDateStr = formatDate(d);
             currentFeedOffset = offset;
             
             document.getElementById('btnDateToday').classList.toggle('active-tab', offset === 0);
@@ -2531,7 +2709,7 @@
             if(!val) return;
             let parts = val.split('-');
             let d = new Date(parts[0], parts[1]-1, parts[2]);
-            currentFeedDateStr = d.toLocaleDateString();
+            currentFeedDateStr = convertToDDMMYYYY(val);
             
             let today = new Date(); today.setHours(0,0,0,0);
             d.setHours(0,0,0,0);
@@ -2555,7 +2733,10 @@
             transactions.forEach(t => {
                 if (t.shift === 'General Bill') return; // Hide General Bills
                 if (t.date === currentFeedDateStr && t.company === currentUser.company && (t.shift === currentFeedShift || !t.shift)) {
-                    doneToday.set(t.cust, t);
+                    let entry = doneToday.get(t.cust) || { itemsTrans: null, payTrans: null };
+                    if (t.item === 'Payment') entry.payTrans = t;
+                    else entry.itemsTrans = t;
+                    doneToday.set(t.cust, entry);
                 }
             });
 
@@ -2567,13 +2748,13 @@
                 if (selectedMM && c.milkman_id !== selectedMM) return;
                 if (c.shift !== currentFeedShift && c.shift !== 'Both') return; // Filter By Shift
                 
-                let trans = doneToday.get(c.name);
+                let entry = doneToday.get(c.name);
                 
-                if (trans && currentFeedOffset <= 0) {
+                if (entry && currentFeedOffset <= 0) {
                     completed.push({c, i});
-                    if (trans.item !== 'Payment') {
+                    if (entry.itemsTrans) {
                         try {
-                            let items = JSON.parse(trans.item);
+                            let items = JSON.parse(entry.itemsTrans.item);
                             if (Array.isArray(items)) {
                                 items.forEach(it => {
                                     if(!itemsToCarry[it.item]) itemsToCarry[it.item] = 0;
@@ -2581,12 +2762,12 @@
                                 });
                             }
                         } catch(e) {
-                            if(!itemsToCarry[trans.item]) itemsToCarry[trans.item] = 0;
-                            itemsToCarry[trans.item] += parseFloat(trans.qty || 0);
+                            if(!itemsToCarry[entry.itemsTrans.item]) itemsToCarry[entry.itemsTrans.item] = 0;
+                            itemsToCarry[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.qty || 0);
                         }
                     }
                 } else {
-                    pending.push({c, i, trans});
+                    pending.push({c, i, entry});
                     let defItems = getCustItems(c);
                     defItems.forEach(di => {
                         if(!itemsToCarry[di.item]) itemsToCarry[di.item] = 0;
@@ -2620,7 +2801,7 @@
                 
                 let defItems = getCustItems(c);
                 let itemsHtml = defItems.map((d, itemIdx) => {
-                    let preFillQty = trans ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
+                        let preFillQty = (entry && entry.itemsTrans) ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
                     return `
                     <div style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; display:flex; align-items:center; gap:8px;">
                         <span style="font-size:12px; width:70px; font-weight:bold;">${d.item}</span>
@@ -2654,9 +2835,9 @@
                 if (isOld) {
                     html += `<div style="text-align:center; font-size:12px; color:var(--warning); margin-top:5px; padding:8px; border:1px dashed var(--warning); border-radius:6px;">⚠️ Locked for past dates. Contact Owner to edit.</div>`;
                 } else if (currentFeedOffset > 0) {
-                    let btnTxt = trans ? "Update Pre-order 📅" : "Save Pre-order 📅";
-                    let bgBtn = trans ? "var(--warning)" : "var(--primary)";
-                    let colBtn = trans ? "black" : "white";
+                        let btnTxt = entry ? "Update Pre-order 📅" : "Save Pre-order 📅";
+                        let bgBtn = entry ? "var(--warning)" : "var(--primary)";
+                        let colBtn = entry ? "black" : "white";
                     html += `<button class="btn-save" style="width:100%; padding:10px; font-size:14px; margin-top:5px; background:${bgBtn}; color:${colBtn};" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
                 } else {
                     html += `<button class="btn-save" style="width:100%; padding:10px; font-size:14px; margin-top:5px;" onclick="saveFeedEntry(${i}, this)">Done / Update ✔</button>`;
@@ -2683,11 +2864,11 @@
                 cTarget += parseFloat(di.qty || 0);
             });
             
-            let trans = doneToday.get(c.name);
-            if (trans && trans.item !== 'Payment') {
+            let entry = doneToday.get(c.name);
+            if (entry && entry.itemsTrans) {
                 let cDelivered = 0;
                 try {
-                    let items = JSON.parse(trans.item);
+                    let items = JSON.parse(entry.itemsTrans.item);
                     if (Array.isArray(items)) {
                         items.forEach(it => {
                             if(!deliveredItems[it.item]) deliveredItems[it.item] = 0;
@@ -2698,11 +2879,11 @@
                         });
                     }
                 } catch(e) {
-                    if(!deliveredItems[trans.item]) deliveredItems[trans.item] = 0;
-                    if(!deliveredAmount[trans.item]) deliveredAmount[trans.item] = 0;
-                    deliveredItems[trans.item] += parseFloat(trans.qty || 0);
-                    deliveredAmount[trans.item] += parseFloat(trans.total || 0);
-                    cDelivered += parseFloat(trans.qty || 0);
+                    if(!deliveredItems[entry.itemsTrans.item]) deliveredItems[entry.itemsTrans.item] = 0;
+                    if(!deliveredAmount[entry.itemsTrans.item]) deliveredAmount[entry.itemsTrans.item] = 0;
+                    deliveredItems[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.qty || 0);
+                    deliveredAmount[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.total || 0);
+                    cDelivered += parseFloat(entry.itemsTrans.qty || 0);
                 }
                 
                 if (cTarget > 0 && cDelivered === 0) {
@@ -2790,7 +2971,7 @@
                 if (selectedMM && c.milkman_id !== selectedMM) return false;
                 if (c.shift !== 'Both' && c.shift !== currentFeedShift) return false;
                 return true;
-            }).sort((a,b) => getSeq(a) - getSeq(b));
+            }).map(c => ({...c})).sort((a,b) => getSeq(a) - getSeq(b));
 
             if (currentSeqEditList.length === 0) {
                 document.getElementById('seqModalContent').innerHTML = `<p style="color:#94a3b8; font-size:13px; margin:0;">No customers found for sequence editing in ${currentFeedShift} shift.</p>`;
@@ -2854,9 +3035,10 @@
             });
             
             if(promises.length > 0) {
-                let btn = event.target; btn.innerText = "Saving...";
+                let btn = window.event ? window.event.target : null; 
+                if(btn) btn.innerText = "Saving...";
                 await Promise.all(promises);
-                btn.innerText = "Update & Save";
+                if(btn) btn.innerText = "Update & Save";
                 renderTransFeed();
                 if(document.getElementById('ledger-master').classList.contains('hidden') === false && currentUser.type !== 'Milk Man') { renderCustomers(); }
             }
@@ -3109,7 +3291,7 @@
                     let p0 = parseInt(p[0]), p1 = parseInt(p[1]);
                     if(p0 > 12) return { year: parseInt(p[2]), month: p1 };
                     else if(p1 > 12) return { year: parseInt(p[2]), month: p0 };
-                    else return { year: parseInt(p[2]), month: p0 };
+                        else return { year: parseInt(p[2]), month: p1 };
                 } else return { year: parseInt(p[0]), month: parseInt(p[1]) };
             }
             let d = new Date(dStr);
@@ -3117,9 +3299,14 @@
         }
 
         async function buildStatementHTML(custName, company, reportMonth, reportYear) {
-            const openingBalanceResponse = await fetch(`${API_BASE}/opening_balance?cust_name=${encodeURIComponent(custName)}&company=${encodeURIComponent(company)}&month=${reportMonth}&year=${reportYear}`);
-            const openingBalanceData = await openingBalanceResponse.json();
-            let openingBalance = openingBalanceData.opening_balance;
+            let openingBalance = 0;
+            try {
+                const openingBalanceResponse = await fetch(`${API_BASE}/opening_balance?cust_name=${encodeURIComponent(custName)}&company=${encodeURIComponent(company)}&month=${reportMonth}&year=${reportYear}`);
+                const openingBalanceData = await openingBalanceResponse.json();
+                openingBalance = openingBalanceData.opening_balance || 0;
+            } catch (e) {
+                console.error("Error fetching opening balance:", e);
+            }
 
             let currentMonthPurchases = 0;
             let currentMonthPaid = 0;
@@ -3281,7 +3468,11 @@
             printWindow.document.write('</div>');
 
             let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
+            let ownerAddress = currentUser.address || currentUser.addr || '';
+            let ownerMobile = currentUser.mobile || '';
             printWindow.document.write('<h2>' + companyName.toUpperCase() + '</h2>');
+            if (ownerAddress) printWindow.document.write('<p style="text-align:center; margin:2px 0; font-size:14px;">' + ownerAddress + '</p>');
+            if (ownerMobile) printWindow.document.write('<p style="text-align:center; margin:2px 0 15px 0; font-size:14px;"><b>Mob:</b> ' + ownerMobile + '</p>');
             printWindow.document.write('<h3>Customer Statement : ' + custName + ' (' + monthName + ')</h3>');
             
             let cleanContent = printContent.replace(/color:var\(--success\)/g, 'color:green; font-weight:bold;')
@@ -3424,6 +3615,11 @@
             if(activeDiv) activeDiv.classList.remove('hidden');
             if(activeBtn) activeBtn.classList.add('active-tab');
         }
+
+        // --- HELP & SUPPORT MODAL CONTROLS ---
+        function openHelpModal() { document.getElementById('helpModal').classList.remove('hidden'); }
+        function closeHelpModal() { document.getElementById('helpModal').classList.add('hidden'); }
+        function toggleFaq(element) { element.parentElement.classList.toggle('active'); }
 
         // --- GLOBAL AUTO LABEL GENERATOR ---
         function injectAutoLabels() {
