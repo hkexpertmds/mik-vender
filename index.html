@@ -3424,8 +3424,8 @@
                     let itemsToProcess = [];
                     if (String(t.item || '').startsWith('[')) {
                         try {
-                            let items = JSON.parse(t.item);
-                            if (Array.isArray(parsed)) itemsToProcess = parsed;
+                            let parsedItems = JSON.parse(t.item);
+                            if (Array.isArray(parsedItems)) itemsToProcess = parsedItems;
                         } catch(e) {}
                     } else {
                         itemsToProcess = [{ item: t.item, qty: t.qty, rate: t.rate, total: tTotal }];
