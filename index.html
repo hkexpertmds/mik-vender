@@ -3407,31 +3407,64 @@
                 return dObj.year === reportYear && dObj.month === reportMonth;
             });
 
-            currentMonthTransactions.sort((a, b) => a.id - b.id).forEach(t => { 
+            let dailyData = {};
+            currentMonthTransactions.forEach(t => { 
+                let dKey = t.date.replace(/\//g, '-');
+                if (!dailyData[dKey]) dailyData[dKey] = { items: [], paid: 0, total: 0 };
+                
                 if(t.item === 'Payment') {
-                    currentMonthPaid += Math.abs(parseFloat(t.total));
-                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${t.date}</td><td><b style="color:var(--success)">Payment Done</b></td><td>-</td><td>-</td><td style="color:var(--success)">-₹${Math.abs(parseFloat(t.total))}</td></tr>`;
+                    let pAmt = Math.abs(parseFloat(t.total));
+                    dailyData[dKey].paid += pAmt;
+                    currentMonthPaid += pAmt;
                 } else {
-                    currentMonthPurchases += parseFloat(t.total);
-                    let displayItem = formatItemDisplay(t.item);
+                    let tTotal = parseFloat(t.total);
+                    dailyData[dKey].total += tTotal;
+                    currentMonthPurchases += tTotal;
                     
-                    let dispQty = t.qty || '-';
-                    let dispRate = t.rate || '-';
+                    let itemsToProcess = [];
                     if (String(t.item || '').startsWith('[')) {
                         try {
                             let items = JSON.parse(t.item);
-                            if (Array.isArray(items)) {
-                                let tRates = [];
-                                items.forEach(i => {
-                                    tRates.push(i.rate);
-                                });
-                                dispQty = items.length + ' Items';
-                                dispRate = tRates.join(', ');
-                            }
+                            if (Array.isArray(parsed)) itemsToProcess = parsed;
                         } catch(e) {}
+                    } else {
+                        itemsToProcess = [{ item: t.item, qty: t.qty, rate: t.rate, total: tTotal }];
                     }
                     
-                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${t.date}</td><td>${displayItem}</td><td>${dispQty}</td><td>${dispRate}</td><td>₹${t.total}</td></tr>`;
+                    itemsToProcess.forEach(it => {
+                        let existingItem = dailyData[dKey].items.find(i => i.item === it.item && i.rate == it.rate);
+                        if (existingItem) {
+                            existingItem.qty += parseFloat(it.qty || 0);
+                        } else {
+                            dailyData[dKey].items.push({ item: it.item, qty: parseFloat(it.qty || 0), rate: parseFloat(it.rate || 0) });
+                        }
+                    });
+                }
+            });
+
+            let sortedDates = Object.keys(dailyData).sort((a, b) => {
+                let pA = a.split('-'); let dateA = pA.length === 3 ? (pA[2].length===4 ? pA[2]+pA[1]+pA[0] : pA[0]+pA[1]+pA[2]) : a;
+                let pB = b.split('-'); let dateB = pB.length === 3 ? (pB[2].length===4 ? pB[2]+pB[1]+pB[0] : pB[0]+pB[1]+pB[2]) : b;
+                return dateA.localeCompare(dateB);
+            });
+
+            sortedDates.forEach(date => {
+                let dayData = dailyData[date];
+                if (dayData.items.length > 0) {
+                    let dispQty, dispRate, displayItem;
+                    if (dayData.items.length === 1) {
+                        displayItem = dayData.items[0].item;
+                        dispQty = dayData.items[0].qty;
+                        dispRate = dayData.items[0].rate;
+                    } else {
+                        displayItem = dayData.items.map(i => `${i.item} <span style="color:#94a3b8">(${i.qty})</span>`).join(', ');
+                        dispQty = dayData.items.length + ' Items';
+                        dispRate = dayData.items.map(i => i.rate).join(', ');
+                    }
+                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${date}</td><td>${displayItem}</td><td>${dispQty}</td><td>${dispRate}</td><td>₹${dayData.total.toFixed(2)}</td></tr>`;
+                }
+                if (dayData.paid > 0) {
+                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${date}</td><td><b style="color:var(--success)">Payment Done</b></td><td>-</td><td>-</td><td style="color:var(--success)">-₹${dayData.paid.toFixed(2)}</td></tr>`;
                 }
             });
 
