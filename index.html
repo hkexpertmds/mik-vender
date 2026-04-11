@@ -421,6 +421,7 @@
             <div id="trans-tab-all" class="hidden">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0;">All Transactions</h3>
+                    <button class="btn-save" style="width:auto; padding:8px 15px;" onclick="openNewTransModal()">➕ New Entry</button>
                 </div>
                 <table><thead><tr><th>Date</th><th>Customer</th><th>Item</th><th>Total</th><th>Actions</th></tr></thead><tbody id="transTableBody"></tbody></table>
             </div>
@@ -639,13 +640,22 @@
 
     <!-- EDIT TRANS MODAL (REPLACES MANUAL ENTRY) -->
     <div id="editTransModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569;">
-            <h3 style="margin-top:0;">✏️ Edit Entry</h3>
-            <div class="grid-form" style="margin-top: 15px; margin-bottom: 0;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                <h3 id="transModalTitle" style="margin:0;">📝 Manual Entry</h3>
+                <button onclick="closeEditTransModal()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            
+            <div id="transTypeSelector" style="display:flex; gap:10px; margin-bottom:15px;">
+                <button id="btnTransTypeItems" class="btn-tab active-tab" onclick="switchTransModalType('Items')">🛒 Items</button>
+                <button id="btnTransTypePay" class="btn-tab" onclick="switchTransModalType('Payment')">💸 Payment</button>
+            </div>
+
+            <div class="grid-form" style="margin-top: 0; margin-bottom: 0;">
                 <input type="hidden" id="editTransIdx">
-                    <input type="text" id="tDateText" placeholder="Record Date" readonly style="opacity:0.7;">
-                    <input type="text" id="tCustName" placeholder="Customer Name" readonly style="opacity:0.7;">
-                    <input type="text" id="tShiftText" placeholder="Shift" readonly style="opacity:0.7;">
+                <input type="date" id="tDateText" placeholder="Record Date" required>
+                <select id="tCustSelect" required><option value="">-- Select Customer --</option></select>
+                <select id="tShiftText" required><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option></select>
             </div>
                 
                 <div id="editTransItemsSection" style="margin-top: 15px;">
@@ -668,7 +678,7 @@
                 <div id="tTotalDisplay" style="display:flex; align-items:center; font-weight:bold; color:var(--success); margin-top:15px; font-size:18px;">Total: ₹0</div>
                 
             <div style="display:flex; gap:10px; margin-top:15px;">
-                <button id="btnTransSave" class="btn-save" onclick="saveTransaction()">Update Entry</button>
+                <button id="btnTransSave" class="btn-save" onclick="saveTransaction()">Save Entry</button>
                 <button class="btn-back" style="margin:0;" onclick="closeEditTransModal()">Cancel</button>
             </div>
         </div>
@@ -803,12 +813,12 @@
         };
          // --- GLOBAL DATE FORMATTER (Fixes Timezone/Locale Bugs) ---
         function formatDate(d) {
-            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}/${d.getFullYear()}`;
+            return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth()+1).padStart(2, '0')}-${d.getFullYear()}`;
         }
         function convertToDDMMYYYY(yyyy_mm_dd) {
             if(!yyyy_mm_dd) return "";
             let p = yyyy_mm_dd.split('-');
-            if(p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`;
+            if(p.length === 3 && p[0].length === 4) return `${p[2]}-${p[1]}-${p[0]}`;
             return yyyy_mm_dd;
         }
 
@@ -816,7 +826,8 @@
         // 🚀 SPEED FIX: Hardcoded 'RICK-PC' se local network me DNS resolution me 2-3 seconds lagte hain.
         // Ab dynamic base URL use hoga (0 delay).
         const API_BASE = (window.location.hostname === '' || window.location.protocol === 'file:') 
-                         ? 'http://rick-pc:5000/api'
+                         ? '/api'
+                         //? 'http://rick-pc:5000/api'
                         // ? 'http://127.0.0.1:5000/api' 
                          : window.location.origin + '/api';
         let currentUser = null;
@@ -1180,6 +1191,7 @@
             }
             // Clear the file input to allow re-selection of the same file
             document.getElementById('qrCodeInput').value = '';
+        if(document.getElementById('profPicInput')) document.getElementById('profPicInput').value = '';
         }
 
         async function saveProfile() {
@@ -1763,21 +1775,65 @@
         }
 
         // --- TRANSACTION ---
-        async function saveTransaction() {
-            const btn = document.getElementById('btnTransSave');
-            btn.innerText = "Saving...";
-            const idx = document.getElementById('editTransIdx').value;
-            const t = transactions[idx];
+        function switchTransModalType(type) {
+            currentEditTransType = type;
+            document.getElementById('btnTransTypeItems').classList.toggle('active-tab', type === 'Items');
+            document.getElementById('btnTransTypePay').classList.toggle('active-tab', type === 'Payment');
             
-            let data = { ...t };
+            document.getElementById('editTransItemsSection').classList.toggle('hidden', type === 'Payment');
+            document.getElementById('editTransPaymentSection').classList.toggle('hidden', type === 'Items');
+            
+            if (type === 'Payment') {
+                document.getElementById('tTotalDisplay').innerText = 'Total: ₹' + (document.getElementById('tPaymentAmt').value || 0);
+            } else {
+                renderEditTransItems(); // Restores item total
+            }
+        }
+
+        function openNewTransModal() {
+            document.getElementById('transModalTitle').innerText = "➕ New Entry";
+            document.getElementById('editTransIdx').value = "";
+            document.getElementById('tDateText').value = new Date().toISOString().split('T')[0];
+            document.getElementById('tDateText').readOnly = false; document.getElementById('tDateText').style.opacity = "1";
+            
+            document.getElementById('tCustSelect').value = ""; document.getElementById('tCustSelect').disabled = false; document.getElementById('tCustSelect').style.opacity = "1";
+            document.getElementById('tShiftText').value = "Morning"; document.getElementById('tShiftText').disabled = false; document.getElementById('tShiftText').style.opacity = "1";
+
+            document.getElementById('btnTransSave').innerText = "Save Entry";
+            document.getElementById('tPaymentAmt').value = "";
+            
+            currentEditTransItems = [];
+            const select = document.getElementById('tItemAdd');
+            select.innerHTML = '<option value="">-- Select Product --</option>';
+            products.forEach(p => select.innerHTML += `<option value="${p.item_name}" data-rate="${p.rate}">${p.item_name} (${p.unit || '-'})</option>`);
+            
+            switchTransModalType('Items');
+            document.getElementById('editTransModal').classList.remove('hidden');
+        }
+
+        async function saveTransaction() {
+            if (!validateForm('editTransModal')) return;
+            const btn = document.getElementById('btnTransSave'); btn.innerText = "Saving...";
+            const idx = document.getElementById('editTransIdx').value;
+            
+            const dateVal = document.getElementById('tDateText').value;
+            if(!dateVal) { alert("Please select date"); btn.innerText = idx !== "" ? "Update Entry" : "Save Entry"; return; }
+            const dateStr = convertToDDMMYYYY(dateVal);
+            const custName = document.getElementById('tCustSelect').value;
+            if(!custName) { alert("Please select customer"); btn.innerText = idx !== "" ? "Update Entry" : "Save Entry"; return; }
+            const shift = document.getElementById('tShiftText').value;
+            
+            let data = idx !== "" ? { ...transactions[idx] } : { date: dateStr, cust: custName, shift: shift, company: currentUser.company };
             
             if (currentEditTransType === 'Payment') {
                 let amt = parseFloat(document.getElementById('tPaymentAmt').value) || 0;
-                if (amt <= 0) { alert("Enter valid amount"); btn.innerText = "Update Entry"; return; }
+                if (amt <= 0) { alert("Enter valid amount"); btn.innerText = idx !== "" ? "Update Entry" : "Save Entry"; return; }
+                data.item = 'Payment';
+                data.qty = '-';
                 data.rate = amt;
                 data.total = amt;
             } else {
-                if (currentEditTransItems.length === 0) { alert("Add at least one item!"); btn.innerText = "Update Entry"; return; }
+                if (currentEditTransItems.length === 0) { alert("Add at least one item!"); btn.innerText = idx !== "" ? "Update Entry" : "Save Entry"; return; }
                 data.item = JSON.stringify(currentEditTransItems);
                 data.qty = '-';
                 let gTotal = 0;
@@ -1789,11 +1845,13 @@
             try {
                 const res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 const savedData = await res.json();
-                transactions[idx] = savedData;
+                if(idx !== "") transactions[idx] = savedData;
+                else transactions.push(savedData);
                 renderTransFeed(); renderTrans();
                 closeEditTransModal();
+                alert(idx !== "" ? "Entry Updated Successfully!" : "New Entry Saved Successfully!");
             } catch(e) { alert("Network error!"); }
-            btn.innerText = "Update Entry";
+            btn.innerText = idx !== "" ? "Update Entry" : "Save Entry";
         }
 
         // --- GENERAL BILLS LOGIC (REPLACES MANUAL ENTRY) ---
@@ -1927,9 +1985,14 @@
             document.getElementById('editGbIdx').value = idx;
             
             let dObj = new Date(t.date);
-            if (isNaN(dObj) && t.date.includes('/')) {
-                let p = t.date.split('/');
-                dObj = new Date(`${p[2]}-${p[1]}-${p[0]}`);
+            if (isNaN(dObj) && (t.date.includes('/') || t.date.includes('-'))) {
+                let p = t.date.split(/[-/]/);
+                if (p.length === 3) {
+                    if (p[0].length === 4) dObj = new Date(`${p[0]}-${p[1]}-${p[2]}`);
+                    else dObj = new Date(`${p[2]}-${p[1]}-${p[0]}`);
+                } else if (p.length === 2) {
+                    dObj = new Date(`${new Date().getFullYear()}-${p[1]}-${p[0]}`);
+                }
             }
             if(!isNaN(dObj)) document.getElementById('gbDate').value = dObj.toISOString().split('T')[0];
             
@@ -2213,7 +2276,6 @@
                     <td>${c.mobile||'-'}<br><span style="font-size:11px; color:#94a3b8;">ID: ${c.cid}</span><br><span style="font-size:11px; color:var(--primary);">User: ${c.username||'-'}</span></td>
                         <td style="display:flex; gap:4px; flex-wrap:wrap;">
                             ${!isMilkMan() ? `<button class="badge" style="background:var(--primary)" onclick="resetPassword('${c.cid}', 'Customer')">Pass</button>` : ''}
-                            <button class="badge" style="background:#10b981; color:white" onclick="openOwnerReport(${realIdx})">Report</button>
                             <button class="badge" style="background:var(--warning); color:black" onclick="editCust(${realIdx})">Edit</button>
                             <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'cust')">Del</button>
                         </td>
@@ -2746,7 +2808,8 @@
             customers.forEach((c, i) => {
                 if (isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if (selectedMM && c.milkman_id !== selectedMM) return;
-                if (c.shift !== currentFeedShift && c.shift !== 'Both') return; // Filter By Shift
+                let cShift = c.shift || 'Morning'; // Fallback for old data
+                if (cShift !== currentFeedShift && cShift !== 'Both') return; // Filter By Shift
                 
                 let entry = doneToday.get(c.name);
                 
@@ -2788,14 +2851,14 @@
             let feedIndex = 0;
             
             pending.forEach(obj => {
-                const {c, i, trans} = obj;
+                const {c, i, entry} = obj;
                 
                 let savedItemsMap = {};
                 let savedPayAmt = '';
-                if (trans) {
-                    if (trans.item === 'Payment') savedPayAmt = Math.abs(parseFloat(trans.rate));
-                    else {
-                        try { let parsed = JSON.parse(trans.item); if(Array.isArray(parsed)) parsed.forEach(it => { savedItemsMap[it.item] = it.qty; }); } catch(e) {}
+                if (entry) {
+                    if (entry.payTrans) savedPayAmt = Math.abs(parseFloat(entry.payTrans.rate));
+                    if (entry.itemsTrans) {
+                        try { let parsed = JSON.parse(entry.itemsTrans.item); if(Array.isArray(parsed)) parsed.forEach(it => { savedItemsMap[it.item] = it.qty; }); } catch(e) {}
                     }
                 }
                 
@@ -2809,7 +2872,7 @@
                     </div>`;
                 }).join('');
 
-                let badgeStatus = trans ? `<span style="font-size:11px; color:var(--success); border:1px solid var(--success); padding:3px 8px; border-radius:12px;">Saved / Pre-ordered</span>` : `<span style="font-size:11px; color:var(--warning); border:1px solid var(--warning); padding:3px 8px; border-radius:12px;">Pending</span>`;
+                let badgeStatus = entry ? `<span style="font-size:11px; color:var(--success); border:1px solid var(--success); padding:3px 8px; border-radius:12px;">Saved / Pre-ordered</span>` : `<span style="font-size:11px; color:var(--warning); border:1px solid var(--warning); padding:3px 8px; border-radius:12px;">Pending</span>`;
 
                 html += `
                 <div style="background:var(--card); border:1px solid #475569; padding: 15px; border-radius:12px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.3); display:flex; flex-direction:column; gap:12px; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
@@ -2864,11 +2927,11 @@
                 cTarget += parseFloat(di.qty || 0);
             });
             
-            let trans = doneToday.get(c.name);
-            if (trans && trans.item !== 'Payment') {
+            let entry = doneToday.get(c.name);
+            if (entry && entry.itemsTrans) {
                 let cDelivered = 0;
                 try {
-                    let items = JSON.parse(trans.item);
+                    let items = JSON.parse(entry.itemsTrans.item);
                     if (Array.isArray(items)) {
                         items.forEach(it => {
                             if(!deliveredItems[it.item]) deliveredItems[it.item] = 0;
@@ -2879,11 +2942,11 @@
                         });
                     }
                 } catch(e) {
-                        if(!deliveredItems[entry.itemsTrans.item]) deliveredItems[entry.itemsTrans.item] = 0;
-                        if(!deliveredAmount[entry.itemsTrans.item]) deliveredAmount[entry.itemsTrans.item] = 0;
-                        deliveredItems[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.qty || 0);
-                        deliveredAmount[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.total || 0);
-                        cDelivered += parseFloat(entry.itemsTrans.qty || 0);
+                    if(!deliveredItems[entry.itemsTrans.item]) deliveredItems[entry.itemsTrans.item] = 0;
+                    if(!deliveredAmount[entry.itemsTrans.item]) deliveredAmount[entry.itemsTrans.item] = 0;
+                    deliveredItems[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.qty || 0);
+                    deliveredAmount[entry.itemsTrans.item] += parseFloat(entry.itemsTrans.total || 0);
+                    cDelivered += parseFloat(entry.itemsTrans.qty || 0);
                 }
                 
                 if (cTarget > 0 && cDelivered === 0) {
@@ -3153,21 +3216,34 @@
         function editTrans(i) { 
             const t = transactions[i]; 
             document.getElementById('editTransIdx').value = i; 
+            document.getElementById('transModalTitle').innerText = "✏️ Edit Entry";
             
-            document.getElementById('tDateText').value = t.date;
-            document.getElementById('tCustName').value = t.cust;
+            let dObj = new Date(t.date);
+            if (isNaN(dObj) && (t.date.includes('/') || t.date.includes('-'))) {
+                let p = t.date.split(/[-/]/);
+                if (p.length === 3) {
+                    if (p[0].length === 4) dObj = new Date(`${p[0]}-${p[1]}-${p[2]}`);
+                    else dObj = new Date(`${p[2]}-${p[1]}-${p[0]}`);
+                }
+            }
+            if(!isNaN(dObj)) document.getElementById('tDateText').value = dObj.toISOString().split('T')[0];
+            else document.getElementById('tDateText').value = '';
+            
+            document.getElementById('tDateText').readOnly = true; document.getElementById('tDateText').style.opacity = "0.7";
+            
+            let custSelect = document.getElementById('tCustSelect');
+            if (!Array.from(custSelect.options).some(opt => opt.value === t.cust)) custSelect.innerHTML += `<option value="${t.cust}">${t.cust}</option>`;
+            custSelect.value = t.cust;
+            custSelect.disabled = true; custSelect.style.opacity = "0.7";
+            
             document.getElementById('tShiftText').value = t.shift || 'Morning';
+            document.getElementById('tShiftText').disabled = true; document.getElementById('tShiftText').style.opacity = "0.7";
             
             if(t.item === 'Payment') {
-                currentEditTransType = 'Payment';
-                document.getElementById('editTransItemsSection').classList.add('hidden');
-                document.getElementById('editTransPaymentSection').classList.remove('hidden');
+                switchTransModalType('Payment');
                 document.getElementById('tPaymentAmt').value = t.rate;
-                document.getElementById('tTotalDisplay').innerText = `Total: ₹${t.rate}`;
             } else {
-                currentEditTransType = 'Items';
-                document.getElementById('editTransItemsSection').classList.remove('hidden');
-                document.getElementById('editTransPaymentSection').classList.add('hidden');
+                switchTransModalType('Items');
                 
                 try {
                     currentEditTransItems = JSON.parse(t.item);
@@ -3182,6 +3258,7 @@
                 
                 renderEditTransItems();
             }
+            document.getElementById('btnTransSave').innerText = "Update Entry";
             
             document.getElementById('editTransModal').classList.remove('hidden');
         }
@@ -3281,21 +3358,31 @@
         function parseDateToMonthYear(dStr) {
             if(!dStr) return { month: 0, year: 0 };
             dStr = String(dStr).trim();
+            let currentYear = new Date().getFullYear();
             if(dStr.includes('-')) {
                 let p = dStr.split('-');
-                if(p[0].length === 4) return { year: parseInt(p[0]), month: parseInt(p[1]) };
-                else return { year: parseInt(p[2]), month: parseInt(p[1]) };
+                if(p.length === 3) {
+                    if(p[0].length === 4) return { year: parseInt(p[0]), month: parseInt(p[1]) };
+                    else return { year: parseInt(p[2]), month: parseInt(p[1]) };
+                } else if(p.length === 2) {
+                    return { year: currentYear, month: parseInt(p[1]) };
+                }
             } else if(dStr.includes('/')) {
                 let p = dStr.split('/');
-                if(p[2].length === 4) {
-                    let p0 = parseInt(p[0]), p1 = parseInt(p[1]);
-                    if(p0 > 12) return { year: parseInt(p[2]), month: p1 };
-                    else if(p1 > 12) return { year: parseInt(p[2]), month: p0 };
-                        else return { year: parseInt(p[2]), month: p1 };
-                } else return { year: parseInt(p[0]), month: parseInt(p[1]) };
+                if(p.length === 3) {
+                    if(p[2].length === 4) {
+                        let p0 = parseInt(p[0]), p1 = parseInt(p[1]);
+                        if(p0 > 12) return { year: parseInt(p[2]), month: p1 };
+                        else if(p1 > 12) return { year: parseInt(p[2]), month: p0 };
+                            else return { year: parseInt(p[2]), month: p1 };
+                    } else return { year: parseInt(p[0]), month: parseInt(p[1]) };
+                } else if(p.length === 2) {
+                    return { year: currentYear, month: parseInt(p[1]) };
+                }
             }
             let d = new Date(dStr);
-            return { year: d.getFullYear(), month: d.getMonth() + 1 };
+            if (!isNaN(d)) return { year: d.getFullYear(), month: d.getMonth() + 1 };
+            return { year: currentYear, month: 0 };
         }
 
         async function buildStatementHTML(custName, company, reportMonth, reportYear) {
@@ -3405,10 +3492,9 @@
         }
 
         let currentReportCustName = '';
-        function openOwnerReport(idx) {
-            const c = customers[idx];
-            currentReportCustName = c.name;
-            document.getElementById('ownerReportTitle').innerText = `📄 Report: ${c.name}`;
+        function openOwnerReport(custName) {
+            currentReportCustName = custName;
+            document.getElementById('ownerReportTitle').innerText = `📄 Report: ${custName}`;
             
             const monthYearInput = document.getElementById('ownerReportMonthYear');
             if (!monthYearInput.value) {
@@ -3498,18 +3584,31 @@
         function renderAccounts() {
             const div = document.getElementById('monthlyReport');
             let summary = {};
+            
+            // Naye aur Purane sabhi customers ko by default 0 balance ke sath load karna
+            customers.forEach(c => {
+                if(currentUser.type !== 'Admin' && c.company !== currentUser.company) return;
+                summary[c.name] = { purchases: 0, paid: 0 };
+            });
+
             transactions.forEach(t => { 
                 if (t.shift === 'General Bill') return; // Hide General Bills from Accounts
                 if(currentUser.type !== 'Admin' && t.company !== currentUser.company) return;
                 if(!summary[t.cust]) summary[t.cust] = { purchases: 0, paid: 0 };
-                    if(t.item === 'Payment') summary[t.cust].paid += Math.abs(parseFloat(t.total));
+                if(t.item === 'Payment') summary[t.cust].paid += Math.abs(parseFloat(t.total));
                 else summary[t.cust].purchases += parseFloat(t.total);
             });
-            let html = `<table><thead><tr><th>Customer</th><th>Total Bill</th><th>Total Paid</th><th>Balance Due</th></tr></thead><tbody>`;
+            let html = `<table><thead><tr><th>Customer</th><th>Total Bill</th><th>Total Paid</th><th>Balance Due</th><th>Action</th></tr></thead><tbody>`;
             let accIndex = 0;
             for(let c in summary) {
                 let bal = summary[c].purchases - summary[c].paid;
-                html += `<tr style="animation-delay:${(accIndex++) * 0.03}s"><td>${c}</td><td>₹${summary[c].purchases}</td><td style="color:var(--success)">₹${summary[c].paid}</td><td style="color:var(--danger)"><b>₹${bal}</b></td></tr>`;
+                html += `<tr style="animation-delay:${(accIndex++) * 0.03}s">
+                    <td>${c}</td>
+                    <td>₹${summary[c].purchases.toFixed(2)}</td>
+                    <td style="color:var(--success)">₹${summary[c].paid.toFixed(2)}</td>
+                    <td style="color:var(--danger)"><b>₹${bal.toFixed(2)}</b></td>
+                    <td><button class="badge" style="background:#10b981; color:white; padding: 6px 12px;" data-cust="${c.replace(/"/g, '&quot;')}" onclick="openOwnerReport(this.getAttribute('data-cust'))">📄 Report</button></td>
+                </tr>`;
             }
             div.innerHTML = html + "</tbody></table>";
         }
