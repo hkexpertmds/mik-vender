@@ -337,6 +337,22 @@ def save_data(table_name):
         res = supabase.table(db_table).update(data).eq('id', item_id).execute()
         return jsonify(res.data[0] if res.data else data)
         
+    # 🛡️ BUG FIX: Add server-side check to prevent duplicate transaction entries
+    if not data.get('id') and table_name == 'transactions':
+        q = supabase.table(db_table).select('id').eq('cust', data.get('cust')).eq('date', data.get('date')).eq('shift', data.get('shift')).eq('company', data.get('company'))
+        
+        if data.get('item') == 'Payment':
+            q = q.eq('item', 'Payment')
+        else:
+            q = q.neq('item', 'Payment')
+            
+        existing_res = q.execute()
+        
+        if existing_res.data:
+            item_id = existing_res.data[0]['id']
+            res = supabase.table(db_table).update(data).eq('id', item_id).execute()
+            return jsonify(res.data[0] if res.data else data)
+
     # INSERT NEW RECORD
     if table_name == 'users':
         if data.get('type') == 'Milk Man':
@@ -393,28 +409,27 @@ def get_opening_balance():
         month = int(request.args.get('month', 0))
         year = int(request.args.get('year', 0))
     except (TypeError, ValueError):
-        return jsonify({"opening_balance": 0, "error": "Invalid month or year parameters"}), 400
+        return jsonify({"opening_balance": 0, "transactions": [], "error": "Invalid month or year parameters"}), 400
 
     # Fetch all transactions to avoid string comparison issues with dates
-    transactions_res = supabase.table('sys_trans').select('date, item, total, shift').eq('cust', cust_name).eq('company', company).neq('shift', 'General Bill').execute()
+    transactions_res = supabase.table('sys_trans').select('*').eq('cust', cust_name).eq('company', company).neq('shift', 'General Bill').execute()
     transactions_all = transactions_res.data if transactions_res.data else []
 
     opening_balance = 0
+    month_transactions = []
+
     for t in transactions_all:
         d_str = str(t.get('date', '')).strip()
         t_year, t_month = 0, 0
         try:
-            if '-' in d_str or '/' in d_str:
-                parts = d_str.replace('/', '-').split('-')
-                if len(parts) == 3:
-                    if len(parts[0]) == 4:
-                        t_year, t_month = int(parts[0]), int(parts[1])
-                    else:
-                        t_year, t_month = int(parts[2]), int(parts[1])
-                elif len(parts) == 2:
-                    current_year = datetime.datetime.now().year
-                    t_year, t_month = current_year, int(parts[1])
-        except Exception:
+            # Standardize date parsing
+            parts = re.split(r'[-/]', d_str)
+            if len(parts) == 3:
+                if len(parts[0]) == 4: # YYYY-MM-DD
+                    t_year, t_month = int(parts[0]), int(parts[1])
+                elif len(parts[2]) == 4: # DD-MM-YYYY
+                    t_year, t_month = int(parts[2]), int(parts[1])
+        except (ValueError, IndexError):
             continue
             
         if t_year > 0 and t_month > 0:
@@ -423,8 +438,10 @@ def get_opening_balance():
                     opening_balance -= abs(float(t.get('total') or 0))
                 else:
                     opening_balance += float(t.get('total') or 0)
+            elif t_year == year and t_month == month:
+                month_transactions.append(t)
     
-    return jsonify({"opening_balance": opening_balance})
+    return jsonify({"opening_balance": opening_balance, "transactions": month_transactions})
 
 if __name__ == '__main__':
     ensure_admin()
