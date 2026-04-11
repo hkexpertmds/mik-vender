@@ -2844,8 +2844,8 @@
             completed.sort((a,b) => getSeq(a.c) - getSeq(b.c));
 
             // Build Carry Summary
-            let summaryPills = Object.keys(itemsToCarry).map(k => `<span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:12px; font-size:13px; font-weight:bold;">${k}: ${itemsToCarry[k]}</span>`).join('');
-            summaryDiv.innerHTML = `<div style="background:var(--primary); padding:15px; border-radius:10px;"><h4 style="margin:0 0 10px 0; color:white;">🛒 Total Requirements for ${currentFeedShift}</h4><div style="display:flex; gap:10px; flex-wrap:wrap; color:white;">${summaryPills || '<span style="font-size:13px;">No items defined</span>'}</div></div>`;
+            //let summaryPills = Object.keys(itemsToCarry).map(k => `<span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:12px; font-size:13px; font-weight:bold;">${k}: ${itemsToCarry[k]}</span>`).join('');
+            //summaryDiv.innerHTML = `<div style="background:var(--primary); padding:15px; border-radius:10px;"><h4 style="margin:0 0 10px 0; color:white;">🛒 Total Requirements for ${currentFeedShift}</h4><div style="display:flex; gap:10px; flex-wrap:wrap; color:white;">${summaryPills || '<span style="font-size:13px;">No items defined</span>'}</div></div>`;
             
             let html = '';
             let feedIndex = 0;
