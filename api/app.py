@@ -324,23 +324,35 @@ def save_data(table_name):
             req_res = supabase.table('sys_requests').select('*').eq('id', item_id).execute()
             if req_res.data:
                 req_data = req_res.data[0]
-                try:
-                    nums = re.findall(r'\d+\.?\d*', str(req_data.get('req_qty', '0')))
-                    payment_amount = float(nums[0]) if nums else 0.0
-                    supabase.table('sys_trans').insert({
-                        "date": req_data['req_date'], "cust": req_data['cust_name'], "item": 'Payment',
-                        "qty": '-', "rate": payment_amount, "total": payment_amount,
-                        "company": req_data['company'], "shift": 'Morning'
-                    }).execute()
-                except Exception: pass
+                if req_data.get('status') not in ['Accepted', 'Approved']:
+                    try:
+                        nums = re.findall(r'\d+\.?\d*', str(req_data.get('req_qty', '0')))
+                        payment_amount = float(nums[0]) if nums else 0.0
+                        
+                        existing_pay = supabase.table('sys_trans').select('id', 'total').eq('cust', req_data['cust_name']).eq('date', req_data['req_date']).eq('company', req_data['company']).eq('item', 'Payment').execute()
+                        if existing_pay.data:
+                            old_total = float(existing_pay.data[0].get('total') or 0)
+                            new_total = old_total + payment_amount
+                            supabase.table('sys_trans').update({"rate": new_total, "total": new_total}).eq('id', existing_pay.data[0]['id']).execute()
+                        else:
+                            supabase.table('sys_trans').insert({
+                                "date": req_data['req_date'], "cust": req_data['cust_name'], "item": 'Payment',
+                                "qty": '-', "rate": payment_amount, "total": payment_amount,
+                                "company": req_data['company'], "shift": 'Morning'
+                            }).execute()
+                    except Exception: pass
         
         res = supabase.table(db_table).update(data).eq('id', item_id).execute()
         return jsonify(res.data[0] if res.data else data)
         
     # 🛡️ BUG FIX: Add server-side check to prevent duplicate transaction entries
     if not data.get('id') and table_name == 'transactions':
-        q = supabase.table(db_table).select('id').eq('cust', data.get('cust')).eq('date', data.get('date')).eq('shift', data.get('shift')).eq('company', data.get('company'))
+        shift_val = data.get('shift')
+        q = supabase.table(db_table).select('id').eq('cust', data.get('cust')).eq('date', data.get('date')).eq('company', data.get('company'))
         
+        if shift_val:
+            q = q.or_(f"shift.eq.{shift_val},shift.is.null")
+            
         if data.get('item') == 'Payment':
             q = q.eq('item', 'Payment')
         else:
