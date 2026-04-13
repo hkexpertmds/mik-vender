@@ -401,31 +401,32 @@
 
         <div id="ledger-trans-view" class="hidden">
             <!-- FEED CONTROLS (DATES & SHIFTS) -->
-            <div style="display:flex; gap:10px; margin-bottom: 10px; overflow-x:auto;">
+            <div style="display:flex; gap:10px; margin-bottom: 15px; background:rgba(0,0,0,0.15); padding:8px; border-radius:10px;">
                 <!-- NEW TABS FOR ENTRIES VIEW -->
-                <button id="tabTransFeed" class="btn-tab active-tab" onclick="switchLedgerTransTab('feed')">🗓️ Daily Feed</button>
-                <button id="tabTransAll" class="btn-tab" onclick="switchLedgerTransTab('all')">📊 All Transactions</button>
+                <button id="tabTransFeed" class="btn-tab active-tab" style="flex:1; margin:0; font-size:13px;" onclick="switchLedgerTransTab('feed')">🗓️ Daily Feed</button>
+                <button id="tabTransAll" class="btn-tab" style="flex:1; margin:0; font-size:13px;" onclick="switchLedgerTransTab('all')">📊 All Trans</button>
             </div>
 
             <div id="trans-tab-feed">
-                <div style="display:flex; gap:10px; margin-bottom: 10px; overflow-x:auto;">
-                    <button class="btn-tab active-tab" id="btnShiftM" onclick="setFeedShift('Morning')">🌅 Morning</button>
-                    <button class="btn-tab" id="btnShiftE" onclick="setFeedShift('Evening')">🌃 Evening</button>
+                <!-- UNIFIED FEED CONTROLS PANEL -->
+                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #475569;">
+                    <div style="display:flex; gap:10px; margin-bottom: 12px; align-items:center;">
+                        <select id="filterMilkMan" onchange="populateTransCustSelect(); renderTransFeed(); renderTrans();" class="hidden" style="flex:1; padding: 8px; background:var(--primary); color:white; border:none; border-radius: 6px; font-weight:bold; margin:0;"></select>
+                        <button class="badge" style="background:var(--warning); color:black; padding:8px 12px; font-size:13px; font-weight:bold; margin-left:auto; border-radius:6px;" onclick="openSeqModal()">🔢 Edit Seq</button>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-direction:column;">
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-tab active-tab" style="flex: 1; padding: 8px; margin:0;" id="btnShiftM" onclick="setFeedShift('Morning')">🌅 Morning</button>
+                            <button class="btn-tab" style="flex: 1; padding: 8px; margin:0;" id="btnShiftE" onclick="setFeedShift('Evening')">🌃 Evening</button>
+                        </div>
+                        <div style="display:flex; gap:5px; align-items:center; overflow-x:auto;">
+                            <button class="btn-tab" style="padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateYest" onclick="setFeedDate(-1)">Yest</button>
+                            <button class="btn-tab active-tab" style="padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateToday" onclick="setFeedDate(0)">Today</button>
+                            <button class="btn-tab" style="padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateTom" onclick="setFeedDate(1)">Tom</button>
+                            <input type="date" id="feedCustomDate" onchange="setFeedDateCustom(this.value)" style="flex:1; max-width: 160px; padding: 6px; font-size: 11px; margin:0;">
+                        </div>
+                    </div>
                 </div>
-            
-            <!-- MILKMAN FILTER & EDIT SEQ -->
-            <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:center;">
-                <select id="filterMilkMan" onchange="populateTransCustSelect(); renderTransFeed(); renderTrans();" class="hidden" style="flex:1; max-width: 300px; background:var(--primary); color:white; border:none; font-weight:bold;"></select>
-                <button class="badge" style="background:var(--warning); color:black; padding:8px 12px; font-size:13px; font-weight:bold;" onclick="openSeqModal()">Edit Seq</button>
-            </div>
-
-            <!-- DATES ROW -->
-            <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:center; overflow-x:auto; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
-                <button class="btn-tab" id="btnDateYest" onclick="setFeedDate(-1)">Yesterday</button>
-                <button class="btn-tab active-tab" id="btnDateToday" onclick="setFeedDate(0)">Today</button>
-                <button class="btn-tab" id="btnDateTom" onclick="setFeedDate(1)">Tomorrow</button>
-                <input type="date" id="feedCustomDate" onchange="setFeedDateCustom(this.value)" style="width:auto; padding:8px; margin:0;">
-            </div>
 
             <!-- FINAL DAILY REPORT (OUTSIDE SCROLL) -->
             <div id="daily-feed-report" style="margin-bottom: 15px;"></div>
@@ -1039,7 +1040,7 @@
                 'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill',
                 'btn-self': '<span style="font-size:24px; margin:0;">📈</span>View Detailed My Report',
                 'tabCust': 'Customers', 'tabTrans': 'Entries',
-                'tabTransFeed': '🗓️ Daily Feed', 'tabTransAll': '📊 All Transactions',
+                'tabTransFeed': '🗓️ Daily Feed', 'tabTransAll': '📊 All Trans',
                 'btnShiftM': '🌅 Morning', 'btnShiftE': '🌃 Evening',
                 'tabSelfStatement': '📊 Statement', 'tabSelfOrder': '🛒 My Order', 'tabSelfReq': '💬 Requests', 'tabSelfPay': '💸 Payment',
                 'langBtn': '🌐 2. Language (हिंदी)'
