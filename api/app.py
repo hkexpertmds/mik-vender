@@ -185,7 +185,8 @@ def sync_data():
     company = req_data.get('company')
     name = req_data.get('name')
     
-    u_cols = 'id, name, login_id, type, company, email, address, route, mobile, qr_code'
+    # 🚀 SPEED FIX: Removed heavy 'qr_code' from background fetching to reduce megabytes of payload
+    u_cols = 'id, name, login_id, type, company, email, address, route, mobile'
     c_cols = 'id, name, addr, cid, defItem, defQty, defRate, company, milkman_id, route, shift, mobile, seq_no, seq_no_eve'
 
     def safe_get(f):
@@ -202,14 +203,14 @@ def sync_data():
                 f_c = executor.submit(lambda: supabase.table('sys_customers').select(c_cols).execute().data)
                 f_t = executor.submit(lambda: supabase.table('sys_trans').select('*').order('id', desc=True).limit(300).execute().data)
                 f_p = executor.submit(lambda: supabase.table('sys_products').select('*').execute().data)
-                f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').order('id', desc=True).limit(50).execute().data)
+                f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').order('id', desc=True).limit(20).execute().data)
                 f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').execute().data)
             else:
                 f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols).eq('company', company).execute().data)
                 f_c = executor.submit(lambda: supabase.table('sys_customers').select(c_cols).eq('company', company).execute().data)
                 f_t = executor.submit(lambda: supabase.table('sys_trans').select('*').eq('company', company).order('id', desc=True).limit(300).execute().data)
                 f_p = executor.submit(lambda: supabase.table('sys_products').select('*').eq('company', company).execute().data)
-                f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('company', company).order('id', desc=True).limit(50).execute().data)
+                f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('company', company).order('id', desc=True).limit(20).execute().data)
                 f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
         return jsonify({"success": True, "data": {"users": safe_get(f_u), "customers": safe_get(f_c), "transactions": safe_get(f_t), "products": safe_get(f_p), "requests": safe_get(f_r), "routes": safe_get(f_ro)}})
         
@@ -218,23 +219,30 @@ def sync_data():
         milkman_customers = milkman_customers_res.data if milkman_customers_res.data else []
         customer_names = [c['name'] for c in milkman_customers]
 
+        def get_mm_trans():
+            if not customer_names: return []
+            if len(customer_names) > 40:
+                return supabase.table('sys_trans').select('*').eq('company', company).order('id', desc=True).limit(150).execute().data
+            return supabase.table('sys_trans').select('*').eq('company', company).in_('cust', customer_names).order('id', desc=True).limit(150).execute().data
+
         with ThreadPoolExecutor(max_workers=4) as executor:
-            if customer_names:
-                f_t = executor.submit(lambda: supabase.table('sys_trans').select('*').eq('company', company).in_('cust', customer_names).order('id', desc=True).limit(200).execute().data)
-            else:
-                f_t = executor.submit(lambda: [])
+            f_t = executor.submit(get_mm_trans)
             f_p = executor.submit(lambda: supabase.table('sys_products').select('*').eq('company', company).execute().data)
-            f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('company', company).eq('milkman_id', login_id).order('id', desc=True).limit(50).execute().data)
+            f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('company', company).eq('milkman_id', login_id).order('id', desc=True).limit(10).execute().data)
             f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
-        return jsonify({"success": True, "data": {"users": [], "customers": milkman_customers, "transactions": safe_get(f_t), "products": safe_get(f_p), "requests": safe_get(f_r), "routes": safe_get(f_ro)}})
+            
+        try: milkman_trans = f_t.result()
+        except Exception: milkman_trans = []
+        
+        return jsonify({"success": True, "data": {"users": [], "customers": milkman_customers, "transactions": milkman_trans, "products": safe_get(f_p), "requests": safe_get(f_r), "routes": safe_get(f_ro)}})
         
     elif role == 'Customer':
         with ThreadPoolExecutor(max_workers=5) as executor:
             f_t = executor.submit(lambda: supabase.table('sys_trans').select('*').eq('cust', name).eq('company', company).order('id', desc=True).limit(100).execute().data)
             f_p = executor.submit(lambda: supabase.table('sys_products').select('*').eq('company', company).execute().data)
-            f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('cust_id', login_id).eq('company', company).order('id', desc=True).limit(20).execute().data)
+            f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('cust_id', login_id).eq('company', company).order('id', desc=True).limit(15).execute().data)
             f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
-            f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols).eq('company', company).execute().data)
+            f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols + ', qr_code').eq('company', company).eq('type', 'Owner').execute().data)
         return jsonify({"success": True, "data": {"users": safe_get(f_u), "customers": [], "transactions": safe_get(f_t), "products": safe_get(f_p), "requests": safe_get(f_r), "routes": safe_get(f_ro)}})
     return jsonify({"success": False})
 
