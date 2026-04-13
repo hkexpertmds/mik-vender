@@ -1810,7 +1810,7 @@
 
         async function saveTransaction() {
             if (!validateForm('editTransModal')) return;
-            const btn = document.getElementById('btnTransSave'); btn.innerText = "Saving...";
+            const btn = document.getElementById('btnTransSave'); btn.innerText = "Saving..."; btn.disabled = true;
             const idx = document.getElementById('editTransIdx').value;
             
             const dateVal = document.getElementById('tDateText').value;
@@ -1848,7 +1848,7 @@
                 closeEditTransModal();
                 alert(idx !== "" ? "Entry Updated Successfully!" : "New Entry Saved Successfully!");
             } catch(e) { alert("Network error!"); }
-            btn.innerText = idx !== "" ? "Update Entry" : "Save Entry";
+            btn.innerText = idx !== "" ? "Update Entry" : "Save Entry"; btn.disabled = false;
         }
 
         // --- GENERAL BILLS LOGIC (REPLACES MANUAL ENTRY) ---
@@ -2660,7 +2660,7 @@
             let payAmt = parseFloat(document.getElementById('temp-pay').value) || 0;
 
             try {
-                let existingItemsTrans = transactions.find(t => t.date === dateStr && t.cust === custObj.name && t.shift === shift && t.item !== 'Payment');
+                let existingItemsTrans = transactions.find(t => t.date === dateStr && t.cust === custObj.name && (t.shift === shift || !t.shift) && t.item !== 'Payment');
                 if (itemsToSave.length > 0) {
                     let data = { date: dateStr, cust: custObj.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: custObj.company, shift: shift };
                     if (existingItemsTrans) data.id = existingItemsTrans.id;
@@ -2671,7 +2671,7 @@
                     await fetch(`${API_BASE}/transactions/${existingItemsTrans.id}`, { method: 'DELETE' });
                     transactions = transactions.filter(t => t.id !== existingItemsTrans.id);
                 }
-                let existingPayTrans = transactions.find(t => t.date === dateStr && t.cust === custObj.name && t.shift === shift && t.item === 'Payment');
+                let existingPayTrans = transactions.find(t => t.date === dateStr && t.cust === custObj.name && (t.shift === shift || !t.shift) && t.item === 'Payment');
                 if (payAmt > 0) {
                     let pData = { date: dateStr, cust: custObj.name, item: 'Payment', qty: '-', rate: payAmt, total: payAmt, company: custObj.company, shift: shift };
                     if (existingPayTrans) pData.id = existingPayTrans.id;
@@ -3105,8 +3105,8 @@
             }
 
             try {
-                let existingItemsTrans = transactions.find(t => t.date === currentFeedDateStr && t.cust === c.name && t.shift === currentFeedShift && t.item !== 'Payment');
-                let existingPayTrans = transactions.find(t => t.date === currentFeedDateStr && t.cust === c.name && t.shift === currentFeedShift && t.item === 'Payment');
+                let existingItemsTrans = transactions.find(t => t.date === currentFeedDateStr && t.cust === c.name && (t.shift === currentFeedShift || !t.shift) && t.item !== 'Payment');
+                let existingPayTrans = transactions.find(t => t.date === currentFeedDateStr && t.cust === c.name && (t.shift === currentFeedShift || !t.shift) && t.item === 'Payment');
 
                 if (itemsToSave.length > 0) {
                     let data = { date: currentFeedDateStr, cust: c.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: c.company, shift: currentFeedShift };
