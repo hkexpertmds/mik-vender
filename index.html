@@ -342,8 +342,13 @@
         
         <div id="ledger-cust-view">
             
-            <select id="filterCustMilkManSelect" onchange="renderCustomers()" class="hidden" style="margin-bottom: 15px; width: 100%; max-width: 300px; background:var(--primary); color:white; border:none; font-weight:bold;"></select>
-            <div class="grid-form">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap: 10px;">
+                <select id="filterCustMilkManSelect" onchange="renderCustomers()" class="hidden" style="flex:1; max-width: 300px; background:var(--primary); color:white; border:none; font-weight:bold; padding: 10px; border-radius: 8px;"></select>
+                <button class="btn-save" id="btnShowNewCust" style="width:auto; padding:10px 15px;" onclick="openNewCustForm()">➕ New Customer</button>
+            </div>
+
+            <div id="cust-form-section" class="hidden">
+                <div class="grid-form">
                 <input type="hidden" id="editCustIdx">
                 <select id="cMilkMan" onchange="autoFillCustRoute()" required><option value="">-- Assign Milk Man --</option></select>
                 <div id="cSeqContainer" style="display: flex; grid-column: 1 / -1; gap: 10px; width: 100%;">
@@ -373,7 +378,11 @@
                     </div>
                     <ul id="cItemList" style="margin-top: 10px; margin-bottom: 0; padding-left: 20px; font-size: 13px; color: var(--text);"></ul>
                 </div>
-                <button id="btnCustSave" class="btn-save" onclick="saveCustomer()">Save Customer</button>
+                <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
+                    <button id="btnCustSave" class="btn-save" style="flex:1;" onclick="saveCustomer()">Save Customer</button>
+                    <button class="btn-back" style="flex:1; margin:0;" onclick="closeCustForm()">Cancel</button>
+                </div>
+                </div>
             </div>
             <div style="overflow-x: auto; margin-top: 20px;">
                 <table style="min-width: 600px;"><thead><tr><th>Name</th><th>Route & Shift</th><th>Milkman</th><th>Mobile & ID</th><th>Actions</th></tr></thead><tbody id="customerTableBody"></tbody></table>
@@ -1706,6 +1715,17 @@
             resetForm('user'); populateRouteDropdown(); renderUsers();
         }
 
+        function openNewCustForm() {
+            resetForm('cust');
+            document.getElementById('cust-form-section').classList.remove('hidden');
+            document.getElementById('btnShowNewCust').classList.add('hidden');
+        }
+
+        function closeCustForm() {
+            document.getElementById('cust-form-section').classList.add('hidden');
+            document.getElementById('btnShowNewCust').classList.remove('hidden');
+        }
+
         // --- CUSTOMER ---
         async function saveCustomer() {
             if (!validateForm('ledger-cust-view')) return;
@@ -1769,6 +1789,7 @@
 
             if(idx === "") customers.push(savedData); else customers[idx] = savedData;
             resetForm('cust'); renderCustomers();
+            closeCustForm();
         }
 
         // --- TRANSACTION ---
@@ -3204,6 +3225,8 @@
             renderCustItems();
             document.getElementById('editCustIdx').value = i; 
             document.getElementById('btnCustSave').innerText = "Update Customer"; 
+            document.getElementById('cust-form-section').classList.remove('hidden');
+            document.getElementById('btnShowNewCust').classList.add('hidden');
         }
         
         function editTrans(i) { 
@@ -3660,6 +3683,7 @@
             document.getElementById('tabTrans').classList.toggle('active-tab', type === 'trans');
             
             if(type === 'cust') {
+                closeCustForm();
                 let custFilterSel = document.getElementById('filterCustMilkManSelect');
                 if (currentUser && currentUser.type !== 'Milk Man' && currentUser.type !== 'Customer') {
                     custFilterSel.classList.remove('hidden');
