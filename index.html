@@ -2882,6 +2882,21 @@
                             <span style="font-size:13px; color:#94a3b8; font-weight:bold;">Seq: #${getSeq(c) !== 999 ? getSeq(c) : '-'}</span>
                             <strong style="font-size:16px; color:var(--text); margin-left:5px;">${c.name}</strong>
                         </div>
+                        // hk
+                        let isOld = false;
+                        if (isMilkMan() && currentFeedOffset < -1) isOld = true;
+        
+                        if (isOld) {
+                            html += `<div style="text-align:center; font-size:12px; color:var(--warning); margin-top:5px; padding:8px; border:1px dashed var(--warning); border-radius:6px;">⚠️ Locked for past dates. Contact Owner to edit.</div>`;
+                        } else if (currentFeedOffset > 0) {
+                                let btnTxt = entry ? "Update Pre-order 📅" : "Save Pre-order 📅";
+                                let bgBtn = entry ? "var(--warning)" : "var(--primary)";
+                                let colBtn = entry ? "black" : "white";
+                            html += `<button class="btn-save" style="width:100%; padding:10px; font-size:14px; margin-top:5px; background:${bgBtn}; color:${colBtn};" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
+                        } else {
+                            html += `<button class="btn-save" style="width:100%; padding:10px; font-size:14px; margin-top:5px;" onclick="saveFeedEntry(${i}, this)">Done / Update ✔</button>`;
+                        }
+                        // hk
                         ${badgeStatus}
                     </div>
                     <div style="display:flex; flex-wrap:wrap; gap:10px;">
@@ -2893,19 +2908,6 @@
                     </div>
                     `;
                     
-                let isOld = false;
-                if (isMilkMan() && currentFeedOffset < -1) isOld = true;
-
-                if (isOld) {
-                    html += `<div style="text-align:center; font-size:12px; color:var(--warning); margin-top:5px; padding:8px; border:1px dashed var(--warning); border-radius:6px;">⚠️ Locked for past dates. Contact Owner to edit.</div>`;
-                } else if (currentFeedOffset > 0) {
-                        let btnTxt = entry ? "Update Pre-order 📅" : "Save Pre-order 📅";
-                        let bgBtn = entry ? "var(--warning)" : "var(--primary)";
-                        let colBtn = entry ? "black" : "white";
-                    html += `<button class="btn-save" style="width:100%; padding:10px; font-size:14px; margin-top:5px; background:${bgBtn}; color:${colBtn};" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
-                } else {
-                    html += `<button class="btn-save" style="width:100%; padding:10px; font-size:14px; margin-top:5px;" onclick="saveFeedEntry(${i}, this)">Done / Update ✔</button>`;
-                }
                 
                 html += `</div>`;
             });
