@@ -2153,11 +2153,26 @@
             document.getElementById('payOnlineFields').classList.toggle('hidden', method !== 'Online');
         }
 
-        const toBase64 = file => new Promise((resolve, reject) => {
+        // 🚀 SPEED FIX: Compress huge mobile screenshots before saving them to DB
+        const compressImage = (file, maxWidth = 600, maxHeight = 600, quality = 0.5) => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width; let height = img.height;
+                    if (width > height) { if (width > maxWidth) { height = Math.round(height *= maxWidth / width); width = maxWidth; } } 
+                    else { if (height > maxHeight) { width = Math.round(width *= maxHeight / height); height = maxHeight; } }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                };
+                img.onerror = e => reject(e);
+            };
+            reader.onerror = e => reject(e);
         });
 
         async function submitPayment() {
@@ -2168,6 +2183,9 @@
             if (isNaN(amount) || amount <= 0) return alert("Please enter a valid payment amount.");
             const method = document.querySelector('input[name="payMethod"]:checked').value;
             let details = {}; let screenshotData = '';
+            
+            const btn = window.event ? window.event.target : null; 
+            
             if (method === 'Cash') {
                 const paidTo = document.getElementById('payCashTo').value.trim();
                 if (!paidTo) return alert("Please specify who you paid the cash to.");
@@ -2175,10 +2193,13 @@
             } else {
                 const fileInput = document.getElementById('payScreenshot');
                 if (fileInput.files.length === 0) return alert("Please upload a screenshot for online payment.");
-                try { screenshotData = await toBase64(fileInput.files[0]); } catch (e) { return alert("Error reading screenshot file."); }
+                if(btn) { btn.innerText = "Compressing..."; btn.disabled = true; }
+                try { screenshotData = await compressImage(fileInput.files[0]); } catch (e) { 
+                    if(btn) { btn.innerText = "Submit Payment"; btn.disabled = false; }
+                    return alert("Error reading screenshot file."); 
+                }
                 details.screenshot = screenshotData;
             }
-            const btn = window.event ? window.event.target : null; 
             if(btn) { btn.innerText = "Submitting..."; btn.disabled = true; }
             let data = { cust_id: currentUser.login_id, cust_name: currentUser.name, req_date: requestDate, req_qty: `Payment of ₹${amount} via ${method}`, type: 'Payment', details: JSON.stringify({ amount, method, ...details }), company: currentUser.company, milkman_id: customers.find(c => c.cid === currentUser.login_id)?.milkman_id || '' };
             try {
