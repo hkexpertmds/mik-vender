@@ -171,7 +171,7 @@
         <p style="color: #94a3b8; margin-bottom: 30px;">Select your portal to continue</p>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
             <div class="role-card" onclick="showLogin('Owner')"><h3>👑</h3><h4>Owner</h4></div>
-            <div class="role-card" onclick="showLogin('Milk Man')"><h3>🛵</h3><h4>Milk Man</h4></div>
+            <div class="role-card" onclick="showLogin('Milk Man')"><h3>🛵</h3><h4>Delivery Man</h4></div>
             <div class="role-card" onclick="showLogin('Customer')"><h3>🥛</h3><h4>Customer</h4></div>
         </div>
 
@@ -274,7 +274,7 @@
         
         <div class="menu-grid">
             <button id="btn-route" class="btn-save box-btn" style="background:#059669" onclick="showView('route-master')"><span style="font-size:28px; margin-bottom:8px;">🗺️</span>Manage Routes</button>
-            <button id="btn-um" class="btn-save box-btn" style="background:#312e81" onclick="showView('user-master')"><span style="font-size:28px; margin-bottom:8px;">🛵</span>Manage Milk Men</button>
+            <button id="btn-um" class="btn-save box-btn" style="background:#312e81" onclick="showView('user-master')"><span style="font-size:28px; margin-bottom:8px;">🛵</span>Manage Delivery Men</button>
             <button id="btn-prod" class="btn-save box-btn" style="background:#4f46e5" onclick="showView('product-master')"><span style="font-size:28px; margin-bottom:8px;">📦</span>Manage Products</button>
             <button id="btn-lm" class="btn-save box-btn" style="background:#1e3a8a" onclick="showView('ledger-master')"><span style="font-size:28px; margin-bottom:8px;">📖</span>Customer Ledger</button>
             <button id="btn-req" class="btn-save box-btn" style="background:#ea580c" onclick="showView('request-master')"><span style="font-size:28px; margin-bottom:8px;">📝</span>Customer Requests</button>
@@ -318,20 +318,30 @@
     </div>
 
     <div id="user-master" class="container hidden">
-        <h2>🛵 Milk Man Master</h2>
-        <div class="grid-form">
-            <input type="hidden" id="editUserIdx">
-            <input type="text" id="uId" placeholder="System ID (Auto)" readonly style="opacity:0.7">
-            <input type="text" id="uUsername" placeholder="Create Login Username (Optional)">
-            <input type="text" id="uName" placeholder="Milk Man Name" required>
-            <input type="text" id="uMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
-            <select id="uRoute" required>
-                <option value="">-- Select Route --</option>
-            </select>
-            <input type="text" id="uPass" placeholder="Set Password">
-            <button id="btnUserSave" class="btn-save" onclick="saveUser()">Save Milk Man</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h2 style="margin:0;">🛵 Delivery Man Master</h2>
+            <button class="btn-save" id="btnShowNewUser" style="width:auto; padding:10px 15px;" onclick="openNewUserForm()">➕ New Delivery Man</button>
         </div>
-        <table><thead><tr><th>Name</th><th>ID</th><th>Route</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="userTableBody"></tbody></table>
+        <div id="user-form-section" class="hidden">
+            <div class="grid-form">
+                <input type="hidden" id="editUserIdx">
+                <input type="text" id="uId" placeholder="System ID (Auto)" readonly style="opacity:0.7">
+                <input type="text" id="uUsername" placeholder="Create Login Username (Optional)">
+                <input type="text" id="uName" placeholder="Delivery Man Name" required>
+                <input type="text" id="uMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+                <select id="uRoute" required>
+                    <option value="">-- Select Route --</option>
+                </select>
+                <input type="text" id="uPass" placeholder="Set Password">
+                <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
+                    <button id="btnUserSave" class="btn-save" style="flex:1;" onclick="saveUser()">Save Delivery Man</button>
+                    <button class="btn-back" style="flex:1; margin:0;" onclick="closeUserForm()">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div style="overflow-x: auto; margin-top: 20px;">
+            <table><thead><tr><th>Name</th><th>ID</th><th>Route</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="userTableBody"></tbody></table>
+        </div>
     </div>
 
     <div id="ledger-master" class="container hidden">
@@ -350,7 +360,7 @@
             <div id="cust-form-section" class="hidden">
                 <div class="grid-form">
                 <input type="hidden" id="editCustIdx">
-                <select id="cMilkMan" onchange="autoFillCustRoute()" required><option value="">-- Assign Milk Man --</option></select>
+                <select id="cMilkMan" onchange="autoFillCustRoute()" required><option value="">-- Assign Delivery Man --</option></select>
                 <div id="cSeqContainer" style="display: flex; grid-column: 1 / -1; gap: 10px; width: 100%;">
                     <input type="number" id="cSeq" placeholder="Morning Seq No" style="flex: 1;">
                     <input type="number" id="cSeqEve" placeholder="Evening Seq No" style="flex: 1;">
@@ -385,7 +395,7 @@
                 </div>
             </div>
             <div style="overflow-x: auto; margin-top: 20px;">
-                <table style="min-width: 600px;"><thead><tr><th>Name</th><th>Route & Shift</th><th>Milkman</th><th>Mobile & ID</th><th>Actions</th></tr></thead><tbody id="customerTableBody"></tbody></table>
+                <table style="min-width: 600px;"><thead><tr><th>Name</th><th>Route & Shift</th><th>Delivery Man</th><th>Mobile & ID</th><th>Actions</th></tr></thead><tbody id="customerTableBody"></tbody></table>
             </div>
         </div>
 
@@ -484,22 +494,32 @@
 
     <!-- PRODUCT MASTER -->
     <div id="product-master" class="container hidden">
-        <h2>📦 Product Master</h2>
-        <div class="grid-form">
-            <input type="hidden" id="editProdIdx">
-            <input type="text" id="pName" placeholder="Item Name (e.g. Cow Milk)" required>
-            <div style="display:flex; gap:10px;">
-                <input type="number" id="pRate" placeholder="Rate (₹)" style="flex:1;" required>
-                <select id="pUnit" style="width:100px;">
-                    <option value="Ltr">Ltr</option>
-                    <option value="Kg">Kg</option>
-                    <option value="Pkt">Pkt</option>
-                    <option value="Piece">Piece</option>
-                </select>
-            </div>
-            <button id="btnProdSave" class="btn-save" onclick="saveProduct()">Save Product</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h2 style="margin:0;">📦 Product Master</h2>
+            <button class="btn-save" id="btnShowNewProduct" style="width:auto; padding:10px 15px;" onclick="openNewProductForm()">➕ New Product</button>
         </div>
-        <table><thead><tr><th>Item Name</th><th>Rate (₹)</th><th>Actions</th></tr></thead><tbody id="productTableBody"></tbody></table>
+        <div id="product-form-section" class="hidden">
+            <div class="grid-form">
+                <input type="hidden" id="editProdIdx">
+                <input type="text" id="pName" placeholder="Item Name (e.g. Cow Milk)" required>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="pRate" placeholder="Rate (₹)" style="flex:1;" required>
+                    <select id="pUnit" style="width:100px;">
+                        <option value="Ltr">Ltr</option>
+                        <option value="Kg">Kg</option>
+                        <option value="Pkt">Pkt</option>
+                        <option value="Piece">Piece</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
+                    <button id="btnProdSave" class="btn-save" style="flex:1;" onclick="saveProduct()">Save Product</button>
+                    <button class="btn-back" style="flex:1; margin:0;" onclick="closeProductForm()">Cancel</button>
+                </div>
+            </div>
+        </div>
+        <div style="overflow-x: auto; margin-top: 20px;">
+            <table><thead><tr><th>Item Name</th><th>Rate (₹)</th><th>Actions</th></tr></thead><tbody id="productTableBody"></tbody></table>
+        </div>
     </div>
 
     <!-- REQUEST MASTER -->
@@ -589,7 +609,7 @@
         <!-- TAB: REQUESTS -->
         <div id="self-tab-req" class="hidden">
             <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                <h3 style="margin-bottom:10px; font-size: 16px;">✉️ Send Message to Milkman</h3>
+                <h3 style="margin-bottom:10px; font-size: 16px;">✉️ Send Message to Delivery Man</h3>
                 <p style="font-size:12px; color:#94a3b8; margin-top:-5px; margin-bottom:15px;">
                     For requests not covered above (e.g., "bill payment collected", "going on vacation for a week"), send a message here.
                 </p>
@@ -614,7 +634,7 @@
                         <label style="font-size:14px;"><input type="radio" name="payMethod" value="Online" onchange="togglePaymentFields()"> Online</label>
                     </div>
                     <div id="payCashFields">
-                        <input type="text" id="payCashTo" placeholder="Paid to (e.g., Milkman's Name)" style="padding:10px; background:var(--input); border:1px solid #475569; border-radius:8px; color:white;">
+                        <input type="text" id="payCashTo" placeholder="Paid to (e.g., Delivery Man's Name)" style="padding:10px; background:var(--input); border:1px solid #475569; border-radius:8px; color:white;">
                     </div>
                     <div id="payOnlineFields" class="hidden">
                         <div style="text-align:center; margin-bottom:15px;">
@@ -1009,7 +1029,7 @@
         const translations = {
             'en': {
                 'btn-route': '<span style="font-size:28px; margin-bottom:8px;">🗺️</span>Manage Routes',
-                'btn-um': '<span style="font-size:28px; margin-bottom:8px;">🛵</span>Manage Milk Men',
+                'btn-um': '<span style="font-size:28px; margin-bottom:8px;">🛵</span>Manage Delivery Men',
                 'btn-prod': '<span style="font-size:28px; margin-bottom:8px;">📦</span>Manage Products',
                 'btn-lm-owner': '<span style="font-size:28px; margin-bottom:8px;">📖</span>Customer Ledger',
                 'btn-lm-mm': '<span style="font-size:28px; margin-bottom:8px;">📝</span>Customers & Entries',
@@ -1026,7 +1046,7 @@
             },
             'hi': {
                 'btn-route': '<span style="font-size:28px; margin-bottom:8px;">🗺️</span>रूट (Routes)',
-                'btn-um': '<span style="font-size:28px; margin-bottom:8px;">🛵</span>दूध वाले (Milk Men)',
+                'btn-um': '<span style="font-size:28px; margin-bottom:8px;">🛵</span>डिलीवरी वाले (Delivery Men)',
                 'btn-prod': '<span style="font-size:28px; margin-bottom:8px;">📦</span>प्रोडक्ट और रेट',
                 'btn-lm-owner': '<span style="font-size:28px; margin-bottom:8px;">📖</span>कस्टमर खाता',
                 'btn-lm-mm': '<span style="font-size:28px; margin-bottom:8px;">📝</span>कस्टमर और एंट्री',
@@ -1594,6 +1614,7 @@
 
             if(id === 'user-master') { 
                 resetForm('user'); 
+                closeUserForm();
                 populateRouteDropdown();
                 renderUsers(); 
             }
@@ -1633,7 +1654,7 @@
 
                 togglePaymentFields();
             }
-            if(id === 'product-master') { resetForm('product'); renderProducts(); }
+            if(id === 'product-master') { resetForm('product'); closeProductForm(); renderProducts(); }
             if(id === 'request-master') { renderOwnerRequests(); }
             if(id === 'route-master') { resetForm('route'); renderRoutes(); } // This was missing from the previous diff, adding it back.
             if(id === 'owner-master') { renderOwners(); }
@@ -1675,6 +1696,26 @@
                 console.error("Error fetching requests:", error);
             }
         }
+
+        function openNewUserForm() {
+            resetForm('user');
+            document.getElementById('user-form-section').classList.remove('hidden');
+            document.getElementById('btnShowNewUser').classList.add('hidden');
+        }
+        function closeUserForm() {
+            document.getElementById('user-form-section').classList.add('hidden');
+            document.getElementById('btnShowNewUser').classList.remove('hidden');
+        }
+        function openNewProductForm() {
+            resetForm('product');
+            document.getElementById('product-form-section').classList.remove('hidden');
+            document.getElementById('btnShowNewProduct').classList.add('hidden');
+        }
+        function closeProductForm() {
+            document.getElementById('product-form-section').classList.add('hidden');
+            document.getElementById('btnShowNewProduct').classList.remove('hidden');
+        }
+
         async function saveUser() {
             if(isMilkMan()) { alert("Access Denied!"); return; }
             if (!validateForm('user-master')) return;
@@ -1695,7 +1736,7 @@
             
             if(!data.name || !data.mobile) return alert("Name and Mobile are required!");
             if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
-            if(idx === "" && !data.pass) return alert("Password is required for new Milk Man!");
+            if(idx === "" && !data.pass) return alert("Password is required for new Delivery Man!");
             if(!data.route) return alert("Route is mandatory! Please assign a Route.");
             
             let uId = document.getElementById('uId').value.trim();
@@ -1707,12 +1748,13 @@
             
             if (savedData.success === false) {
                 alert(savedData.message);
-                document.getElementById('btnUserSave').innerText = idx === "" ? "Save Milk Man" : "Update Milk Man";
+                document.getElementById('btnUserSave').innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man";
                 return;
             }
 
             if(idx === "") users.push(savedData); else users[idx] = savedData;
             resetForm('user'); populateRouteDropdown(); renderUsers();
+            closeUserForm();
         }
 
         function openNewCustForm() {
@@ -1732,7 +1774,7 @@
             document.getElementById('btnCustSave').innerText = "Saving...";
             const idx = document.getElementById('editCustIdx').value;
             if (idx === "" && !document.getElementById('cPass').value) return alert("Error: Please set a password for the new Customer!");
-            if(!document.getElementById('cMilkMan').value) return alert("Error: Please assign a Milk Man to this customer!");
+            if(!document.getElementById('cMilkMan').value) return alert("Error: Please assign a Delivery Man to this customer!");
             
             let cUsername = document.getElementById('cUsername').value.trim();
 
@@ -2125,6 +2167,7 @@
             const savedData = await res.json();
             if(idx === "") products.push(savedData); else products[idx] = savedData;
             resetForm('product'); renderProducts(); populateProductDropdowns();
+            closeProductForm();
         }
 
         // --- ROUTES ---
@@ -2278,7 +2321,7 @@
             const tbody = document.getElementById('customerTableBody');
             const mmSelect = document.getElementById('cMilkMan');
             
-            let mmHtml = '<option value="">-- Assign Milk Man --</option>';
+            let mmHtml = '<option value="">-- Assign Delivery Man --</option>';
             
             let custFilterSel = document.getElementById('filterCustMilkManSelect');
             let selectedCustMM = (custFilterSel && !custFilterSel.classList.contains('hidden')) ? custFilterSel.value : null;
@@ -3180,8 +3223,8 @@
         }
 
         // Standard helpers (Edit/Delete/Reset)
-        function editUser(i) { const u = users[i]; document.getElementById('uName').value = u.name; document.getElementById('uId').value = u.login_id; document.getElementById('uUsername').value = u.username || ''; document.getElementById('uPass').value = ""; let up = document.getElementById('uPass'); (up.closest('.form-group-auto') || up).classList.add('hidden'); document.getElementById('uMobile').value = u.mobile || ''; let ur = u.route; if(!ur || ur==='undefined') ur = 'Unnamed Route'; populateRouteDropdown(u.login_id); document.getElementById('uRoute').value = ur; document.getElementById('editUserIdx').value = i; document.getElementById('btnUserSave').innerText = "Update Milk Man"; }
-        function editProduct(i) { document.getElementById('pName').value = products[i].item_name; document.getElementById('pRate').value = products[i].rate; document.getElementById('pUnit').value = products[i].unit || 'Ltr'; document.getElementById('editProdIdx').value = i; document.getElementById('btnProdSave').innerText = "Update Product"; }
+        function editUser(i) { const u = users[i]; document.getElementById('uName').value = u.name; document.getElementById('uId').value = u.login_id; document.getElementById('uUsername').value = u.username || ''; document.getElementById('uPass').value = ""; let up = document.getElementById('uPass'); (up.closest('.form-group-auto') || up).classList.add('hidden'); document.getElementById('uMobile').value = u.mobile || ''; let ur = u.route; if(!ur || ur==='undefined') ur = 'Unnamed Route'; populateRouteDropdown(u.login_id); document.getElementById('uRoute').value = ur; document.getElementById('editUserIdx').value = i; document.getElementById('btnUserSave').innerText = "Update Delivery Man"; document.getElementById('user-form-section').classList.remove('hidden'); document.getElementById('btnShowNewUser').classList.add('hidden'); }
+        function editProduct(i) { document.getElementById('pName').value = products[i].item_name; document.getElementById('pRate').value = products[i].rate; document.getElementById('pUnit').value = products[i].unit || 'Ltr'; document.getElementById('editProdIdx').value = i; document.getElementById('btnProdSave').innerText = "Update Product"; document.getElementById('product-form-section').classList.remove('hidden'); document.getElementById('btnShowNewProduct').classList.add('hidden'); }
         function editRoute(i) { let rName = routes[i].route_name; if(!rName || rName==='undefined') rName=''; document.getElementById('rName').value = rName; document.getElementById('editRouteIdx').value = i; document.getElementById('btnRouteSave').innerText = "Update Route"; }
 
 
@@ -3355,7 +3398,7 @@
                 if(document.getElementById('tItemList')) document.getElementById('tItemList').innerHTML = "";
             }
             if(type==='user') { 
-                document.getElementById('editUserIdx').value = ""; document.getElementById('btnUserSave').innerText = "Save Milk Man"; 
+                document.getElementById('editUserIdx').value = ""; document.getElementById('btnUserSave').innerText = "Save Delivery Man"; 
                 ['uName','uPass','uMobile','uRoute'].forEach(id=>document.getElementById(id).value=""); 
                 let up = document.getElementById('uPass'); (up.closest('.form-group-auto') || up).classList.remove('hidden');
                 document.getElementById('uId').value = ""; 
@@ -3688,7 +3731,7 @@
                 if (currentUser && currentUser.type !== 'Milk Man' && currentUser.type !== 'Customer') {
                     custFilterSel.classList.remove('hidden');
                     let oldVal = custFilterSel.value;
-                    custFilterSel.innerHTML = '<option value="">-- All Milk Men / View All --</option>';
+                    custFilterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>';
                     users.filter(u => u.type === 'Milk Man').forEach(u => { custFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; });
                     custFilterSel.value = oldVal;
                 } else if(custFilterSel) {
@@ -3699,7 +3742,7 @@
                 if (currentUser && currentUser.type !== 'Milk Man' && currentUser.type !== 'Customer') {
                     filterSel.classList.remove('hidden');
                     let oldVal = filterSel.value;
-                    filterSel.innerHTML = '<option value="">-- All Milk Men / View All --</option>';
+                    filterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>';
                     users.filter(u => u.type === 'Milk Man').forEach(u => { filterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; });
                     filterSel.value = oldVal;
                 } else if(filterSel) {
