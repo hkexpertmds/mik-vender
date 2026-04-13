@@ -392,6 +392,7 @@
                 <div style="display:flex; gap:10px; margin-bottom: 10px; overflow-x:auto;">
                     <button class="btn-tab active-tab" id="btnShiftM" onclick="setFeedShift('Morning')">🌅 Morning</button>
                     <button class="btn-tab" id="btnShiftE" onclick="setFeedShift('Evening')">🌃 Evening</button>
+                    <button class="badge" style="background:var(--warning); color:black; padding:8px 12px; font-size:13px; font-weight:bold;" onclick="openSeqModal()">Edit Seq</button>
                 </div>
             
             <!-- TOTAL REQUIREMENT SUMMARY -->
@@ -400,7 +401,7 @@
             <!-- MILKMAN FILTER & EDIT SEQ -->
             <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:center;">
                 <select id="filterMilkMan" onchange="populateTransCustSelect(); renderTransFeed(); renderTrans();" class="hidden" style="flex:1; max-width: 300px; background:var(--primary); color:white; border:none; font-weight:bold;"></select>
-                <button class="badge" style="background:var(--warning); color:black; padding:8px 12px; font-size:13px; font-weight:bold;" onclick="openSeqModal()">Edit Seq</button>
+                
             </div>
 
             <!-- DATES ROW -->
@@ -2844,8 +2845,8 @@
             completed.sort((a,b) => getSeq(a.c) - getSeq(b.c));
 
             // Build Carry Summary
-            let summaryPills = Object.keys(itemsToCarry).map(k => `<span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:12px; font-size:13px; font-weight:bold;">${k}: ${itemsToCarry[k]}</span>`).join('');
-            summaryDiv.innerHTML = `<div style="background:var(--primary); padding:15px; border-radius:10px;"><h4 style="margin:0 0 10px 0; color:white;">🛒 Total Requirements for ${currentFeedShift}</h4><div style="display:flex; gap:10px; flex-wrap:wrap; color:white;">${summaryPills || '<span style="font-size:13px;">No items defined</span>'}</div></div>`;
+            // let summaryPills = Object.keys(itemsToCarry).map(k => `<span style="background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:12px; font-size:13px; font-weight:bold;">${k}: ${itemsToCarry[k]}</span>`).join('');
+            // summaryDiv.innerHTML = `<div style="background:var(--primary); padding:15px; border-radius:10px;"><h4 style="margin:0 0 10px 0; color:white;">🛒 Total Requirements for ${currentFeedShift}</h4><div style="display:flex; gap:10px; flex-wrap:wrap; color:white;">${summaryPills || '<span style="font-size:13px;">No items defined</span>'}</div></div>`;
             
             let html = '';
             let feedIndex = 0;
