@@ -411,24 +411,22 @@
 
             <div id="trans-tab-feed">
                 <!-- UNIFIED FEED CONTROLS PANEL -->
-                <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #475569;">
-                    <div style="display:flex; gap:10px; margin-bottom: 12px; align-items:center;">
-                        <select id="filterMilkMan" onchange="populateTransCustSelect(); renderTransFeed(); renderTrans();" class="hidden" style="flex:1; padding: 8px; background:var(--primary); color:white; border:none; border-radius: 6px; font-weight:bold; margin:0;"></select>
-                        <button class="badge" style="background:var(--warning); color:black; padding:8px 12px; font-size:13px; font-weight:bold; margin-left:auto; border-radius:6px;" onclick="openSeqModal()">🔢 Edit Seq</button>
-                    </div>
-                    <div style="display:flex; gap:8px; flex-direction:column;">
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn-tab active-tab" style="flex: 1; padding: 8px; margin:0;" id="btnShiftM" onclick="setFeedShift('Morning')">🌅 Morning</button>
-                            <button class="btn-tab" style="flex: 1; padding: 8px; margin:0;" id="btnShiftE" onclick="setFeedShift('Evening')">🌃 Evening</button>
-                        </div>
-                        <div style="display:flex; gap:5px; align-items:center; overflow-x:auto;">
-                            <button class="btn-tab" style="padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateYest" onclick="setFeedDate(-1)">Yest</button>
-                            <button class="btn-tab active-tab" style="padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateToday" onclick="setFeedDate(0)">Today</button>
-                            <button class="btn-tab" style="padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateTom" onclick="setFeedDate(1)">Tom</button>
-                            <input type="date" id="feedCustomDate" onchange="setFeedDateCustom(this.value)" style="flex:1; max-width: 160px; padding: 6px; font-size: 11px; margin:0;">
-                        </div>
-                    </div>
+            <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #475569; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                <div style="display:flex; gap:10px; align-items:center; flex: 1 1 200px;">
+                    <select id="filterMilkMan" onchange="populateTransCustSelect(); renderTransFeed(); renderTrans();" class="hidden" style="flex:1; padding: 8px; background:var(--primary); color:white; border:none; border-radius: 6px; font-weight:bold; margin:0;"></select>
+                    <button class="badge" style="background:var(--warning); color:black; padding:8px 12px; font-size:13px; font-weight:bold; border-radius:6px; white-space:nowrap; margin-left:auto;" onclick="openSeqModal()">🔢 Edit Seq</button>
                 </div>
+                <div style="display:flex; gap:8px; flex: 1 1 150px;">
+                    <button class="btn-tab active-tab" style="flex: 1; padding: 8px; margin:0;" id="btnShiftM" onclick="setFeedShift('Morning')">🌅 Morning</button>
+                    <button class="btn-tab" style="flex: 1; padding: 8px; margin:0;" id="btnShiftE" onclick="setFeedShift('Evening')">🌃 Evening</button>
+                </div>
+                <div style="display:flex; gap:5px; align-items:center; flex: 1 1 220px; overflow-x:auto;">
+                    <button class="btn-tab" style="flex: 1; padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateYest" onclick="setFeedDate(-1)">Yest</button>
+                    <button class="btn-tab active-tab" style="flex: 1; padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateToday" onclick="setFeedDate(0)">Today</button>
+                    <button class="btn-tab" style="flex: 1; padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateTom" onclick="setFeedDate(1)">Tom</button>
+                    <input type="date" id="feedCustomDate" onchange="setFeedDateCustom(this.value)" style="flex: 2; min-width: 100px; padding: 6px; font-size: 11px; margin:0;">
+                </div>
+            </div>
 
             <!-- FINAL DAILY REPORT (OUTSIDE SCROLL) -->
             <div id="daily-feed-report" style="margin-bottom: 15px;"></div>
@@ -760,7 +758,7 @@
                 
                 <div class="faq-item">
                     <div class="faq-question" onclick="toggleFaq(this)"><span>❌ Login Failed / Wrong ID Password?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Kripya dhyan dein ki aapne sahi Role (Owner, Milk Man, Customer) select kiya hai. Apna ID aur Password check karein. Agar aap password bhool gaye hain, toh Owner se sampark karein.</div>
+                    <div class="faq-answer">Kripya dhyan dein ki aapne sahi Role (Owner, Delivery Man, Customer) select kiya hai. Apna ID aur Password check karein. Agar aap password bhool gaye hain, toh Owner se sampark karein.</div>
                 </div>
 
                 <div class="faq-item">
@@ -780,7 +778,7 @@
 
                 <div class="faq-item">
                     <div class="faq-question" onclick="toggleFaq(this)"><span>🔑 Password Reset/Change Kaise Karein?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Owner apne dashboard se "Customers" ya "Milk Men" list mein jakar "Pass" button daba kar kisi ka bhi password reset kar sakte hain. Khud ka password badalne ke liye upar "Profile" menu me jayein.</div>
+                    <div class="faq-answer">Owner apne dashboard se "Customers" ya "Delivery Men" list mein jakar "Pass" button daba kar kisi ka bhi password reset kar sakte hain. Khud ka password badalne ke liye upar "Profile" menu me jayein.</div>
                 </div>
 
                 <div class="faq-item">
@@ -795,7 +793,7 @@
 
                 <div class="faq-item">
                     <div class="faq-question" onclick="toggleFaq(this)"><span>🔢 Delivery Sequence (Kram) kaise badlein?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Owner ya Milk Man "Daily Feed" tab me "Edit Seq" button par click karke subah ya shaam ke hisaab se customers ko nayi sequence (1, 2, 3...) de sakte hain.</div>
+                    <div class="faq-answer">Owner ya Delivery Man "Daily Feed" tab me "Edit Seq" button par click karke subah ya shaam ke hisaab se customers ko nayi sequence (1, 2, 3...) de sakte hain.</div>
                 </div>
 
                 <div class="faq-item">
@@ -1390,7 +1388,8 @@
 
         function showLogin(role) {
             currentLoginRole = role;
-            document.getElementById('login-title').innerText = `Login as ${role}`;
+            let displayRole = role === 'Milk Man' ? 'Delivery Man' : role;
+            document.getElementById('login-title').innerText = `Login as ${displayRole}`;
             
             let savedRole = localStorage.getItem('savedRole');
             if (savedRole === role && localStorage.getItem('savedId')) {
