@@ -1675,10 +1675,16 @@
                 tempDateEl.min = new Date().toISOString().split("T")[0]; // Set min date to today
                 document.getElementById('temp-change-items-view').innerHTML = '<p style="font-size:13px; color:#94a3b8;">Please select a date to make a change.</p>';
                 
-                const custObj = customers.find(c => c.cid === currentUser.login_id);
+                const custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
                 if (custObj) {
                     const milkman = users.find(u => u.login_id === custObj.milkman_id);
                     if (milkman) document.getElementById('payCashTo').value = milkman.name;
+                    
+                    const shiftSel = document.getElementById('tempChangeShift');
+                    if (shiftSel && custObj.shift) {
+                        if (custObj.shift === 'Evening') shiftSel.value = 'Evening';
+                        else shiftSel.value = 'Morning';
+                    }
                 }
 
                 const owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
@@ -2237,9 +2243,10 @@
             if(!date || !qty) return alert("Please enter Date and Requirement!");
             
             const btn = window.event ? window.event.target : null; if(btn) btn.innerText = "Sending...";
+            let custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
             let data = {
                 cust_id: currentUser.login_id, cust_name: currentUser.name, req_date: date, req_qty: qty,
-                company: currentUser.company, milkman_id: customers.find(c => c.cid === currentUser.login_id)?.milkman_id || ''
+                company: currentUser.company, milkman_id: custObj ? custObj.milkman_id : ''
             };
             const res = await fetch(`${API_BASE}/requests`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
             requests.push(await res.json());
@@ -2301,7 +2308,8 @@
                 details.screenshot = screenshotData;
             }
             if(btn) { btn.innerText = "Submitting..."; btn.disabled = true; }
-            let data = { cust_id: currentUser.login_id, cust_name: currentUser.name, req_date: requestDate, req_qty: `Payment of ₹${amount} via ${method}`, type: 'Payment', details: JSON.stringify({ amount, method, ...details }), company: currentUser.company, milkman_id: customers.find(c => c.cid === currentUser.login_id)?.milkman_id || '' };
+            let custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
+            let data = { cust_id: currentUser.login_id, cust_name: currentUser.name, req_date: requestDate, req_qty: `Payment of ₹${amount} via ${method}`, type: 'Payment', details: JSON.stringify({ amount, method, ...details }), company: currentUser.company, milkman_id: custObj ? custObj.milkman_id : '' };
             try {
                 const res = await fetch(`${API_BASE}/requests`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
                 requests.push(await res.json());
@@ -2444,7 +2452,7 @@
             const payUl = document.getElementById('custPaymentList');
             if(!msgUl || !payUl) return; 
             let msgHtml = ''; let payHtml = '';
-            requests.filter(r => r.cust_id === currentUser.login_id).forEach(r => {
+            requests.filter(r => String(r.cust_id) === String(currentUser.login_id)).forEach(r => {
                 let status = r.status || 'Pending';
                 let color = status === 'Pending' ? 'var(--warning)' : (status === 'Approved' ? 'var(--success)' : 'var(--danger)');
                 let li = `<li style="margin-bottom:5px;">On <b>${r.req_date}</b>: ${r.req_qty} <span style="color:${color}; border:1px solid ${color}; padding:2px 5px; border-radius:4px; font-size:10px; margin-left:5px;">${status}</span></li>`;
@@ -2635,12 +2643,12 @@
             const select = document.getElementById('selfItemAdd');
             if(!ul || !select) return;
             
-            let custObj = customers.find(c => c.cid === currentUser.login_id);
-            if(!custObj) return;
-            
             let selectHtml = '<option value="">-- Select Product --</option>';
             products.forEach(p => selectHtml += `<option value="${p.item_name}" data-rate="${p.rate}">${p.item_name} (${p.unit || '-'})</option>`);
             select.innerHTML = selectHtml;
+            
+            let custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
+            if(!custObj) return;
             
             let items = getCustItems(custObj);
             let html = '';
@@ -2658,7 +2666,7 @@
         }
         
         async function addSelfCustItem() {
-            let custObj = customers.find(c => c.cid === currentUser.login_id);
+            let custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
             if(!custObj) return;
             const item = document.getElementById('selfItemAdd').value;
             const qtyInput = document.getElementById('selfQtyAdd').value;
@@ -2678,17 +2686,19 @@
             document.getElementById('selfQtyAdd').value = ''; document.getElementById('selfItemAdd').value = ''; document.getElementById('selfRateAdd').value = '';
             if(btn) btn.innerText = "Add / Update";
             renderSelfCustItems();
+            renderTempChangeItems();
         }
         
         async function removeSelfCustItem(idx) {
             if(!confirm("Remove this item from your daily plan?")) return;
-            let custObj = customers.find(c => c.cid === currentUser.login_id);
+            let custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
             if(!custObj) return;
             let items = getCustItems(custObj);
             items.splice(idx, 1);
             custObj.defItem = JSON.stringify(items);
             await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
             renderSelfCustItems();
+            renderTempChangeItems();
         }
 
         // --- SELF VIEW TEMP CHANGE LOGIC ---
@@ -2713,7 +2723,7 @@
             
             const dateStr = convertToDDMMYYYY(dateEl.value);
 
-            const custObj = customers.find(c => c.cid === currentUser.login_id);
+            const custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
             if (!custObj) {
                 viewDiv.innerHTML = "Error: Customer profile not found.";
                 return;
@@ -2766,7 +2776,7 @@
             const dateEl = document.getElementById('tempChangeDate');
             const shift = document.getElementById('tempChangeShift').value;
             const dateStr = convertToDDMMYYYY(dateEl.value);
-            const custObj = customers.find(c => c.cid === currentUser.login_id);
+            const custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
 
             let defItems = getCustItems(custObj);
             let itemsToSave = []; let grandTotal = 0;
