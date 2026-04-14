@@ -1477,6 +1477,7 @@
                     
                     // Empty initialize for fast render
                     users = []; customers = []; transactions = []; products = []; requests = []; routes = [];
+                    if (currentUser.type === 'Customer') customers.push(currentUser);
                     populateProductDropdowns();
                     setupUI(); 
                     
@@ -1522,6 +1523,7 @@
                 const result = await res.json();
                 if (result.success) {
                     users = result.data.users || []; customers = result.data.customers || [];
+                    if (currentUser.type === 'Customer') customers.push(currentUser);
                     transactions = result.data.transactions || []; products = result.data.products || [];
                     requests = result.data.requests || []; routes = result.data.routes || [];
                     
@@ -3931,6 +3933,7 @@
                 if(!currentUser.company) currentUser.company = 'Default';
                 
                 users = []; customers = []; transactions = []; products = []; requests = []; routes = [];
+                if (currentUser.type === 'Customer') customers.push(currentUser);
                 populateProductDropdowns();
                 setupUI();
                 
