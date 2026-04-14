@@ -3077,14 +3077,17 @@
             let html = '';
             let feedIndex = 0;
             
-            pending.forEach(obj => {
+            const renderCard = (obj, isCompleted) => {
                 const {c, i, entry} = obj;
                 
                 let savedItemsMap = {};
                 let savedPayAmt = '';
+                let savedTotalAmt = 0;
+                
                 if (entry) {
                     if (entry.payTrans) savedPayAmt = Math.abs(parseFloat(entry.payTrans.rate));
                     if (entry.itemsTrans) {
+                        savedTotalAmt = parseFloat(entry.itemsTrans.total || 0);
                         try { let parsed = JSON.parse(entry.itemsTrans.item); if(Array.isArray(parsed)) parsed.forEach(it => { savedItemsMap[it.item] = it.qty; }); } catch(e) {}
                     }
                 }
@@ -3117,12 +3120,16 @@
                     actionButton = `<button class="btn-save" style="width:auto; padding:6px 12px; font-size:13px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
                 }
 
-                html += `
-                <div style="background:var(--card); border:1px solid #475569; padding: 10px 12px; border-radius:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.2); display:flex; flex-direction:column; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
+                let cardBorder = entry ? '1px solid var(--success)' : '1px solid #475569';
+                let titleColor = entry ? 'var(--success)' : 'var(--text)';
+                let amountBadge = entry && savedTotalAmt > 0 ? `<span style="font-size:11px; background:rgba(16, 185, 129, 0.15); color:var(--success); padding:2px 6px; border-radius:4px; margin-left:5px;">₹${savedTotalAmt}</span>` : '';
+
+                return `
+                <div style="background:var(--card); border:${cardBorder}; padding: 10px 12px; border-radius:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.2); display:flex; flex-direction:column; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:12px; color:#94a3b8; font-weight:bold;">#${getSeq(c) !== 999 ? getSeq(c) : '-'}</span>
-                            <strong style="font-size:15px; color:var(--text);">${c.name}</strong>
+                            <strong style="font-size:15px; color:${titleColor};">${c.name}${amountBadge}</strong>
                         </div>
                         ${actionButton}
                     </div>
@@ -3134,7 +3141,9 @@
                         </div>
                     </div>
                 </div>`;
-            });
+            };
+
+            pending.forEach(obj => { html += renderCard(obj, false); });
 
         let targetItems = {};
         let deliveredItems = {};
@@ -3233,14 +3242,7 @@
             if (completed.length > 0) {
                 completedHtml += `<h4 style="margin-top:25px; color:var(--success); border-bottom:1px solid #334155; padding-bottom:5px;">✅ Completed Today</h4>`;
                 completed.forEach(obj => {
-                    completedHtml += `
-                    <div style="opacity:0.6; background:var(--input); padding: 12px 15px; border-radius:10px; border-left: 5px solid var(--success); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="width: 45px; text-align: center; background: rgba(0,0,0,0.1); padding: 4px; border-radius: 4px; border: 1px solid #475569; font-size: 12px;">Seq: #${getSeq(obj.c) !== 999 ? getSeq(obj.c) : '-'}</span>
-                            <strong style="font-size:15px; color:var(--text);">${obj.c.name}</strong>
-                        </div>
-                        <span style="font-size:12px; color:var(--success); font-weight:bold;">Done</span>
-                    </div>`;
+                    completedHtml += renderCard(obj, true);
                 });
             }
             
@@ -3343,10 +3345,11 @@
 
             defItems.forEach((d, itemIdx) => {
                 let el = document.getElementById(`feed-qty-${idx}-${itemIdx}`);
-                if (el && el.value > 0) {
+                if (el && el.value !== '' && parseFloat(el.value) > 0) {
                     let q = parseFloat(el.value);
-                    itemsToSave.push({item: d.item, qty: q, rate: d.rate, total: q * d.rate});
-                    grandTotal += (q * d.rate);
+                    let rate = parseFloat(d.rate) || 0;
+                    itemsToSave.push({item: d.item, qty: q, rate: rate, total: q * rate});
+                    grandTotal += (q * rate);
                 }
             });
 
