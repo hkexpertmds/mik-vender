@@ -2635,7 +2635,7 @@
                 if (t.date !== currentFeedDateStr) return; // Only show currently selected date's entries
                 if (t.shift === 'General Bill') return; // Hide General Bills from main ledger
                 if (selectedMM) {
-                    let cObj = customers.find(c => c.name === t.cust);
+                    let cObj = customers.find(c => (c.name || '').trim() === (t.cust || '').trim());
                     if (cObj && cObj.milkman_id !== selectedMM) return;
                 }
                 
@@ -2823,8 +2823,7 @@
                     if (Array.isArray(parsed)) parsed.forEach(it => { savedItemsMap[it.item] = it.qty; });
                 } catch (e) {}
             }
-            
-            let existingPayTrans = transactions.find(t => t.date === dateStr && t.cust === currentUser.name && t.shift === shift && t.item === 'Payment');
+            let existingPayTrans = transactions.find(t => t.date === dateStr && (t.cust || '').trim() === cName && (t.shift === shift || !t.shift) && t.item === 'Payment');
             let savedPayAmt = existingPayTrans ? Math.abs(parseFloat(existingPayTrans.rate)) : '';
 
             let defItems = getCustItems(custObj);
@@ -2870,9 +2869,10 @@
             let payAmt = parseFloat(document.getElementById('temp-pay').value) || 0;
 
             try {
-                let existingItemsTrans = transactions.find(t => t.date === dateStr && t.cust === custObj.name && (t.shift === shift || !t.shift) && t.item !== 'Payment');
+                let cName = (custObj.name || '').trim();
+                let existingItemsTrans = transactions.find(t => t.date === dateStr && (t.cust || '').trim() === cName && (t.shift === shift || !t.shift) && t.item !== 'Payment');
                 if (itemsToSave.length > 0) {
-                    let data = { date: dateStr, cust: custObj.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: custObj.company, shift: shift };
+                    let data = { date: dateStr, cust: custObj.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: custObj.company || currentUser.company, shift: shift };
                     if (existingItemsTrans) data.id = existingItemsTrans.id;
                     let res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                     let savedData = await res.json();
@@ -2881,9 +2881,9 @@
                     await fetch(`${API_BASE}/transactions/${existingItemsTrans.id}`, { method: 'DELETE' });
                     transactions = transactions.filter(t => t.id !== existingItemsTrans.id);
                 }
-                let existingPayTrans = transactions.find(t => t.date === dateStr && t.cust === custObj.name && (t.shift === shift || !t.shift) && t.item === 'Payment');
+                let existingPayTrans = transactions.find(t => t.date === dateStr && (t.cust || '').trim() === cName && (t.shift === shift || !t.shift) && t.item === 'Payment');
                 if (payAmt > 0) {
-                    let pData = { date: dateStr, cust: custObj.name, item: 'Payment', qty: '-', rate: payAmt, total: payAmt, company: custObj.company, shift: shift };
+                    let pData = { date: dateStr, cust: custObj.name, item: 'Payment', qty: '-', rate: payAmt, total: payAmt, company: custObj.company || currentUser.company, shift: shift };
                     if (existingPayTrans) pData.id = existingPayTrans.id;
                     let res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pData) });
                     let savedData = await res.json();
@@ -3000,11 +3000,13 @@
             let doneToday = new Map();
             transactions.forEach(t => {
                 if (t.shift === 'General Bill') return; // Hide General Bills
-                if (t.date === currentFeedDateStr && t.company === currentUser.company && (t.shift === currentFeedShift || !t.shift)) {
-                    let entry = doneToday.get(t.cust) || { itemsTrans: null, payTrans: null };
+                // Robust matching: Ignore exact company strictness locally & trim spaces
+                if (t.date === currentFeedDateStr && (t.shift === currentFeedShift || !t.shift)) {
+                    let cName = (t.cust || '').trim();
+                    let entry = doneToday.get(cName) || { itemsTrans: null, payTrans: null };
                     if (t.item === 'Payment') entry.payTrans = t;
                     else entry.itemsTrans = t;
-                    doneToday.set(t.cust, entry);
+                    doneToday.set(cName, entry);
                 }
             });
 
@@ -3016,7 +3018,7 @@
                 let cShift = c.shift || 'Morning'; // Fallback for old data
                 if (cShift !== currentFeedShift && cShift !== 'Both') return; // Filter By Shift
                 
-                let entry = doneToday.get(c.name);
+                let entry = doneToday.get((c.name || '').trim());
                 
                 if (entry && currentFeedOffset <= 0) {
                     completed.push({c, i});
@@ -3315,11 +3317,12 @@
             }
 
             try {
-                let existingItemsTrans = transactions.find(t => t.date === currentFeedDateStr && t.cust === c.name && (t.shift === currentFeedShift || !t.shift) && t.item !== 'Payment');
-                let existingPayTrans = transactions.find(t => t.date === currentFeedDateStr && t.cust === c.name && (t.shift === currentFeedShift || !t.shift) && t.item === 'Payment');
+                let cName = (c.name || '').trim();
+                let existingItemsTrans = transactions.find(t => t.date === currentFeedDateStr && (t.cust || '').trim() === cName && (t.shift === currentFeedShift || !t.shift) && t.item !== 'Payment');
+                let existingPayTrans = transactions.find(t => t.date === currentFeedDateStr && (t.cust || '').trim() === cName && (t.shift === currentFeedShift || !t.shift) && t.item === 'Payment');
 
                 if (itemsToSave.length > 0) {
-                    let data = { date: currentFeedDateStr, cust: c.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: c.company, shift: currentFeedShift };
+                    let data = { date: currentFeedDateStr, cust: c.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: c.company || currentUser.company, shift: currentFeedShift };
                     if (existingItemsTrans) data.id = existingItemsTrans.id;
 
                     let res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
@@ -3332,7 +3335,7 @@
                 }
 
                 if (payAmt > 0) {
-                    let pData = { date: currentFeedDateStr, cust: c.name, item: 'Payment', qty: '-', rate: payAmt, total: payAmt, company: c.company, shift: currentFeedShift };
+                    let pData = { date: currentFeedDateStr, cust: c.name, item: 'Payment', qty: '-', rate: payAmt, total: payAmt, company: c.company || currentUser.company, shift: currentFeedShift };
                     if (existingPayTrans) pData.id = existingPayTrans.id;
 
                     let res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pData) });
