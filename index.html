@@ -2869,8 +2869,23 @@
             let payAmt = parseFloat(document.getElementById('temp-pay').value) || 0;
 
             try {
-                let cName = (custObj.name || '').trim();
-                let existingItemsTrans = transactions.find(t => t.date === dateStr && (t.cust || '').trim() === cName && (t.shift === shift || !t.shift) && t.item !== 'Payment');
+                let cName = (custObj.name || '').trim().toLowerCase();
+                let targetShift = shift.toLowerCase();
+
+                let existingItemsTrans = transactions.find(t => {
+                    let tDateStr = convertToDDMMYYYY((t.date || '').trim());
+                    let tShift = (t.shift || '').trim().toLowerCase();
+                    let tCust = (t.cust || '').trim().toLowerCase();
+                    return tDateStr === dateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item !== 'Payment';
+                });
+
+                let existingPayTrans = transactions.find(t => {
+                    let tDateStr = convertToDDMMYYYY((t.date || '').trim());
+                    let tShift = (t.shift || '').trim().toLowerCase();
+                    let tCust = (t.cust || '').trim().toLowerCase();
+                    return tDateStr === dateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item === 'Payment';
+                });
+
                 if (itemsToSave.length > 0) {
                     let data = { date: dateStr, cust: custObj.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: custObj.company || currentUser.company, shift: shift };
                     if (existingItemsTrans) data.id = existingItemsTrans.id;
@@ -2881,7 +2896,6 @@
                     await fetch(`${API_BASE}/transactions/${existingItemsTrans.id}`, { method: 'DELETE' });
                     transactions = transactions.filter(t => t.id !== existingItemsTrans.id);
                 }
-                let existingPayTrans = transactions.find(t => t.date === dateStr && (t.cust || '').trim() === cName && (t.shift === shift || !t.shift) && t.item === 'Payment');
                 if (payAmt > 0) {
                     let pData = { date: dateStr, cust: custObj.name, item: 'Payment', qty: '-', rate: payAmt, total: payAmt, company: custObj.company || currentUser.company, shift: shift };
                     if (existingPayTrans) pData.id = existingPayTrans.id;
@@ -2998,11 +3012,15 @@
             let selectedMM = (filterSel && !filterSel.classList.contains('hidden')) ? filterSel.value : null;
 
             let doneToday = new Map();
+            let targetShift = currentFeedShift.toLowerCase();
+
             transactions.forEach(t => {
                 if (t.shift === 'General Bill') return; // Hide General Bills
                 // Robust matching: Ignore exact company strictness locally & trim spaces
-                if (t.date === currentFeedDateStr && (t.shift === currentFeedShift || !t.shift)) {
-                    let cName = (t.cust || '').trim();
+                let tDateStr = convertToDDMMYYYY((t.date || '').trim());
+                let tShift = (t.shift || '').trim().toLowerCase();
+                if (tDateStr === currentFeedDateStr && (tShift === targetShift || tShift === '')) {
+                    let cName = (t.cust || '').trim().toLowerCase();
                     let entry = doneToday.get(cName) || { itemsTrans: null, payTrans: null };
                     if (t.item === 'Payment') entry.payTrans = t;
                     else entry.itemsTrans = t;
@@ -3018,7 +3036,7 @@
                 let cShift = c.shift || 'Morning'; // Fallback for old data
                 if (cShift !== currentFeedShift && cShift !== 'Both') return; // Filter By Shift
                 
-                let entry = doneToday.get((c.name || '').trim());
+                let entry = doneToday.get((c.name || '').trim().toLowerCase());
                 
                 if (entry && currentFeedOffset <= 0) {
                     completed.push({c, i});
@@ -3317,9 +3335,22 @@
             }
 
             try {
-                let cName = (c.name || '').trim();
-                let existingItemsTrans = transactions.find(t => t.date === currentFeedDateStr && (t.cust || '').trim() === cName && (t.shift === currentFeedShift || !t.shift) && t.item !== 'Payment');
-                let existingPayTrans = transactions.find(t => t.date === currentFeedDateStr && (t.cust || '').trim() === cName && (t.shift === currentFeedShift || !t.shift) && t.item === 'Payment');
+                let cName = (c.name || '').trim().toLowerCase();
+                let targetShift = currentFeedShift.toLowerCase();
+
+                let existingItemsTrans = transactions.find(t => {
+                    let tDateStr = convertToDDMMYYYY((t.date || '').trim());
+                    let tShift = (t.shift || '').trim().toLowerCase();
+                    let tCust = (t.cust || '').trim().toLowerCase();
+                    return tDateStr === currentFeedDateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item !== 'Payment';
+                });
+                
+                let existingPayTrans = transactions.find(t => {
+                    let tDateStr = convertToDDMMYYYY((t.date || '').trim());
+                    let tShift = (t.shift || '').trim().toLowerCase();
+                    let tCust = (t.cust || '').trim().toLowerCase();
+                    return tDateStr === currentFeedDateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item === 'Payment';
+                });
 
                 if (itemsToSave.length > 0) {
                     let data = { date: currentFeedDateStr, cust: c.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: c.company || currentUser.company, shift: currentFeedShift };
