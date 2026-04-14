@@ -3079,7 +3079,7 @@
                 let entry = doneToday.get((c.name || '').trim().toLowerCase());
                 
                 if (entry && currentFeedOffset <= 0) {
-                    completed.push({c, i});
+                    completed.push({c, i, entry});
                 } else {
                     pending.push({c, i, entry});
                 }
