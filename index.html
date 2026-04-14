@@ -157,11 +157,18 @@
         </div>
     </div>
 
+    <!-- GLOBAL LOADING OVERLAY -->
+    <div id="global-loading-overlay" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.85); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px);">
+        <div class="spinner"></div>
+        <h2 id="global-loading-title" style="font-size: 24px; color: var(--primary); margin-top: 25px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Loading...</h2>
+        <p id="global-loading-text" style="color: #e2e8f0; font-size: 14px; font-weight: 500;">Please wait</p>
+    </div>
+
     <!-- PROFILE DROPDOWN MENU -->
     <div id="profile-dropdown" class="hidden" style="position: fixed; top: 60px; left: 20px; background: var(--card); border: 1px solid #475569; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 1000; overflow: hidden; display: flex; flex-direction: column; min-width: 180px;">
         <button onclick="showView('profile-view'); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">👤 1. Profile</button>
         <button id="lang-btn" onclick="changeLanguage(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🌐 2. Language (हिंदी)</button>
-        <button onclick="openHelpModal(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🆘 3. Need Help?</button>
+        <button id="btn-help-dropdown" onclick="openHelpModal(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🆘 3. Need Help?</button>
         <button onclick="logout()" style="background: transparent; color: var(--danger); padding: 12px 20px; text-align: left; border-radius: 0; width: 100%; border: none;">🚪 4. Logout</button>
     </div>
 
@@ -177,7 +184,7 @@
 
         <!-- Help Option -->
         <div style="margin-top: 30px; text-align: center;">
-            <button class="btn-save" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); width: auto; padding: 10px 25px;" onclick="openHelpModal()">🆘 Need Help?</button>
+            <button id="btn-help-landing" class="btn-save" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); width: auto; padding: 10px 25px;" onclick="openHelpModal()">🆘 Need Help?</button>
         </div>
     </div>
 
@@ -749,61 +756,15 @@
     <div id="helpModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10002; display:flex; justify-content:center; align-items:center; padding:20px;">
         <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; max-height:85vh; display:flex; flex-direction:column; border:1px solid #475569;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                <h3 style="margin:0;">🆘 Help & Support</h3>
+                <h3 id="help-modal-title" style="margin:0;">🆘 Help & Support</h3>
                 <button onclick="closeHelpModal()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
             </div>
             
             <div style="overflow-y:auto; flex:1; padding-right:10px;">
-                <p style="color:var(--text); font-size: 14px; margin-top:0; margin-bottom: 15px;">Aam taur par aane wali problems ke solutions niche diye gaye hain. Kisi bhi error par click karein:</p>
+                <p id="help-modal-intro" style="color:var(--text); font-size: 14px; margin-top:0; margin-bottom: 15px;">Aam taur par aane wali problems ke solutions niche diye gaye hain. Kisi bhi error par click karein:</p>
                 
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>❌ Login Failed / Wrong ID Password?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Kripya dhyan dein ki aapne sahi Role (Owner, Delivery Man, Customer) select kiya hai. Apna ID aur Password check karein. Agar aap password bhool gaye hain, toh Owner se sampark karein.</div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>🌐 Connection Failed / Network Error?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Apna internet connection check karein. Agar aap local computer par hain, toh ensure karein ki Backend server (Python) chalu hai aur screen par "Backend Chal Raha Hai..." likha aa raha hai.</div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>📅 Kal ka doodh band karna/badalna hai?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Apne Customer dashboard mein jayein, "My Order" (🛒) tab select karein, wahan "One-Time Change" mein agle din ki date select karein aur quantity ko update/0 karke save kar dein.</div>
-                </div>
-                
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>🔄 Data sync ya update nahi ho raha?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Page ko refresh karein, ya logout karke dobara login karein. Agar phir bhi problem aaye toh ensure karein background data properly sync ho gaya hai.</div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>🔑 Password Reset/Change Kaise Karein?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Owner apne dashboard se "Customers" ya "Delivery Men" list mein jakar "Pass" button daba kar kisi ka bhi password reset kar sakte hain. Khud ka password badalne ke liye upar "Profile" menu me jayein.</div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>📦 Naya Product ya Rate kaise add karein?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">"Manage Products" (📦) menu mein jayein. Wahan aap doodh ke alawa naye items (jaise Ghee, Paneer) aur unka naya rate add ya update kar sakte hain.</div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>💸 Customer Online Payment kaise karein?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Customer apne portal me "Payment" (💸) tab me jayen, "Online" select karein, Owner ka QR code scan karke payment karein aur screenshot upload karke submit kar dein.</div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>🔢 Delivery Sequence (Kram) kaise badlein?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Owner ya Delivery Man "Daily Feed" tab me "Edit Seq" button par click karke subah ya shaam ke hisaab se customers ko nayi sequence (1, 2, 3...) de sakte hain.</div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>🧾 Bina khate wale customer ka bill kaise banayein?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">"General Bill" (🧾) section ka use karein. Naye customer ka naam, mobile no. aur items daal kar turant invoice / receipt print kar sakte hain.</div>
-                </div>
-
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)"><span>💳 Apna QR Code ya Profile Photo kaise badlein?</span><span class="faq-icon">▼</span></div>
-                    <div class="faq-answer">Upar right corner mein User Profile (👤) par click karein. "Edit Profile" daba kar aap apni photo, details, aur Payment QR code update karke save kar sakte hain.</div>
+                <div id="help-faq-container">
+                    <!-- FAQs will be injected here via JS to support language changes -->
                 </div>
 
                 <!-- Contact Info Box inside Modal -->
@@ -833,6 +794,23 @@
     </div>
 
     <script>
+        // --- NETWORK EVENT LISTENERS ---
+        window.addEventListener('offline', () => alert("⚠️ Internet Disconnected! You are now offline.", "error"));
+        window.addEventListener('online', () => {
+            alert("✅ Internet Restored! Reconnecting...", "success");
+            if (currentUser) fetchBackgroundData(true);
+        });
+
+        // --- LOADING OVERLAY HELPERS ---
+        function showGlobalLoading(title = "Loading...", text = "Please wait") {
+            const overlay = document.getElementById('global-loading-overlay');
+            if (overlay) { document.getElementById('global-loading-title').innerText = title; document.getElementById('global-loading-text').innerText = text; overlay.classList.remove('hidden'); }
+        }
+        function hideGlobalLoading() {
+            const overlay = document.getElementById('global-loading-overlay');
+            if (overlay) overlay.classList.add('hidden');
+        }
+
         // --- GLOBAL PREMIUM TOAST SYSTEM ---
         // Overrides native blocking alert() with beautiful UI Toasts
         window.nativeAlert = window.alert;
@@ -1058,6 +1036,28 @@
             }
         }
 
+        const enFaqs = `<div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>❌ Login Failed / Wrong ID Password?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Please ensure you have selected the correct Role (Owner, Delivery Man, Customer). Check your ID and Password. If you forgot your password, contact your Owner.</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🌐 Connection Failed / Network Error?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Check your internet connection. If you are on a local computer, ensure the Backend server (Python) is running.</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>📅 How to pause/change tomorrow's order?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Go to your Customer dashboard, select the "My Order" (🛒) tab, choose tomorrow's date in "One-Time Change" and update the quantity to 0 or your desired amount, then save.</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🔄 Data not syncing or updating?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Refresh the page, or log out and log back in. If the problem persists, ensure background data has synced properly.</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🔑 How to Reset/Change Password?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Owners can reset any password from their "Customers" or "Delivery Men" list by clicking "Pass". To change your own password, go to the "Profile" menu at the top.</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>📦 How to add a new Product or Rate?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Go to the "Manage Products" (📦) menu. There you can add new items (like Ghee, Paneer) and their rates.</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>💸 How can a Customer pay online?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Customers can go to the "Payment" (💸) tab in their portal, select "Online", scan the Owner's QR code, upload the screenshot, and submit.</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🔢 How to change Delivery Sequence?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Owners or Delivery Men can click the "Edit Seq" button in the "Daily Feed" tab to assign a new sequence (1, 2, 3...) to customers.</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🧾 How to create a bill for a non-regular customer?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Use the "General Bill" (🧾) section. Enter the new customer's name, mobile no., and items to instantly print an invoice/receipt.</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>💳 How to change my QR Code or Profile Photo?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Click on User Profile (👤) in the top right corner. Click "Edit Profile" to update your photo, details, and Payment QR code, then save.</div></div>`;
+
+        const hiFaqs = `<div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>❌ Login Failed / Wrong ID Password?</span><span class="faq-icon">▼</span></div><div class="faq-answer">कृपया ध्यान दें कि आपने सही Role (Owner, Delivery Man, Customer) सेलेक्ट किया है। अपना ID और Password चेक करें। अगर आप पासवर्ड भूल गए हैं, तो Owner से संपर्क करें।</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🌐 Connection Failed / Network Error?</span><span class="faq-icon">▼</span></div><div class="faq-answer">अपना इंटरनेट कनेक्शन चेक करें। अगर आप लोकल कंप्यूटर पर हैं, तो सुनिश्चित करें कि Backend सर्वर (Python) चालू है।</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>📅 कल का दूध बंद करना/बदलना है?</span><span class="faq-icon">▼</span></div><div class="faq-answer">अपने Customer डैशबोर्ड में जाएं, "My Order" (🛒) टैब चुनें, वहां "One-Time Change" में अगले दिन की तारीख सेलेक्ट करें और मात्रा को अपडेट/0 करके सेव कर दें।</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🔄 Data sync या update नहीं हो रहा?</span><span class="faq-icon">▼</span></div><div class="faq-answer">पेज को रिफ्रेश करें, या लॉगआउट करके दोबारा लॉगिन करें। अगर फिर भी प्रॉब्लम आए तो सुनिश्चित करें बैकग्राउंड डेटा सिंक हो गया है।</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🔑 Password Reset/Change कैसे करें?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Owner अपने डैशबोर्ड से "Customers" या "Delivery Men" लिस्ट में जाकर "Pass" बटन दबा कर किसी का भी पासवर्ड रीसेट कर सकते हैं। खुद का पासवर्ड बदलने के लिए ऊपर "Profile" मेनू में जाएं।</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>📦 नया Product या Rate कैसे add करें?</span><span class="faq-icon">▼</span></div><div class="faq-answer">"Manage Products" (📦) मेनू में जाएं। वहां आप दूध के अलावा नए आइटम (जैसे Ghee, Paneer) और उनका रेट add या update कर सकते हैं।</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>💸 Customer Online Payment कैसे करें?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Customer अपने पोर्टल में "Payment" (💸) टैब में जाएं, "Online" सेलेक्ट करें, Owner का QR कोड स्कैन करके पेमेंट करें और स्क्रीनशॉट अपलोड करके सबमिट कर दें।</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🔢 Delivery Sequence (क्रम) कैसे बदलें?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Owner या Delivery Man "Daily Feed" टैब में "Edit Seq" बटन पर क्लिक करके ग्राहकों को नई सीक्वेंस (1, 2, 3...) दे सकते हैं।</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🧾 बिना खाते वाले ग्राहक का बिल कैसे बनाएं?</span><span class="faq-icon">▼</span></div><div class="faq-answer">"General Bill" (🧾) सेक्शन का उपयोग करें। नए ग्राहक का नाम, मोबाइल नंबर और आइटम्स डालकर तुरंत इनवॉइस/रसीद प्रिंट कर सकते हैं।</div></div>
+        <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>💳 अपना QR Code या Profile Photo कैसे बदलें?</span><span class="faq-icon">▼</span></div><div class="faq-answer">ऊपर राइट कॉर्नर में User Profile (👤) पर क्लिक करें। "Edit Profile" दबा कर आप अपनी फोटो, डिटेल्स, और Payment QR कोड अपडेट करके सेव कर सकते हैं।</div></div>`;
+
         const translations = {
             'en': {
                 'btn-route': '<span style="font-size:28px; margin-bottom:8px;">🗺️</span>Manage Routes',
@@ -1074,6 +1074,11 @@
                 'tabTransFeed': '🗓️ Daily Feed', 'tabTransAll': '📊 All Trans',
                 'btnShiftM': '🌅 Morning', 'btnShiftE': '🌃 Evening',
                 'tabSelfStatement': '📊 Statement', 'tabSelfOrder': '🛒 My Order', 'tabSelfReq': '💬 Requests', 'tabSelfPay': '💸 Payment',
+                'btn-help-dropdown': '🆘 3. Need Help?',
+                'btn-help-landing': '🆘 Need Help?',
+                'help-modal-title': '🆘 Help & Support',
+                'help-modal-intro': 'Solutions to common problems are given below. Click on any question to expand:',
+                'help-faq-container': enFaqs,
                 'langBtn': '🌐 2. Language (हिंदी)'
             },
             'hi': {
@@ -1091,6 +1096,11 @@
                 'tabTransFeed': '🗓️ डेली एंट्री', 'tabTransAll': '📊 सभी एंट्री',
                 'btnShiftM': '🌅 सुबह', 'btnShiftE': '🌃 शाम',
                 'tabSelfStatement': '📊 मेरा खाता', 'tabSelfOrder': '🛒 मेरा ऑर्डर', 'tabSelfReq': '💬 मैसेज', 'tabSelfPay': '💸 पेमेंट',
+                'btn-help-dropdown': '🆘 3. मदद (Need Help)',
+                'btn-help-landing': '🆘 मदद चाहिए?',
+                'help-modal-title': '🆘 मदद और सपोर्ट',
+                'help-modal-intro': 'आम तौर पर आने वाली समस्याओं के समाधान नीचे दिए गए हैं। किसी भी प्रश्न पर क्लिक करें:',
+                'help-faq-container': hiFaqs,
                 'langBtn': '🌐 2. Language (English)'
             }
         };
@@ -1131,6 +1141,12 @@
             setHtml('tabSelfOrder', dict['tabSelfOrder']);
             setHtml('tabSelfReq', dict['tabSelfReq']);
             setHtml('tabSelfPay', dict['tabSelfPay']);
+
+            setHtml('btn-help-dropdown', dict['btn-help-dropdown']);
+            setHtml('btn-help-landing', dict['btn-help-landing']);
+            setHtml('help-modal-title', dict['help-modal-title']);
+            setHtml('help-modal-intro', dict['help-modal-intro']);
+            setHtml('help-faq-container', dict['help-faq-container']);
 
             let langBtn = document.getElementById('lang-btn');
             if(langBtn) langBtn.innerHTML = dict['langBtn'];
@@ -1442,6 +1458,12 @@
 
             const pass = document.getElementById('loginPass').value;
             
+            showGlobalLoading("Authenticating...", "Checking your credentials securely...");
+            let slowNetTimer = setTimeout(() => {
+                document.getElementById('global-loading-text').innerText = "Network is slow. Please wait...";
+                alert("⚠️ Network is running slow. Please wait...", "warning");
+            }, 6000);
+
             try {
                 const response = await fetch(`${API_BASE}/login`, {
                     method: 'POST',
@@ -1500,7 +1522,7 @@
                     document.getElementById('toast-container').appendChild(syncToast);
                     
                     // Trigger Background Data Download
-                    fetchBackgroundData();
+                    fetchBackgroundData(true);
                 } else {
                     alert(result.message || "Wrong ID or Password");
                 if (isAutoLogin) logout();
@@ -1509,11 +1531,18 @@
             alert("Connection Failed!\n\nReason: " + err.message + "\n\nSteps to Fix:\n1. Open CMD, type 'python app.py' and ensure it shows 'Backend Chal Raha Hai...'\n2. Do NOT double-click the HTML file. Open your browser and go to http://127.0.0.1:5000 directly.");
                 console.error(err);
             if (isAutoLogin) showView('landing-page');
+            } finally {
+                clearTimeout(slowNetTimer);
+                if(!currentUser) hideGlobalLoading();
             }
         if (btn) btn.innerText = "Login";
         }
 
-        async function fetchBackgroundData() {
+        async function fetchBackgroundData(isInitialLogin = false) {
+            let slowDataTimer = setTimeout(() => {
+                if(isInitialLogin && document.getElementById('global-loading-text')) document.getElementById('global-loading-text').innerText = "Downloading data is taking longer due to slow internet...";
+                alert("⚠️ Downloading data is taking longer due to slow internet...", "warning");
+            }, 6000);
             try {
                 const res = await fetch(`${API_BASE}/sync_data`, {
                     method: 'POST',
@@ -1538,6 +1567,9 @@
                 let syncToast = document.getElementById('sync-toast');
                 if (syncToast) syncToast.remove();
                 alert("Data sync failed. Please check connection.", "error");
+            } finally {
+                clearTimeout(slowDataTimer);
+                if(isInitialLogin) hideGlobalLoading();
             }
         }
         
@@ -3954,7 +3986,7 @@
                 syncToast.innerHTML = '<span>🔄 Loading live data...</span>';
                 document.getElementById('toast-container').appendChild(syncToast);
                 
-                fetchBackgroundData();
+                fetchBackgroundData(true);
             } else if(session) {
                 showView('loading-screen');
                 const auth = JSON.parse(session);
