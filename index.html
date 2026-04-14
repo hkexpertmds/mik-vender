@@ -3173,8 +3173,11 @@
                 let defItems = getCustItems(c);
                 let itemsHtml = defItems.map((d, itemIdx) => {
                     let preFillQty = (entry && entry.itemsTrans) ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
-                    return `<input type="number" id="feed-qty-${i}-${itemIdx}" value="${preFillQty}" style="width:40px; padding:4px; margin:0; font-size:11px; text-align:center; border:1px solid var(--success); background:rgba(0,0,0,0.2); color:var(--text); border-radius:4px;" title="${d.item}">`;
-                }).join('<span style="color:#475569; font-size:10px; margin:0 2px;">+</span>');
+                    return `<div style="display:flex; align-items:center; gap:4px;">
+                        <span style="font-size:10px; color:#94a3b8; white-space:nowrap; max-width:60px; overflow:hidden; text-overflow:ellipsis;" title="${d.item}">${d.item}</span>
+                        <input type="number" id="feed-qty-${i}-${itemIdx}" value="${preFillQty}" style="width:40px; padding:4px; margin:0; font-size:11px; text-align:center; border:1px solid var(--success); background:rgba(0,0,0,0.2); color:var(--text); border-radius:4px;" title="${d.item}">
+                    </div>`;
+                }).join('<span style="color:#475569; font-size:12px; margin:0 4px; align-self:center;">+</span>');
 
                 let isOld = false;
                 if (isMilkMan() && currentFeedOffset < -1) isOld = true;
@@ -3189,15 +3192,20 @@
                     </div>
                     <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                         ${itemsHtml}
-                        <input type="number" id="feed-pay-${i}" value="${savedPayAmt}" placeholder="Pay₹" style="width:50px; padding:4px; margin:0; font-size:11px; text-align:center; border:1px solid var(--success); background:rgba(0,0,0,0.2); color:var(--text); border-radius:4px;">
+                        <div style="display:flex; align-items:center; gap:4px; margin-left:4px;">
+                            <span style="font-size:10px; color:var(--success); font-weight:bold;">Pay ₹</span>
+                            <input type="number" id="feed-pay-${i}" value="${savedPayAmt}" placeholder="Amt" style="width:45px; padding:4px; margin:0; font-size:11px; text-align:center; border:1px solid var(--success); background:rgba(0,0,0,0.2); color:var(--text); border-radius:4px;">
+                        </div>
                         ${actionButton}
                     </div>
                 </div>`;
             };
 
             if (pending.length > 0) {
-                pendingHtml += `<h4 style="margin-top:0; margin-bottom:10px; color:var(--warning); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">⏳ Pending</h4>`;
+                pendingHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(251, 191, 36, 0.3); margin-bottom:20px;">
+                    <h4 style="margin-top:0; margin-bottom:15px; color:var(--warning); border-bottom:1px dashed rgba(251, 191, 36, 0.3); padding-bottom:8px;">⏳ Pending</h4>`;
                 pending.forEach(obj => { pendingHtml += renderCard(obj, false); });
+                pendingHtml += `</div>`;
             }
 
         let targetItems = {};
@@ -3295,13 +3303,15 @@
 
             let completedHtml = '';
             if (completed.length > 0) {
-                completedHtml += `<h4 style="margin-top:15px; margin-bottom:10px; color:var(--success); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">✅ Submitted</h4>`;
+                completedHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(16, 185, 129, 0.3);">
+                    <h4 style="margin-top:0; margin-bottom:15px; color:var(--success); border-bottom:1px dashed rgba(16, 185, 129, 0.3); padding-bottom:8px;">✅ Delivered</h4>`;
                 completed.forEach(obj => {
                     completedHtml += renderCompactCard(obj);
                 });
+                completedHtml += `</div>`;
             }
             
-            if(pending.length === 0 && completed.length > 0) pendingHtml = `<p style="font-size:15px; color:var(--success); text-align:center; margin-top:10px; margin-bottom:20px;">All entries submitted for today! 🎉</p>`;
+            if(pending.length === 0 && completed.length > 0) pendingHtml = `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(16, 185, 129, 0.3); margin-bottom:20px;"><p style="font-size:16px; color:var(--success); text-align:center; margin:0;">All entries delivered for today! 🎉</p></div>`;
 
             feedDiv.innerHTML = pendingHtml + completedHtml;
         }
