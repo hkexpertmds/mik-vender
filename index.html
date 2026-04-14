@@ -2821,7 +2821,16 @@
             }
             document.getElementById('temp-change-container').style.borderColor = 'transparent';
 
-            let existingTrans = transactions.find(t => t.date === dateStr && t.cust === currentUser.name && t.shift === shift && t.item !== 'Payment');
+            let cName = (custObj.name || '').trim().toLowerCase();
+            let targetShift = shift.toLowerCase();
+
+            let existingTrans = transactions.find(t => {
+                let tDateStr = convertToDDMMYYYY((t.date || '').trim());
+                let tShift = (t.shift || '').trim().toLowerCase();
+                let tCust = (t.cust || '').trim().toLowerCase();
+                return tDateStr === dateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item !== 'Payment';
+            });
+            
             let savedItemsMap = {};
             if (existingTrans) {
                 try {
@@ -2829,7 +2838,13 @@
                     if (Array.isArray(parsed)) parsed.forEach(it => { savedItemsMap[it.item] = it.qty; });
                 } catch (e) {}
             }
-            let existingPayTrans = transactions.find(t => t.date === dateStr && (t.cust || '').trim() === cName && (t.shift === shift || !t.shift) && t.item === 'Payment');
+            
+            let existingPayTrans = transactions.find(t => {
+                let tDateStr = convertToDDMMYYYY((t.date || '').trim());
+                let tShift = (t.shift || '').trim().toLowerCase();
+                let tCust = (t.cust || '').trim().toLowerCase();
+                return tDateStr === dateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item === 'Payment';
+            });
             let savedPayAmt = existingPayTrans ? Math.abs(parseFloat(existingPayTrans.rate)) : '';
 
             let defItems = getCustItems(custObj);
