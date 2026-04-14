@@ -929,9 +929,15 @@
         }
         function convertToDDMMYYYY(yyyy_mm_dd) {
             if(!yyyy_mm_dd) return "";
-            let p = yyyy_mm_dd.split('-');
-            if(p.length === 3 && p[0].length === 4) return `${p[2]}-${p[1]}-${p[0]}`;
-            return yyyy_mm_dd;
+            let date_str = yyyy_mm_dd.toString().trim().replace(/\//g, '-');
+            let p = date_str.split('-');
+            if(p.length === 3) {
+                let y, m, d;
+                if(p[0].length === 4) { y = p[0]; m = p[1]; d = p[2]; }
+                else { d = p[0]; m = p[1]; y = p[2]; }
+                return `${String(d).padStart(2, '0')}-${String(m).padStart(2, '0')}-${y}`;
+            }
+            return date_str;
         }
 
 
@@ -2872,19 +2878,35 @@
                 let cName = (custObj.name || '').trim().toLowerCase();
                 let targetShift = shift.toLowerCase();
 
-                let existingItemsTrans = transactions.find(t => {
+                let allItemsTrans = transactions.filter(t => {
                     let tDateStr = convertToDDMMYYYY((t.date || '').trim());
                     let tShift = (t.shift || '').trim().toLowerCase();
                     let tCust = (t.cust || '').trim().toLowerCase();
                     return tDateStr === dateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item !== 'Payment';
                 });
+                let existingItemsTrans = allItemsTrans[0];
 
-                let existingPayTrans = transactions.find(t => {
+                let allPayTrans = transactions.filter(t => {
                     let tDateStr = convertToDDMMYYYY((t.date || '').trim());
                     let tShift = (t.shift || '').trim().toLowerCase();
                     let tCust = (t.cust || '').trim().toLowerCase();
                     return tDateStr === dateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item === 'Payment';
                 });
+                let existingPayTrans = allPayTrans[0];
+
+                // Auto-Heal Duplicates
+                if (allItemsTrans.length > 1) {
+                    for(let i=1; i<allItemsTrans.length; i++) {
+                        await fetch(`${API_BASE}/transactions/${allItemsTrans[i].id}`, { method: 'DELETE' }).catch(e=>console.log(e));
+                        transactions = transactions.filter(t => t.id !== allItemsTrans[i].id);
+                    }
+                }
+                if (allPayTrans.length > 1) {
+                    for(let i=1; i<allPayTrans.length; i++) {
+                        await fetch(`${API_BASE}/transactions/${allPayTrans[i].id}`, { method: 'DELETE' }).catch(e=>console.log(e));
+                        transactions = transactions.filter(t => t.id !== allPayTrans[i].id);
+                    }
+                }
 
                 if (itemsToSave.length > 0) {
                     let data = { date: dateStr, cust: custObj.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: custObj.company || currentUser.company, shift: shift };
@@ -3022,8 +3044,11 @@
                 if (tDateStr === currentFeedDateStr && (tShift === targetShift || tShift === '')) {
                     let cName = (t.cust || '').trim().toLowerCase();
                     let entry = doneToday.get(cName) || { itemsTrans: null, payTrans: null };
-                    if (t.item === 'Payment') entry.payTrans = t;
-                    else entry.itemsTrans = t;
+                    if (t.item === 'Payment') {
+                        if (!entry.payTrans) entry.payTrans = t;
+                    } else {
+                        if (!entry.itemsTrans) entry.itemsTrans = t;
+                    }
                     doneToday.set(cName, entry);
                 }
             });
@@ -3328,29 +3353,39 @@
             let payEl = document.getElementById(`feed-pay-${idx}`);
             let payAmt = payEl ? parseFloat(payEl.value) : 0;
 
-            if (itemsToSave.length === 0 && (!payAmt || payAmt <= 0)) {
-                alert("Enter at least one quantity or payment amount!");
-                btn.innerText = "Done ✔"; btn.disabled = false;
-                return;
-            }
-
             try {
                 let cName = (c.name || '').trim().toLowerCase();
                 let targetShift = currentFeedShift.toLowerCase();
 
-                let existingItemsTrans = transactions.find(t => {
+                let allItemsTrans = transactions.filter(t => {
                     let tDateStr = convertToDDMMYYYY((t.date || '').trim());
                     let tShift = (t.shift || '').trim().toLowerCase();
                     let tCust = (t.cust || '').trim().toLowerCase();
                     return tDateStr === currentFeedDateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item !== 'Payment';
                 });
+                let existingItemsTrans = allItemsTrans[0];
                 
-                let existingPayTrans = transactions.find(t => {
+                let allPayTrans = transactions.filter(t => {
                     let tDateStr = convertToDDMMYYYY((t.date || '').trim());
                     let tShift = (t.shift || '').trim().toLowerCase();
                     let tCust = (t.cust || '').trim().toLowerCase();
                     return tDateStr === currentFeedDateStr && tCust === cName && (tShift === targetShift || tShift === '') && t.item === 'Payment';
                 });
+                let existingPayTrans = allPayTrans[0];
+
+                // Auto-Heal Duplicates
+                if (allItemsTrans.length > 1) {
+                    for(let i=1; i<allItemsTrans.length; i++) {
+                        await fetch(`${API_BASE}/transactions/${allItemsTrans[i].id}`, { method: 'DELETE' }).catch(e=>console.log(e));
+                        transactions = transactions.filter(t => t.id !== allItemsTrans[i].id);
+                    }
+                }
+                if (allPayTrans.length > 1) {
+                    for(let i=1; i<allPayTrans.length; i++) {
+                        await fetch(`${API_BASE}/transactions/${allPayTrans[i].id}`, { method: 'DELETE' }).catch(e=>console.log(e));
+                        transactions = transactions.filter(t => t.id !== allPayTrans[i].id);
+                    }
+                }
 
                 if (itemsToSave.length > 0) {
                     let data = { date: currentFeedDateStr, cust: c.name, item: JSON.stringify(itemsToSave), qty: '-', rate: grandTotal, total: grandTotal, company: c.company || currentUser.company, shift: currentFeedShift };
