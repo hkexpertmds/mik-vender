@@ -3178,7 +3178,7 @@
                 cTarget += parseFloat(di.qty || 0);
             });
             
-            let entry = doneToday.get(c.name);
+            let entry = doneToday.get((c.name || '').trim().toLowerCase());
             if (entry && entry.itemsTrans) {
                 let cDelivered = 0;
                 try {
