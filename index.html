@@ -135,6 +135,12 @@
         .faq-icon { transition: transform 0.3s; font-size: 12px; }
         :root.light-mode .faq-item { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
         :root.light-mode .faq-answer { color: #475569; }
+
+        /* Profile Menu List */
+        .profile-list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background 0.2s; }
+        .profile-list-item:hover { background: rgba(99, 102, 241, 0.1); }
+        .profile-list-item:last-child { border-bottom: none; }
+        :root.light-mode .profile-list-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
@@ -296,33 +302,51 @@
 
     <!-- MY PROFILE VIEW -->
     <div id="profile-view" class="container hidden">
-        <h2>👤 My Profile</h2>
-        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom: 20px;">
-            <img id="profPicPreview" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); margin-bottom:10px; cursor:pointer;" onclick="document.getElementById('profPicInput').click()" title="Click to change picture">
-            <input type="file" id="profPicInput" accept="image/*" style="display:none;" onchange="handleProfPic(event)">
-            <button id="btnChangePic" class="badge" style="background:var(--primary); font-size: 14px; padding: 6px 12px; margin-bottom: 10px;" onclick="document.getElementById('profPicInput').click()">📷 Change Picture</button>
-        </div>
-        <div id="owner-qr-section" class="hidden" style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align:center;">
-             <h3 style="margin-top:0; margin-bottom:10px; font-size: 16px;">💳 Payment QR Code</h3>
-             <img id="qrCodePreview" src="https://via.placeholder.com/150" style="width:150px; height:150px; border-radius:10px; object-fit:cover; border:3px solid var(--primary); margin-bottom:10px;">
-             <input type="file" id="qrCodeInput" accept="image/*" style="display:none;" onchange="handleQrCodePic(event)">
-             <button id="btnChangeQr" class="badge hidden" style="background:var(--primary); font-size: 14px; padding: 6px 12px;" onclick="document.getElementById('qrCodeInput').click()">📷 Change QR Code</button>
-        </div>
-        <div class="grid-form">
-            <input type="text" id="profId" readonly style="opacity:0.6; cursor:not-allowed;" title="User ID">
-            <input type="text" id="profUsername" placeholder="Login Username (Optional)">
-            <input type="text" id="profName" placeholder="Full Name" required>
-            <div id="profPassWrapper" style="position:relative;"> 
-                <input type="password" id="profPass" placeholder="New Password (leave blank to keep current)" style="margin:0; padding-right:35px;">
-                <span onclick="togglePasswordVisibility('profPass', 'profEye')" id="profEye" style="position:absolute; right:12px; top:10px; cursor:pointer;">👁️</span>
+        <h2 style="margin-bottom: 20px;">👤 My Profile</h2>
+        
+        <!-- Main Header -->
+        <div style="text-align:center; padding-bottom: 20px;">
+            <div style="position:relative; display:inline-block;">
+                <img id="mainProfilePic" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); background: white;">
+                <div style="position:absolute; bottom:0; right:0; background:var(--primary); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid var(--card);" onclick="openMediaManager('profile')" title="Change Picture">📷</div>
             </div>
-            <input type="text" id="profMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
-            <input type="email" id="profEmail" placeholder="Email ID">
-            <input type="text" id="profAddr" placeholder="Address">
+            <h3 style="margin:10px 0 5px 0; color:var(--text); font-size: 20px;" id="mainProfileName">Name</h3>
+            <p style="margin:0; color:var(--primary); font-weight:bold; font-size: 14px;" id="mainProfileRole">Role</p>
         </div>
-        <button id="btnEditProfile" class="btn-save" style="background:var(--warning); color:black;" onclick="enableProfileEdit()">Edit Profile</button>
-        <button id="btnSaveProfile" class="btn-save hidden" onclick="saveProfile()">Update Profile</button>
-        <button class="btn-back" style="border-color:var(--danger); color:var(--danger); margin-top:15px;" onclick="logout()">Logout / Change User</button>
+        
+        <!-- Profile Details List -->
+        <div style="display:flex; flex-direction:column; background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid #475569; overflow:hidden; margin-bottom: 20px;">
+            <div class="profile-list-item" onclick="openEditField('name', 'Full Name', 'text')">
+                <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Full Name</span><br><b id="lbl-name" style="font-size:15px; color:var(--text);">...</b></div>
+                <span style="color:var(--primary); font-size:18px;">✎</span>
+            </div>
+            <div class="profile-list-item" onclick="openEditField('username', 'Username', 'text')">
+                <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Username</span><br><b id="lbl-username" style="font-size:15px; color:var(--text);">...</b></div>
+                <span style="color:var(--primary); font-size:18px;">✎</span>
+            </div>
+            <div class="profile-list-item" onclick="openEditField('mobile', 'Mobile Number', 'tel')">
+                <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Mobile Number</span><br><b id="lbl-mobile" style="font-size:15px; color:var(--text);">...</b></div>
+                <span style="color:var(--primary); font-size:18px;">✎</span>
+            </div>
+            <div class="profile-list-item" id="row-email" onclick="openEditField('email', 'Email ID', 'email')">
+                <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Email ID</span><br><b id="lbl-email" style="font-size:15px; color:var(--text);">...</b></div>
+                <span style="color:var(--primary); font-size:18px;">✎</span>
+            </div>
+            <div class="profile-list-item" id="row-addr" onclick="openEditField('addr', 'Address', 'text')">
+                <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Address</span><br><b id="lbl-addr" style="font-size:15px; color:var(--text);">...</b></div>
+                <span style="color:var(--primary); font-size:18px;">✎</span>
+            </div>
+            <div class="profile-list-item" id="row-pass" onclick="openEditField('pass', 'Password', 'password')">
+                <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Password</span><br><b style="font-size:15px; color:var(--text);">********</b></div>
+                <span style="color:var(--primary); font-size:18px;">✎</span>
+            </div>
+            <div class="profile-list-item" onclick="openMediaManager()">
+                <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Media & QR Codes</span><br><b style="font-size:15px; color:var(--text);">Manage Pictures</b></div>
+                <span style="color:var(--primary); font-size:18px;">🖼️</span>
+            </div>
+        </div>
+        
+        <button class="btn-back" style="border-color:var(--danger); color:var(--danger);" onclick="logout()">Logout / Switch User</button>
     </div>
 
     <div id="user-master" class="container hidden">
@@ -780,6 +804,57 @@
         </div>
     </div>
 
+    <!-- EDIT PROFILE FIELD MODAL -->
+    <div id="editFieldModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid #475569;">
+            <h3 id="editFieldTitle" style="margin-top:0; margin-bottom: 15px; color:var(--primary);">Edit Field</h3>
+            <input type="hidden" id="editFieldKey">
+            <div style="position:relative; margin-bottom: 20px;">
+                <input type="text" id="editFieldValue" style="width:100%; margin:0;" required>
+                <span id="editFieldEye" onclick="togglePasswordVisibility('editFieldValue', 'editFieldEye')" class="hidden" style="position:absolute; right:12px; top:12px; cursor:pointer; user-select:none; font-size:16px;">👁️</span>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-save" id="btnSaveField" onclick="saveSingleProfileField()">Update & Save</button>
+                <button class="btn-back" style="margin:0;" onclick="closeEditFieldModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEDIA MANAGER MODAL -->
+    <div id="mediaManagerModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10004; display:flex; justify-content:center; align-items:center; padding:20px;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:450px; padding:25px; border-radius:16px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+            <h3 style="margin-top:0; margin-bottom: 5px; color:var(--primary);">🖼️ Manage Pictures</h3>
+            <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:20px;">Tap on any image to crop & change it.</p>
+            
+            <div style="display:flex; flex-direction:column; gap:20px;">
+                <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; text-align:center; border:1px dashed #475569;">
+                    <h4 style="margin:0 0 10px 0; color:var(--text); font-size:14px;">Profile Picture</h4>
+                    <img id="mmProfilePic" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:2px solid var(--primary); cursor:pointer; background:white;" onclick="document.getElementById('mmProfileInput').click()">
+                    <input type="file" id="mmProfileInput" accept="image/*" class="hidden" onchange="handlePicUpload(event, 'profile')">
+                </div>
+
+                <div id="mmOwnerSection" class="hidden" style="display:flex; flex-direction:column; gap:20px;">
+                    <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; text-align:center; border:1px dashed #475569;">
+                        <h4 style="margin:0 0 5px 0; color:var(--text); font-size:14px;">Payment QR Code</h4>
+                        <p style="font-size:11px; color:#94a3b8; margin:0 0 10px 0;">Customers scan this to pay you.</p>
+                        <img id="mmQrPic" src="https://via.placeholder.com/150" style="width:150px; height:150px; border-radius:10px; object-fit:cover; border:2px solid var(--success); cursor:pointer; background:white;" onclick="document.getElementById('mmQrInput').click()">
+                        <input type="file" id="mmQrInput" accept="image/*" class="hidden" onchange="handlePicUpload(event, 'qr')">
+                    </div>
+                    <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; text-align:center; border:1px dashed #475569;">
+                        <h4 style="margin:0 0 5px 0; color:var(--text); font-size:14px;">Company Logo</h4>
+                        <p style="font-size:11px; color:#94a3b8; margin:0 0 10px 0;">This logo will appear on your printed bills.</p>
+                        <img id="mmLogoPic" src="https://via.placeholder.com/150" style="width:150px; height:100px; border-radius:10px; object-fit:contain; border:2px solid var(--warning); cursor:pointer; background:white;" onclick="document.getElementById('mmLogoInput').click()">
+                        <input type="file" id="mmLogoInput" accept="image/*" class="hidden" onchange="handlePicUpload(event, 'logo')">
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button class="btn-save" id="btnSaveMedia" onclick="saveMediaPictures()">Save Changes</button>
+                <button class="btn-back" style="margin:0;" onclick="closeMediaManager()">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Cropping Modal -->
     <div id="qrCropModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10001; display:flex; justify-content:center; align-items:center; padding:20px;">
         <div class="modal-box" style="background:var(--card); width:100%; max-width:600px; padding:20px; border-radius:12px; max-height:90vh; display:flex; flex-direction:column; border:1px solid #475569;">
@@ -1197,66 +1272,102 @@
         let cropper; // Global variable for Cropper instance
         let currentProfilePicBase64 = "";
         let currentQrCodeBase64 = "";
+        let currentCompanyLogoBase64 = "";
         let currentCropTarget = "qr";
 
-        function handleProfPic(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                currentCropTarget = "profile";
-                document.getElementById('cropModalTitle').innerText = "Crop Profile Picture";
-                document.getElementById('qrCropImage').src = evt.target.result;
-                document.getElementById('qrCropModal').classList.remove('hidden');
-                if (cropper) cropper.destroy();
-                cropper = new Cropper(document.getElementById('qrCropImage'), { aspectRatio: 1, viewMode: 1, autoCropArea: 0.8, background: false });
-            };
-            reader.readAsDataURL(file);
-            e.target.value = '';
-        }
-
-        function handleQrCodePic(e) {
+        function handlePicUpload(e, target) {
             const file = e.target.files[0];
             if(!file) return;
 
             const reader = new FileReader();
             reader.onload = function(evt) {
-                currentCropTarget = "qr";
-                document.getElementById('cropModalTitle').innerText = "Crop QR Code";
+                currentCropTarget = target;
+                let title = target === 'profile' ? "Crop Profile Picture" : (target === 'qr' ? "Crop Payment QR" : "Crop Company Logo");
+                document.getElementById('cropModalTitle').innerText = title;
+                
                 const qrCropImage = document.getElementById('qrCropImage');
                 qrCropImage.src = evt.target.result;
 
-                // Open the modal
                 document.getElementById('qrCropModal').classList.remove('hidden');
 
-                // Initialize Cropper.js
-                if (cropper) {
-                    cropper.destroy();
-                }
+                if (cropper) cropper.destroy();
+                let aspectRatio = target === 'logo' ? NaN : 1; // Free crop for logo, Square for others
                 cropper = new Cropper(qrCropImage, {
-                    aspectRatio: 1, // Square aspect ratio for QR codes
-                    viewMode: 1, // Restrict the crop box to not exceed the canvas
-                    autoCropArea: 0.8, // Initial crop area percentage
-                    background: false // Hide the grid background
+                    aspectRatio: aspectRatio,
+                    viewMode: 1,
+                    autoCropArea: 0.8,
+                    background: false
                 });
             };
             reader.readAsDataURL(file);
             e.target.value = '';
         }
 
+        function openMediaManager(defaultTarget = null) {
+            currentProfilePicBase64 = currentUser.profile_pic || '';
+            document.getElementById('mmProfilePic').src = currentProfilePicBase64 || 'https://via.placeholder.com/100';
+            
+            if (currentUser.type === 'Owner') {
+                currentQrCodeBase64 = currentUser.qr_code || '';
+                currentCompanyLogoBase64 = currentUser.company_logo || '';
+                document.getElementById('mmQrPic').src = currentQrCodeBase64 || 'https://via.placeholder.com/150';
+                document.getElementById('mmLogoPic').src = currentCompanyLogoBase64 || 'https://via.placeholder.com/150';
+                document.getElementById('mmOwnerSection').classList.remove('hidden');
+            } else {
+                document.getElementById('mmOwnerSection').classList.add('hidden');
+            }
+            document.getElementById('mediaManagerModal').classList.remove('hidden');
+            if (defaultTarget) document.getElementById('mm' + defaultTarget.charAt(0).toUpperCase() + defaultTarget.slice(1) + 'Input').click();
+        }
+        function closeMediaManager() { document.getElementById('mediaManagerModal').classList.add('hidden'); }
+
+        async function saveMediaPictures() {
+            const btn = document.getElementById('btnSaveMedia');
+            btn.innerText = "Saving...";
+            
+            let data = { ...currentUser };
+            data.profile_pic = currentProfilePicBase64;
+            
+            if (currentUser.type === 'Owner') {
+                data.qr_code = currentQrCodeBase64;
+                data.company_logo = currentCompanyLogoBase64;
+            }
+
+            let table = currentUser.type === 'Customer' ? 'customers' : 'users';
+            try {
+                const res = await fetch(`${API_BASE}/${table}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                const saved = await res.json();
+                if (saved.success === false) { alert(saved.message); btn.innerText = "Save Changes"; return; }
+                
+                currentUser = { ...data, ...saved };
+                localStorage.setItem('sessionUser', JSON.stringify(currentUser));
+                
+                showView('profile-view');
+                closeMediaManager();
+                alert("Pictures Saved Successfully!", "success");
+                setupUI();
+            } catch(e) { alert("Error saving pictures!"); }
+            btn.innerText = "Save Changes";
+        }
+
         function cropQrCode() {
             if (cropper) {
-                const croppedCanvas = cropper.getCroppedCanvas({ width: 200, height: 200, fillColor: '#fff' });
+                let width = currentCropTarget === 'logo' ? 300 : 200;
+                let height = currentCropTarget === 'logo' ? 150 : 200;
+
+                const croppedCanvas = cropper.getCroppedCanvas({ width: width, height: height, fillColor: '#fff' });
                 const croppedBase64 = croppedCanvas.toDataURL('image/png');
                 if (currentCropTarget === 'profile') {
                     currentProfilePicBase64 = croppedBase64;
-                    document.getElementById('profPicPreview').src = currentProfilePicBase64;
-                } else {
+                    document.getElementById('mmProfilePic').src = currentProfilePicBase64;
+                    document.getElementById('mainProfilePic').src = currentProfilePicBase64; 
+                } else if (currentCropTarget === 'qr') {
                     currentQrCodeBase64 = croppedBase64;
-                    document.getElementById('qrCodePreview').src = currentQrCodeBase64;
+                    document.getElementById('mmQrPic').src = currentQrCodeBase64;
+                } else {
+                    currentCompanyLogoBase64 = croppedBase64;
+                    document.getElementById('mmLogoPic').src = currentCompanyLogoBase64;
                 }
-                document.getElementById('btnSaveProfile').classList.remove('hidden');
-                document.getElementById('btnEditProfile').classList.add('hidden');
                 closeQrCropModal();
             }
         }
@@ -1267,55 +1378,45 @@
                 cropper.destroy();
                 cropper = null;
             }
-            // Clear the file input to allow re-selection of the same file
-            document.getElementById('qrCodeInput').value = '';
-        if(document.getElementById('profPicInput')) document.getElementById('profPicInput').value = '';
         }
 
-        async function saveProfile() {
-            if (!validateForm('profile-view')) return;
-            let btn = document.getElementById('btnSaveProfile'); if(btn) btn.innerText = "Updating...";
+        function openEditField(key, title, type) {
+            document.getElementById('editFieldTitle').innerText = 'Edit ' + title;
+            document.getElementById('editFieldKey').value = key;
+            document.getElementById('editFieldValue').type = type;
+            document.getElementById('editFieldValue').value = (key === 'pass' || key === 'cpass') ? '' : (currentUser[key === 'addr' && currentUser.type !== 'Customer' ? 'address' : key] || '');
+            document.getElementById('editFieldEye').classList.toggle('hidden', type !== 'password');
+            document.getElementById('editFieldModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('editFieldValue').focus(), 100);
+        }
+        function closeEditFieldModal() { document.getElementById('editFieldModal').classList.add('hidden'); }
+
+        async function saveSingleProfileField() {
+            const key = document.getElementById('editFieldKey').value;
+            const val = document.getElementById('editFieldValue').value.trim();
+            const btn = document.getElementById('btnSaveField');
+            
+            if (key !== 'pass' && key !== 'cpass' && !val && key !== 'username' && key !== 'email') { return alert("This field cannot be empty!"); }
+            if (key === 'mobile' && val.length !== 10) { return alert("Mobile Number must be exactly 10 digits!"); }
+
+            btn.innerText = "Updating...";
             let data = { ...currentUser };
-            data.username = document.getElementById('profUsername').value.trim();
-            data.name = document.getElementById('profName').value;
-            data.profile_pic = currentProfilePicBase64;
-            data.mobile = document.getElementById('profMobile').value;
             
-            if (data.mobile && data.mobile.length !== 10) {
-                alert("Mobile Number must be exactly 10 digits!");
-                btn.innerText = "Update Profile";
-                return;
-            }
+            let actualKey = key;
+            if (key === 'addr' && currentUser.type !== 'Customer') actualKey = 'address';
+            if (key === 'pass' && currentUser.type === 'Customer') actualKey = 'cpass';
             
-            let table = 'users';
-            if (currentUser.type === 'Customer') {
-                table = 'customers';
-                data.addr = document.getElementById('profAddr').value;
-            } else {
-                data.pass = document.getElementById('profPass').value;
-                if(currentUser.type === 'Owner' || currentUser.type === 'Admin') {
-                    data.address = document.getElementById('profAddr').value;
-                    data.email = document.getElementById('profEmail').value;
-                    if (currentUser.type === 'Owner') {
-                        data.qr_code = currentQrCodeBase64;
-                    }
-                }
-            }
+            data[actualKey] = val;
+            let table = currentUser.type === 'Customer' ? 'customers' : 'users';
 
             try {
                 const res = await fetch(`${API_BASE}/${table}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 const saved = await res.json();
                 
-                if (saved.success === false) {
-                    alert(saved.message);
-                    btn.innerText = "Update Profile";
-                    return;
-                }
+                if (saved.success === false) { alert(saved.message); btn.innerText = "Update & Save"; return; }
 
-                // Combine data sent with data received to preserve fields (like qr_code) that the backend might not return.
                 const finalObject = { ...data, ...saved };
 
-                // Update the local array to maintain state consistency within the current session
                 if (table === 'users') {
                     const userIndex = users.findIndex(u => u.id === finalObject.id);
                     if (userIndex > -1) users[userIndex] = finalObject;
@@ -1325,39 +1426,20 @@
                 }
                 currentUser = finalObject;
                 
-                // Fix for Login Error: Update cached session with immutable ID instead of old mobile/username
                 let sessionAuth = JSON.parse(localStorage.getItem('sessionAuth'));
                 if (sessionAuth) {
                     sessionAuth.login_id = currentUser.login_id || currentUser.cid;
+                    if (key === 'pass' || key === 'cpass') sessionAuth.pass = val;
                     localStorage.setItem('sessionAuth', JSON.stringify(sessionAuth));
                 }
                 localStorage.setItem('sessionUser', JSON.stringify(currentUser));
                 
-                alert("Profile Updated Successfully!");
-                setupUI(); showView('main-menu');
-            } catch(e) { alert("Error saving profile!"); }
-            if(btn) btn.innerText = "Update Profile";
-        }
-
-        function enableProfileEdit() {
-            ['profName', 'profMobile', 'profEmail', 'profAddr', 'profUsername'].forEach(fieldId => {
-                if (document.getElementById(fieldId)) {
-                    document.getElementById(fieldId).readOnly = false;
-                    document.getElementById(fieldId).style.opacity = "1";
-                }
-            });
-            
-            if (currentUser.type !== 'Customer' && document.getElementById('profPassWrapper')) {
-                document.getElementById('profPassWrapper').classList.remove('hidden');
-            }
-            
-            if (document.getElementById('btnChangePic')) document.getElementById('btnChangePic').classList.remove('hidden');
-            if (currentUser.type === 'Owner' && document.getElementById('btnChangeQr')) {
-                document.getElementById('btnChangeQr').classList.remove('hidden');
-            }
-            
-            if (document.getElementById('btnSaveProfile')) document.getElementById('btnSaveProfile').classList.remove('hidden');
-            if (document.getElementById('btnEditProfile')) document.getElementById('btnEditProfile').classList.add('hidden');
+                showView('profile-view');
+                closeEditFieldModal();
+                alert("Profile Updated Successfully!", "success");
+                setupUI();
+            } catch(e) { alert("Error updating field!"); }
+            btn.innerText = "Update & Save";
         }
 
         // --- FORM VALIDATOR ---
@@ -1649,42 +1731,18 @@
             }, 50);
 
             if(id === 'profile-view') {
-                document.getElementById('profId').value = currentUser.login_id || currentUser.cid;
-                document.getElementById('profUsername').value = currentUser.username || '';
-                document.getElementById('profName').value = currentUser.name || '';
-                document.getElementById('profPass').value = ''; // Do NOT pre-fill with hashed password, user will enter new if needed
-                document.getElementById('profMobile').value = currentUser.mobile || '';
-                document.getElementById('profEmail').value = currentUser.email || '';
-                document.getElementById('profAddr').value = currentUser.address || currentUser.addr || '';
-                currentProfilePicBase64 = currentUser.profile_pic || '';
-                document.getElementById('profPicPreview').src = currentProfilePicBase64 || 'https://via.placeholder.com/100';
-
-                if (currentUser.type === 'Owner') {
-                    document.getElementById('owner-qr-section').classList.remove('hidden');
-                    currentQrCodeBase64 = currentUser.qr_code || '';
-                    document.getElementById('qrCodePreview').src = currentQrCodeBase64 || 'https://via.placeholder.com/150';
-                } else {
-                    document.getElementById('owner-qr-section').classList.add('hidden');
-                }
-
-                // Initialize Profile in View-Only Mode
-                ['profName', 'profMobile', 'profEmail', 'profAddr', 'profUsername'].forEach(fieldId => {
-                    if(document.getElementById(fieldId)) {
-                        document.getElementById(fieldId).readOnly = true;
-                        document.getElementById(fieldId).style.opacity = "0.7";
-                    }
-                });
-                document.getElementById('profPassWrapper').classList.add('hidden');
-                if (document.getElementById('profPassWrapper')) document.getElementById('profPassWrapper').classList.add('hidden');
-                if (document.getElementById('btnChangePic')) document.getElementById('btnChangePic').classList.remove('hidden');
-                if (document.getElementById('btnChangeQr')) document.getElementById('btnChangeQr').classList.add('hidden');
-                document.getElementById('btnSaveProfile').classList.add('hidden');
-                document.getElementById('btnEditProfile').classList.remove('hidden');
-                if (document.getElementById('btnSaveProfile')) document.getElementById('btnSaveProfile').classList.add('hidden');
-                if (document.getElementById('btnEditProfile')) document.getElementById('btnEditProfile').classList.remove('hidden');
-
-                document.getElementById('profEmail').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
-                document.getElementById('profAddr').classList.toggle('hidden', currentUser.type === 'Milk Man');
+                document.getElementById('mainProfilePic').src = currentUser.profile_pic || 'https://via.placeholder.com/100';
+                document.getElementById('mainProfileName').innerText = currentUser.name || '';
+                document.getElementById('mainProfileRole').innerText = currentUser.type || '';
+                document.getElementById('lbl-name').innerText = currentUser.name || '';
+                document.getElementById('lbl-username').innerText = currentUser.username || '-';
+                document.getElementById('lbl-mobile').innerText = currentUser.mobile || '-';
+                document.getElementById('lbl-email').innerText = currentUser.email || '-';
+                document.getElementById('lbl-addr').innerText = currentUser.address || currentUser.addr || '-';
+                
+                document.getElementById('row-email').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
+                document.getElementById('row-addr').classList.toggle('hidden', currentUser.type === 'Milk Man');
+                document.getElementById('row-pass').classList.toggle('hidden', currentUser.type === 'Customer');
             }
 
             if(id === 'user-master') { 
@@ -2173,6 +2231,7 @@
             let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
             let ownerAddress = currentUser.address || currentUser.addr || '';
             let ownerMobile = currentUser.mobile || '';
+            let ownerLogo = currentUser.company_logo || '';
                 let printHtml = `<html><head><title>Cash Memo</title><style>
                     body { font-family: sans-serif; padding: 20px; color: black; max-width: 400px; margin: auto; }
                     h2, h4 { text-align: center; margin: 5px 0; }
@@ -2184,6 +2243,7 @@
                     <div class="no-print" style="text-align:right; margin-bottom:10px;">
                         <button onclick="window.print()" style="padding:8px 15px; background:#4f46e5; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer;">🖨️ Print Receipt</button>
                     </div>
+                    ${ownerLogo ? `<img src="${ownerLogo}" style="max-width:150px; max-height:80px; display:block; margin: 0 auto 5px auto;">` : ''}
                     <h2>${companyName.toUpperCase()}</h2>
                     ${ownerAddress ? `<p style="text-align:center; margin:2px 0; font-size:12px;">${ownerAddress}</p>` : ''}
                     ${ownerMobile ? `<p style="text-align:center; margin:2px 0 10px 0; font-size:12px;"><b>Mob:</b> ${ownerMobile}</p>` : ''}
@@ -3743,9 +3803,11 @@
             let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
             let ownerAddress = currentUser.address || currentUser.addr || '';
             let ownerMobile = currentUser.mobile || '';
+            let companyLogo = currentUser.company_logo || '';
             printWindow.document.write('<h2>' + companyName.toUpperCase() + '</h2>');
             if (ownerAddress) printWindow.document.write('<p style="text-align:center; margin:2px 0; font-size:14px;">' + ownerAddress + '</p>');
             if (ownerMobile) printWindow.document.write('<p style="text-align:center; margin:2px 0 15px 0; font-size:14px;"><b>Mob:</b> ' + ownerMobile + '</p>');
+            if (companyLogo) printWindow.document.write('<img src="' + companyLogo + '" style="max-width:150px; max-height:80px; display:block; margin: 0 auto 10px auto;">');
             
             printWindow.document.write('<h3>Invoice : ' + custName + ' (' + monthName + ')</h3>');
             
