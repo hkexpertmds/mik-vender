@@ -1752,26 +1752,6 @@
         function genAutoId(prefix) { return prefix + Math.floor(Math.random() * 90000 + 10000); }
 
         // --- STAFF ---
-        async function fetchTransactions() {
-            try {
-                const response = await fetch(`${API_BASE}/transactions?company=${currentUser.company}`);
-                if (!response.ok) throw new Error('Failed to fetch transactions');
-                transactions = await response.json();
-            } catch (error) {
-                console.error("Error fetching transactions:", error);
-                // Optionally, alert the user or show a message
-            }
-        }
-
-        async function fetchRequests() {
-            try {
-                const response = await fetch(`${API_BASE}/requests?company=${currentUser.company}`);
-                if (!response.ok) throw new Error('Failed to fetch requests');
-                requests = await response.json();
-            } catch (error) {
-                console.error("Error fetching requests:", error);
-            }
-        }
 
         function openNewUserForm() {
             resetForm('user');
@@ -3003,47 +2983,47 @@
                 let itemsHtml = defItems.map((d, itemIdx) => {
                         let preFillQty = (entry && entry.itemsTrans) ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
                     return `
-                    <div style="background:rgba(255,255,255,0.05); padding:5px 10px; border-radius:6px; display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:12px; width:70px; font-weight:bold;">${d.item}</span>
-                        <input type="number" id="feed-qty-${i}-${itemIdx}" value="${preFillQty}" style="width:65px; padding:6px; margin:0;" placeholder="Qty">
+                    <div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:12px; font-weight:bold; max-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${d.item}">${d.item}</span>
+                        <input type="number" id="feed-qty-${i}-${itemIdx}" value="${preFillQty}" style="width:50px; padding:4px; margin:0; font-size:12px; text-align:center;" placeholder="Qty">
                     </div>`;
                 }).join('');
 
-                let badgeStatus = entry ? `<span style="font-size:11px; color:var(--success); border:1px solid var(--success); padding:3px 8px; border-radius:12px;">Saved / Pre-ordered</span>` : `<span style="font-size:11px; color:var(--warning); border:1px solid var(--warning); padding:3px 8px; border-radius:12px;">Pending</span>`;
-
-                html += `
-                <div style="background:var(--card); border:1px solid #475569; padding: 15px; border-radius:12px; margin-bottom:15px; box-shadow:0 4px 6px rgba(0,0,0,0.3); display:flex; flex-direction:column; gap:12px; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #334155; padding-bottom:10px;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-size:13px; color:#94a3b8; font-weight:bold;">Seq: #${getSeq(c) !== 999 ? getSeq(c) : '-'}</span>
-                            <strong style="font-size:16px; color:var(--text); margin-left:5px;">${c.name}</strong>
-                        </div>
-                        ${badgeStatus}
-                    </div>
-                    <div style="display:flex; flex-wrap:wrap; gap:10px;">
-                        ${itemsHtml || '<span style="font-size:12px; color:#94a3b8;">No default items set.</span>'}
-                        <div style="background:rgba(16, 185, 129, 0.05); padding:5px 10px; border-radius:6px; display:flex; align-items:center; gap:8px; border:1px solid rgba(16, 185, 129, 0.3);">
-                            <span style="font-size:12px; color:var(--success); font-weight:bold;">Payment</span>
-                            <input type="number" id="feed-pay-${i}" value="${savedPayAmt}" placeholder="₹ Amt" style="width:75px; padding:6px; margin:0;">
-                        </div>
-                    </div>
-                    `;
-                    
                 let isOld = false;
                 if (isMilkMan() && currentFeedOffset < -1) isOld = true;
-
-                if (isOld) {
-                    html += `<div style="text-align:center; font-size:12px; color:var(--warning); margin-top:5px; padding:8px; border:1px dashed var(--warning); border-radius:6px;">⚠️ Locked for past dates. Contact Owner to edit.</div>`;
-                } else if (currentFeedOffset > 0) {
-                        let btnTxt = entry ? "Update Pre-order 📅" : "Save Pre-order 📅";
-                        let bgBtn = entry ? "var(--warning)" : "var(--primary)";
-                        let colBtn = entry ? "black" : "white";
-                    html += `<button class="btn-save" style="width:100%; padding:10px; font-size:14px; margin-top:5px; background:${bgBtn}; color:${colBtn};" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
-                } else {
-                    html += `<button class="btn-save" style="width:100%; padding:10px; font-size:14px; margin-top:5px;" onclick="saveFeedEntry(${i}, this)">Done / Update ✔</button>`;
-                }
                 
-                html += `</div>`;
+                let actionButton = '';
+                if (isOld) {
+                    actionButton = `<span style="font-size:11px; color:var(--warning); padding:4px 8px; border:1px dashed var(--warning); border-radius:6px;">⚠️ Locked</span>`;
+                } else if (currentFeedOffset > 0) {
+                    let btnTxt = entry ? "Update 📅" : "Save 📅";
+                    let bgBtn = entry ? "var(--warning)" : "var(--primary)";
+                    let colBtn = entry ? "black" : "white";
+                    actionButton = `<button class="btn-save" style="width:auto; padding:6px 12px; font-size:12px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
+                } else {
+                    let btnTxt = entry ? "Update ✔" : "Done ✔";
+                    let bgBtn = entry ? "var(--warning)" : "var(--primary)";
+                    let colBtn = entry ? "black" : "white";
+                    actionButton = `<button class="btn-save" style="width:auto; padding:6px 12px; font-size:13px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
+                }
+
+                html += `
+                <div style="background:var(--card); border:1px solid #475569; padding: 10px 12px; border-radius:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.2); display:flex; flex-direction:column; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:12px; color:#94a3b8; font-weight:bold;">#${getSeq(c) !== 999 ? getSeq(c) : '-'}</span>
+                            <strong style="font-size:15px; color:var(--text);">${c.name}</strong>
+                        </div>
+                        ${actionButton}
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                        ${itemsHtml || '<span style="font-size:12px; color:#94a3b8;">No default items set.</span>'}
+                        <div style="background:rgba(16, 185, 129, 0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(16, 185, 129, 0.3);">
+                            <span style="font-size:11px; color:var(--success); font-weight:bold;">Pay ₹</span>
+                            <input type="number" id="feed-pay-${i}" value="${savedPayAmt}" placeholder="Amt" style="width:60px; padding:4px; margin:0; font-size:12px; text-align:center;">
+                        </div>
+                    </div>
+                </div>`;
             });
 
         let targetItems = {};
@@ -3311,22 +3291,40 @@
         
         async function approveRequest(i) {
             const req = requests[i];
+            const oldStatus = req.status;
             req.status = 'Approved';
-            // Send the updated request to the backend. The backend will handle transaction creation.
-            await fetch(`${API_BASE}/requests`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(req)
-            });
-            await fetchTransactions(); // Update the transactions array after approval
-            renderOwnerRequests();
+            
+            const btn = window.event ? window.event.target : null;
+            if(btn) { btn.innerText = "Wait..."; btn.disabled = true; }
+            
+            try {
+                await fetch(`${API_BASE}/requests`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(req)
+                });
+                await fetchBackgroundData(); // Re-syncs data and auto-refreshes views
+            } catch(e) {
+                req.status = oldStatus;
+                alert("Error approving request.");
+                if(btn) { btn.innerText = "Approve"; btn.disabled = false; }
+            }
         }
 
         async function rejectRequest(i) {
             if(!confirm("Are you sure you want to reject this request?")) return;
+            const btn = window.event ? window.event.target : null;
+            if(btn) { btn.innerText = "Wait..."; btn.disabled = true; }
+            
             requests[i].status = 'Rejected';
-            await fetch(`${API_BASE}/requests`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(requests[i]) });
-            renderOwnerRequests();
+            try {
+                await fetch(`${API_BASE}/requests`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(requests[i]) });
+                renderOwnerRequests();
+            } catch(e) {
+                requests[i].status = 'Pending';
+                alert("Network error.");
+                if(btn) { btn.innerText = "Reject"; btn.disabled = false; }
+            }
         }
 
         function editCust(i) { 
