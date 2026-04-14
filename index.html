@@ -3089,7 +3089,7 @@
             pending.sort((a,b) => getSeq(a.c) - getSeq(b.c));
             completed.sort((a,b) => getSeq(a.c) - getSeq(b.c));
 
-            let html = '';
+            let pendingHtml = '';
             let feedIndex = 0;
             
             const renderCard = (obj, isCompleted) => {
@@ -3158,7 +3158,47 @@
                 </div>`;
             };
 
-            pending.forEach(obj => { html += renderCard(obj, false); });
+            const renderCompactCard = (obj) => {
+                const {c, i, entry} = obj;
+                let savedItemsMap = {};
+                let savedPayAmt = '';
+                
+                if (entry) {
+                    if (entry.payTrans) savedPayAmt = Math.abs(parseFloat(entry.payTrans.rate));
+                    if (entry.itemsTrans) {
+                        try { let parsed = JSON.parse(entry.itemsTrans.item); if(Array.isArray(parsed)) parsed.forEach(it => { savedItemsMap[it.item] = it.qty; }); } catch(e) {}
+                    }
+                }
+
+                let defItems = getCustItems(c);
+                let itemsHtml = defItems.map((d, itemIdx) => {
+                    let preFillQty = (entry && entry.itemsTrans) ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
+                    return `<input type="number" id="feed-qty-${i}-${itemIdx}" value="${preFillQty}" style="width:40px; padding:4px; margin:0; font-size:11px; text-align:center; border:1px solid var(--success); background:rgba(0,0,0,0.2); color:var(--text); border-radius:4px;" title="${d.item}">`;
+                }).join('<span style="color:#475569; font-size:10px; margin:0 2px;">+</span>');
+
+                let isOld = false;
+                if (isMilkMan() && currentFeedOffset < -1) isOld = true;
+
+                let actionButton = isOld ? `<span style="font-size:10px; color:var(--warning);">⚠️ Locked</span>` : `<button class="btn-save" style="padding:4px 8px; font-size:11px; background:var(--warning); color:black; margin:0;" onclick="saveFeedEntry(${i}, this)">Update</button>`;
+
+                return `
+                <div style="background:rgba(16, 185, 129, 0.05); border:1px solid rgba(16, 185, 129, 0.3); padding: 8px 10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; animation: fadeInUp 0.5s backwards; animation-delay: ${Math.min((feedIndex++) * 0.02, 0.5)}s;">
+                    <div style="display:flex; align-items:center; gap:6px; flex: 1 1 auto; min-width: 100px;">
+                        <span style="font-size:11px; color:#94a3b8; font-weight:bold;">#${getSeq(c) !== 999 ? getSeq(c) : '-'}</span>
+                        <strong style="font-size:13px; color:var(--success); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 120px;">${c.name}</strong>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        ${itemsHtml}
+                        <input type="number" id="feed-pay-${i}" value="${savedPayAmt}" placeholder="Pay₹" style="width:50px; padding:4px; margin:0; font-size:11px; text-align:center; border:1px solid var(--success); background:rgba(0,0,0,0.2); color:var(--text); border-radius:4px;">
+                        ${actionButton}
+                    </div>
+                </div>`;
+            };
+
+            if (pending.length > 0) {
+                pendingHtml += `<h4 style="margin-top:0; margin-bottom:10px; color:var(--warning); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">⏳ Pending</h4>`;
+                pending.forEach(obj => { pendingHtml += renderCard(obj, false); });
+            }
 
         let targetItems = {};
         let deliveredItems = {};
@@ -3255,15 +3295,15 @@
 
             let completedHtml = '';
             if (completed.length > 0) {
-                completedHtml += `<h4 style="margin-top:25px; color:var(--success); border-bottom:1px solid #334155; padding-bottom:5px;">✅ Completed Today</h4>`;
+                completedHtml += `<h4 style="margin-top:15px; margin-bottom:10px; color:var(--success); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">✅ Submitted</h4>`;
                 completed.forEach(obj => {
-                    completedHtml += renderCard(obj, true);
+                    completedHtml += renderCompactCard(obj);
                 });
             }
             
-            if(pending.length === 0 && completed.length > 0) completedHtml += `<p style="font-size:15px; color:var(--success); text-align:center; margin-top:20px;">All entries completed for today! 🎉</p>`;
+            if(pending.length === 0 && completed.length > 0) pendingHtml = `<p style="font-size:15px; color:var(--success); text-align:center; margin-top:10px; margin-bottom:20px;">All entries submitted for today! 🎉</p>`;
 
-            feedDiv.innerHTML = html + completedHtml;
+            feedDiv.innerHTML = pendingHtml + completedHtml;
         }
 
         let currentSeqEditList = [];
