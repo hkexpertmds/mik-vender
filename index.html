@@ -3128,7 +3128,7 @@
                 let itemsHtml = defItems.map((d, itemIdx) => {
                         let preFillQty = (entry && entry.itemsTrans) ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
                     return `
-                    <div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px;">
+                    <div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.1);">
                         <span style="font-size:12px; font-weight:bold; max-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${d.item}">${d.item}</span>
                         <input type="number" id="feed-qty-${i}-${itemIdx}" value="${preFillQty}" style="width:50px; padding:4px; margin:0; font-size:12px; text-align:center;" placeholder="Qty">
                     </div>`;
@@ -3145,7 +3145,7 @@
                     let bgBtn = entry ? "var(--warning)" : "var(--primary)";
                     let colBtn = entry ? "black" : "white";
                     actionButton = `<button class="btn-save" style="width:auto; padding:6px 12px; font-size:12px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
-                } else {
+                } else { // Today or past date
                     let btnTxt = entry ? "Update ✔" : "Done ✔";
                     let bgBtn = entry ? "var(--warning)" : "var(--primary)";
                     let colBtn = entry ? "black" : "white";
@@ -3153,7 +3153,7 @@
                 }
 
                 let cardBorder = entry ? '1px solid var(--success)' : '1px solid #475569';
-                let titleColor = entry ? 'var(--success)' : 'var(--text)';
+                let titleColor = isCompleted ? 'var(--success)' : 'var(--text)'; // Only green if completed
                 let amountBadge = entry && savedTotalAmt > 0 ? `<span style="font-size:11px; background:rgba(16, 185, 129, 0.15); color:var(--success); padding:2px 6px; border-radius:4px; margin-left:5px;">₹${savedTotalAmt}</span>` : '';
 
                 return `
@@ -3175,65 +3175,24 @@
                 </div>`;
             };
 
-            const renderCompactCard = (obj) => {
-                const {c, i, entry} = obj;
-                let savedItemsMap = {};
-                let savedPayAmt = '';
-                
-                if (entry) {
-                    if (entry.payTrans) savedPayAmt = Math.abs(parseFloat(entry.payTrans.rate));
-                    if (entry.itemsTrans) {
-                        try { let parsed = JSON.parse(entry.itemsTrans.item); if(Array.isArray(parsed)) parsed.forEach(it => { savedItemsMap[it.item] = it.qty; }); } catch(e) {}
-                    }
-                }
-
-                let defItems = getCustItems(c);
-                let itemsHtml = defItems.map((d, itemIdx) => {
-                    let preFillQty = (entry && entry.itemsTrans) ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
-                    return `<div style="display:flex; align-items:center; gap:4px;">
-                        <span style="font-size:10px; color:#94a3b8; white-space:nowrap; max-width:60px; overflow:hidden; text-overflow:ellipsis;" title="${d.item}">${d.item}</span>
-                        <input type="number" id="feed-qty-${i}-${itemIdx}" value="${preFillQty}" style="width:40px; padding:4px; margin:0; font-size:11px; text-align:center; border:1px solid var(--success); background:rgba(0,0,0,0.2); color:var(--text); border-radius:4px;" title="${d.item}">
-                    </div>`;
-                }).join('<span style="color:#475569; font-size:12px; margin:0 4px; align-self:center;">+</span>');
-
-                let isOld = false;
-                if (isMilkMan() && currentFeedOffset < -1) isOld = true;
-
-                let actionButton = isOld ? `<span style="font-size:10px; color:var(--warning);">⚠️ Locked</span>` : `<button class="btn-save" style="padding:4px 8px; font-size:11px; background:var(--warning); color:black; margin:0;" onclick="saveFeedEntry(${i}, this)">Update</button>`;
-
-                return `
-                <div style="background:rgba(16, 185, 129, 0.05); border:1px solid rgba(16, 185, 129, 0.3); padding: 8px 10px; border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; animation: fadeInUp 0.5s backwards; animation-delay: ${Math.min((feedIndex++) * 0.02, 0.5)}s;">
-                    <div style="display:flex; align-items:center; gap:6px; flex: 1 1 auto; min-width: 100px;">
-                        <span style="font-size:11px; color:#94a3b8; font-weight:bold;">#${getSeq(c) !== 999 ? getSeq(c) : '-'}</span>
-                        <strong style="font-size:13px; color:var(--success); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 120px;">${c.name}</strong>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                        ${itemsHtml}
-                        <div style="display:flex; align-items:center; gap:4px; margin-left:4px;">
-                            <span style="font-size:10px; color:var(--success); font-weight:bold;">Pay ₹</span>
-                            <input type="number" id="feed-pay-${i}" value="${savedPayAmt}" placeholder="Amt" style="width:45px; padding:4px; margin:0; font-size:11px; text-align:center; border:1px solid var(--success); background:rgba(0,0,0,0.2); color:var(--text); border-radius:4px;">
-                        </div>
-                        ${actionButton}
-                    </div>
-                </div>`;
-            };
-
-            if (pending.length > 0) {
-                pendingHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(251, 191, 36, 0.3); margin-bottom:20px;">
+            if (pending.length > 0) { // If there are pending entries, show them
+                finalFeedHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(251, 191, 36, 0.3); margin-bottom:20px;">
                     <h4 style="margin-top:0; margin-bottom:15px; color:var(--warning); border-bottom:1px dashed rgba(251, 191, 36, 0.3); padding-bottom:8px;">⏳ Pending</h4>`;
-                pending.forEach(obj => { pendingHtml += renderCard(obj, false); });
-                pendingHtml += `</div>`;
+                pending.forEach(obj => { finalFeedHtml += renderCard(obj, false); });
+                finalFeedHtml += `</div>`;
             }
 
         let targetItems = {};
         let deliveredItems = {};
         let deliveredAmount = {};
         let skippedCustomers = [];
+        let totalCustomersForShift = 0;
 
         customers.forEach(c => {
             if (isMilkMan() && c.milkman_id !== currentUser.login_id) return;
             if (selectedMM && c.milkman_id !== selectedMM) return;
             if (c.shift !== currentFeedShift && c.shift !== 'Both') return;
+            totalCustomersForShift++;
             
             let cTarget = 0;
             let defItems = getCustItems(c);
@@ -3315,22 +3274,14 @@
 
         bottomSummaryHtml += `</div>`;
 
-        const reportDiv = document.getElementById('daily-feed-report');
-        if (reportDiv) reportDiv.innerHTML = bottomSummaryHtml;
-
-            let completedHtml = '';
-            if (completed.length > 0) {
-                completedHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(16, 185, 129, 0.3);">
-                    <h4 style="margin-top:0; margin-bottom:15px; color:var(--success); border-bottom:1px dashed rgba(16, 185, 129, 0.3); padding-bottom:8px;">✅ Delivered</h4>`;
-                completed.forEach(obj => {
-                    completedHtml += renderCompactCard(obj);
-                });
-                completedHtml += `</div>`;
+            if (pending.length === 0 && completed.length > 0 && totalCustomersForShift > 0) {
+                finalFeedHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(16, 185, 129, 0.3); margin-bottom:20px;"><p style="font-size:16px; color:var(--success); text-align:center; margin:0;">All entries delivered for today! 🎉</p></div>`;
+            } else if (pending.length === 0 && completed.length === 0 && totalCustomersForShift === 0) {
+                finalFeedHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(16, 185, 129, 0.3); margin-bottom:20px;"><p style="font-size:16px; color:#94a3b8; text-align:center; margin:0;">No customers assigned for this shift or date.</p></div>`;
             }
-            
-            if(pending.length === 0 && completed.length > 0) pendingHtml = `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(16, 185, 129, 0.3); margin-bottom:20px;"><p style="font-size:16px; color:var(--success); text-align:center; margin:0;">All entries delivered for today! 🎉</p></div>`;
 
-            feedDiv.innerHTML = pendingHtml + completedHtml;
+            feedDiv.innerHTML = finalFeedHtml;
+            document.getElementById('daily-feed-report').innerHTML = bottomSummaryHtml;
         }
 
         let currentSeqEditList = [];
