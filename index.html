@@ -438,7 +438,7 @@
             <div style="display:flex; gap:10px; margin-bottom: 15px; background:rgba(0,0,0,0.15); padding:8px; border-radius:10px;">
                 <!-- NEW TABS FOR ENTRIES VIEW -->
                 <button id="tabTransFeed" class="btn-tab active-tab" style="flex:1; margin:0; font-size:13px;" onclick="switchLedgerTransTab('feed')">🗓️ Daily Feed</button>
-                <button id="tabTransAll" class="btn-tab" style="flex:1; margin:0; font-size:13px;" onclick="switchLedgerTransTab('all')">📊 All Trans</button>
+                <button id="tabTransAll" class="btn-tab" style="flex:1; margin:0; font-size:13px;" onclick="switchLedgerTransTab('all')">✅ Completed</button>
             </div>
 
             <div id="trans-tab-feed">
@@ -746,7 +746,7 @@
 
                 <div id="editTransPaymentSection" class="hidden" style="margin-top: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #475569;">
                     <label style="font-size:12px; color:var(--success); font-weight:bold;">Payment Amount (₹)</label>
-                    <input type="number" id="tPaymentAmt" placeholder="Amount" style="margin-top:5px;" oninput="document.getElementById('tTotalDisplay').innerText = 'Total: ₹' + this.value">
+                    <input type="number" id="tPaymentAmt" placeholder="Amount" style="margin-top:5px;" oninput="document.getElementById('tTotalDisplay').innerText = 'Total: ₹' + (parseFloat(this.value) || 0).toFixed(2)">
                 </div>
 
                 <div id="tTotalDisplay" style="display:flex; align-items:center; font-weight:bold; color:var(--success); margin-top:15px; font-size:18px;">Total: ₹0</div>
@@ -1153,7 +1153,7 @@
                 'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill',
                 'btn-self': '<span style="font-size:24px; margin:0;">📈</span>View Detailed My Report',
                 'tabCust': 'Customers', 'tabTrans': 'Entries',
-                'tabTransFeed': '🗓️ Daily Feed', 'tabTransAll': '📊 All Trans',
+                'tabTransFeed': '🗓️ Daily Feed', 'tabTransAll': '✅ Completed',
                 'btnShiftM': '🌅 Morning', 'btnShiftE': '🌃 Evening',
                 'tabSelfStatement': '📊 Statement', 'tabSelfOrder': '🛒 My Order', 'tabSelfReq': '💬 Requests', 'tabSelfPay': '💸 Payment',
                 'btn-help-dropdown': '🆘 3. Need Help?',
@@ -1176,7 +1176,7 @@
                 'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>जनरल बिल',
                 'btn-self': '<span style="font-size:24px; margin:0;">📈</span>मेरी रिपोर्ट देखें',
                 'tabCust': 'कस्टमर्स', 'tabTrans': 'एंट्री',
-                'tabTransFeed': '🗓️ डेली एंट्री', 'tabTransAll': '📊 सभी एंट्री',
+                'tabTransFeed': '🗓️ डेली एंट्री', 'tabTransAll': '✅ Completed',
                 'btnShiftM': '🌅 सुबह', 'btnShiftE': '🌃 शाम',
                 'tabSelfStatement': '📊 मेरा खाता', 'tabSelfOrder': '🛒 मेरा ऑर्डर', 'tabSelfReq': '💬 मैसेज', 'tabSelfPay': '💸 पेमेंट',
                 'btn-help-dropdown': '🆘 3. मदद (Need Help)',
@@ -1969,7 +1969,7 @@
             document.getElementById('editTransPaymentSection').classList.toggle('hidden', type === 'Items');
             
             if (type === 'Payment') {
-                document.getElementById('tTotalDisplay').innerText = 'Total: ₹' + (document.getElementById('tPaymentAmt').value || 0);
+                document.getElementById('tTotalDisplay').innerText = 'Total: ₹' + (parseFloat(document.getElementById('tPaymentAmt').value || 0)).toFixed(2);
             } else {
                 renderEditTransItems(); // Restores item total
             }
@@ -2072,7 +2072,7 @@
                 html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
                     <td style="padding:8px 5px;"><b>${d.item}</b></td>
                     <td style="padding:8px 5px;">${d.qty}</td>
-                    <td style="padding:8px 5px;">₹${d.rate}</td>
+                    <td style="padding:8px 5px;">₹${d.rate.toFixed(2)}</td>
                     <td style="padding:8px 5px; color:var(--success); font-weight:bold;">₹${d.total.toFixed(2)}</td>
                     <td style="padding:8px 5px;"><button type="button" class="badge" style="background:var(--danger);" onclick="removeGbItem(${i})">X</button></td>
                 </tr>`;
@@ -2136,7 +2136,7 @@
                     <td><b>GB-${billNo}</b><br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
                     <td>${t.cust}</td>
                     <td>${displayItem}</td>
-                    <td style="color:var(--success); font-weight:bold;">₹${t.total}</td>
+                    <td style="color:var(--success); font-weight:bold;">₹${parseFloat(t.total).toFixed(2)}</td>
                     <td>
                         <button class="badge" style="background:var(--warning); color:black" onclick="editGb(${realIdx})">Edit</button>
                         <button class="badge" style="background:#4f46e5; color:white" onclick="reprintGb(${realIdx})">Print</button>
@@ -2500,7 +2500,7 @@
             const tbody = document.getElementById('productTableBody'); 
             let html = '';
             products.forEach((p, i) => { 
-                html += `<tr style="animation-delay:${i * 0.04}s"><td>${p.item_name} <span style="font-size:11px; color:#94a3b8;">(${p.unit || '-'})</span></td><td>₹${p.rate}</td><td>
+                html += `<tr style="animation-delay:${i * 0.04}s"><td>${p.item_name} <span style="font-size:11px; color:#94a3b8;">(${p.unit || '-'})</span></td><td>₹${parseFloat(p.rate).toFixed(2)}</td><td>
                     <button class="badge" style="background:var(--warning); color:black" onclick="editProduct(${i})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'product')">Del</button>
                 </td></tr>`; 
@@ -2662,7 +2662,7 @@
                 // For Milk Man, only allow edits for recent dates, regardless of what's selected. Owner can edit anything.
                 if(isMilkMan() && !allowedDates.includes(convertToDDMMYYYY(t.date))) hideClass = 'hidden'; 
 
-                const totalDisplay = t.item === 'Payment' ? `<span style="color:var(--success)">-₹${Math.abs(parseFloat(t.total))}</span>` : `₹${t.total}`;
+                const totalDisplay = t.item === 'Payment' ? `<span style="color:var(--success)">-₹${Math.abs(parseFloat(t.total)).toFixed(2)}</span>` : `₹${parseFloat(t.total).toFixed(2)}`;
                 const displayItem = formatItemDisplay(t.item);
                 
                 html += `<tr style="animation-delay:${Math.min(i * 0.02, 0.5)}s"><td>${t.date}</td><td>${t.cust}</td><td>${displayItem}</td><td>${totalDisplay}</td><td>
@@ -2728,7 +2728,7 @@
             const ul = document.getElementById('cItemList');
             let html = '';
             currentCustDefaults.forEach((d, i) => {
-                html += `<li>${d.item} (Qty: ${d.qty || '-'}) - ₹${d.rate} 
+                html += `<li>${d.item} (Qty: ${d.qty || '-'}) - ₹${parseFloat(d.rate).toFixed(2)} 
                 <button type="button" class="badge" style="background:var(--danger); padding: 2px 5px; margin-left: 10px;" onclick="removeCustItem(${i})">X</button></li>`;
             });
             if(ul) ul.innerHTML = html;
@@ -2756,7 +2756,7 @@
             let html = '';
             if(items.length === 0) html = '<li>No default items set.</li>';
             items.forEach((d, i) => {
-                html += `<li style="margin-bottom:5px;"><b>${d.item}</b> : ${d.qty || '-'} Unit (₹${d.rate}/u) 
+                html += `<li style="margin-bottom:5px;"><b>${d.item}</b> : ${d.qty || '-'} Unit (₹${parseFloat(d.rate).toFixed(2)}/u) 
                 <button type="button" class="badge" style="background:var(--danger); padding: 2px 5px; margin-left: 10px;" onclick="removeSelfCustItem(${i})">Remove</button></li>`;
             });
             if(ul) ul.innerHTML = html;
@@ -2990,11 +2990,11 @@
             currentEditTransItems.forEach((d, i) => {
                 let rowTotal = (parseFloat(d.qty) * parseFloat(d.rate));
                 grandTotal += rowTotal;
-                html += `<li style="margin-bottom:5px;"><b>${d.item}</b> : ${d.qty} Unit (₹${d.rate}/u) = <b>₹${rowTotal}</b> 
+                html += `<li style="margin-bottom:5px;"><b>${d.item}</b> : ${d.qty} Unit (₹${parseFloat(d.rate).toFixed(2)}/u) = <b>₹${rowTotal.toFixed(2)}</b> 
                 <button type="button" class="badge" style="background:var(--danger); margin-left: 10px;" onclick="removeEditTransItem(${i})">X</button></li>`;
             });
             if(ul) ul.innerHTML = html;
-            document.getElementById('tTotalDisplay').innerText = `Total: ₹${grandTotal}`;
+            document.getElementById('tTotalDisplay').innerText = `Total: ₹${grandTotal.toFixed(2)}`;
         }
 
         function autoFillEditTransRate() {
@@ -3154,7 +3154,7 @@
 
                 let cardBorder = entry ? '1px solid var(--success)' : '1px solid #475569';
                 let titleColor = isCompleted ? 'var(--success)' : 'var(--text)'; // Only green if completed
-                let amountBadge = entry && savedTotalAmt > 0 ? `<span style="font-size:11px; background:rgba(16, 185, 129, 0.15); color:var(--success); padding:2px 6px; border-radius:4px; margin-left:5px;">₹${savedTotalAmt}</span>` : '';
+                let amountBadge = entry && savedTotalAmt > 0 ? `<span style="font-size:11px; background:rgba(16, 185, 129, 0.15); color:var(--success); padding:2px 6px; border-radius:4px; margin-left:5px;">₹${savedTotalAmt.toFixed(2)}</span>` : '';
 
                 return `
                 <div style="background:var(--card); border:${cardBorder}; padding: 10px 12px; border-radius:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.2); display:flex; flex-direction:column; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
@@ -3245,10 +3245,10 @@
                 let p = t - d;
                 rows += `<tr>
                     <td style="padding:6px 10px;">${k}</td>
-                        <td style="padding:6px 10px; text-align:center;">${Number(t.toFixed(2))}</td>
-                        <td style="padding:6px 10px; text-align:center; color:var(--success); font-weight:bold;">${Number(d.toFixed(2))}</td>
-                        <td style="padding:6px 10px; text-align:center; color:${p > 0 ? 'var(--danger)' : 'var(--text)'};">${Number(p.toFixed(2))}</td>
-                        <td style="padding:6px 10px; text-align:right; color:var(--success); font-weight:bold;">₹${Number(amt.toFixed(2))}</td>
+                        <td style="padding:6px 10px; text-align:center;">${t.toFixed(2)}</td>
+                        <td style="padding:6px 10px; text-align:center; color:var(--success); font-weight:bold;">${d.toFixed(2)}</td>
+                        <td style="padding:6px 10px; text-align:center; color:${p > 0 ? 'var(--danger)' : 'var(--text)'};">${p.toFixed(2)}</td>
+                        <td style="padding:6px 10px; text-align:right; color:var(--success); font-weight:bold;">₹${amt.toFixed(2)}</td>
                 </tr>`;
             });
             bottomSummaryHtml += `<table style="margin:0; font-size:13px; width:100%;">
@@ -3260,7 +3260,7 @@
                     <th style="padding:6px 10px; text-align:right; color:#94a3b8;">Amount</th>
                 </tr></thead>
                 <tbody>${rows}</tbody>
-                <tfoot><tr><td colspan="4" style="text-align:right; padding:6px 10px; font-weight:bold; border-top:1px solid #334155;">Total Value:</td><td style="text-align:right; padding:6px 10px; font-weight:bold; color:var(--success); border-top:1px solid #334155;">₹${Number(grandTotalAmt.toFixed(2))}</td></tr></tfoot>
+                <tfoot><tr><td colspan="4" style="text-align:right; padding:6px 10px; font-weight:bold; border-top:1px solid #334155;">Total Value:</td><td style="text-align:right; padding:6px 10px; font-weight:bold; color:var(--success); border-top:1px solid #334155;">₹${grandTotalAmt.toFixed(2)}</td></tr></tfoot>
             </table>`;
         } else {
             bottomSummaryHtml += `<p style="font-size:13px; color:#94a3b8; margin:0;">No active items assigned for this shift.</p>`;
@@ -3765,11 +3765,11 @@
                     if (dayData.items.length === 1) {
                         displayItem = dayData.items[0].item;
                         dispQty = dayData.items[0].qty;
-                        dispRate = dayData.items[0].rate;
+                        dispRate = parseFloat(dayData.items[0].rate).toFixed(2);
                     } else {
                         displayItem = dayData.items.map(i => `${i.item} <span style="color:#94a3b8">(${i.qty})</span>`).join(', ');
                         dispQty = dayData.items.length + ' Items';
-                        dispRate = dayData.items.map(i => i.rate).join(', ');
+                        dispRate = dayData.items.map(i => parseFloat(i.rate).toFixed(2)).join(', ');
                     }
                     monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${date}</td><td>${displayItem}</td><td>${dispQty}</td><td>${dispRate}</td><td>₹${dayData.total.toFixed(2)}</td></tr>`;
                 }
