@@ -3596,6 +3596,9 @@
                 if(type === 'trans') {
                     await fetch(`${API_BASE}/transactions/${transactions[idx].id}`, { method: 'DELETE' });
                     transactions.splice(idx, 1);
+                    renderTrans(); // Refresh the "All Trans" list
+                    renderTransFeed(); // Refresh the "Daily Feed" to show the entry as pending again
+                    return; // Prevent full view reload
                 }
                 if(type === 'user') {
                     await fetch(`${API_BASE}/users/${users[idx].id}`, { method: 'DELETE' });
@@ -3615,6 +3618,7 @@
                 }
             } catch(e) {
                 alert("Network error, please try again.");
+                return;
             }
             
             let nextView = 'ledger-master';
