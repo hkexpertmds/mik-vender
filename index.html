@@ -468,10 +468,10 @@
             </div>
             
             <div id="trans-tab-all" class="hidden">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-                    <h3 style="margin:0;">All Transactions</h3>
-                    <input type="text" id="searchTransAll" placeholder="🔍 Search Entry..." onkeyup="searchTable(this, 'transTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
-                    <button class="btn-save" style="width:auto; padding:8px 15px;" onclick="openNewTransModal()">➕ New Entry</button>
+                <div style="display:flex; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
+                    <label for="transAllDate" style="font-weight:bold; color:var(--primary);">Select Date:</label>
+                    <input type="date" id="transAllDate" onchange="renderTrans()" style="padding:8px; margin:0; flex:1; max-width:180px;">
+                    <button class="btn-save" style="width:auto; padding:8px 15px; margin-left:auto;" onclick="openNewTransModal()">➕ New Entry</button>
                 </div>
                 <table><thead><tr><th>Date</th><th>Customer</th><th>Item</th><th>Total</th><th>Actions</th></tr></thead><tbody id="transTableBody"></tbody></table>
             </div>
@@ -2623,30 +2623,44 @@
         }
 
         function renderTrans() {
-            const tbody = document.getElementById('transTableBody'); 
+            const tbody = document.getElementById('transTableBody');
+            if (!tbody) return; // Exit if the element isn't in the DOM
+            
+            const dateInput = document.getElementById('transAllDate');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = new Date().toISOString().split('T')[0];
+            }
+            const filterDate = convertToDDMMYYYY(dateInput.value);
+
             let html = '';
             
-            const dNow = new Date();
-           const today = formatDate(dNow);
-            const yest = formatDate(new Date(new Date().setDate(new Date().getDate() - 1)));
-            const tom = formatDate(new Date(new Date().setDate(new Date().getDate() + 1)));
-            const allowedDates = [today, yest, tom];
+            const today_dt = new Date();
+            const yest_dt = new Date();
+            yest_dt.setDate(yest_dt.getDate() - 1);
+            const tom_dt = new Date();
+            tom_dt.setDate(tom_dt.getDate() + 1);
+            const allowedDates = [formatDate(today_dt), formatDate(yest_dt), formatDate(tom_dt)];
 
             let filterSel = document.getElementById('filterMilkMan');
             let selectedMM = (filterSel && !filterSel.classList.contains('hidden')) ? filterSel.value : null;
 
+            let foundEntries = false;
             transactions.slice().reverse().forEach((t, i) => { 
                 const realIdx = transactions.length - 1 - i;
                 
-                if (t.date !== currentFeedDateStr) return; // Only show currently selected date's entries
+                // Filter by the new date picker
+                if (convertToDDMMYYYY(t.date) !== filterDate) return;
+                
                 if (t.shift === 'General Bill') return; // Hide General Bills from main ledger
                 if (selectedMM) {
                     let cObj = customers.find(c => (c.name || '').trim() === (t.cust || '').trim());
                     if (cObj && cObj.milkman_id !== selectedMM) return;
                 }
                 
+                foundEntries = true;
                 let hideClass = ''; 
-                if(isMilkMan() && !allowedDates.includes(t.date)) hideClass = 'hidden'; // Restrict old edits for Milk Man
+                // For Milk Man, only allow edits for recent dates, regardless of what's selected. Owner can edit anything.
+                if(isMilkMan() && !allowedDates.includes(convertToDDMMYYYY(t.date))) hideClass = 'hidden'; 
 
                 const totalDisplay = t.item === 'Payment' ? `<span style="color:var(--success)">-₹${Math.abs(parseFloat(t.total))}</span>` : `₹${t.total}`;
                 const displayItem = formatItemDisplay(t.item);
@@ -2656,7 +2670,10 @@
                     <button class="badge ${hideClass}" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
                 </td></tr>`; 
             });
-            if(tbody) tbody.innerHTML = html;
+            if (!foundEntries) {
+                html = `<tr><td colspan="5" style="text-align:center; padding: 20px;">No entries found for ${filterDate}.</td></tr>`;
+            }
+            tbody.innerHTML = html;
         }
 
         // --- CUSTOMER MULTI-ITEMS LOGIC ---
@@ -4059,6 +4076,14 @@
             
             if(activeDiv) activeDiv.classList.remove('hidden');
             if(activeBtn) activeBtn.classList.add('active-tab');
+
+            if(tab === 'all') {
+                const dateInput = document.getElementById('transAllDate');
+                if (dateInput && !dateInput.value) {
+                    dateInput.value = new Date().toISOString().split('T')[0];
+                }
+                renderTrans(); // Render the table when tab is switched to
+            }
         }
         // --- GLOBAL ENTER KEY NAVIGATION ---
         document.addEventListener('keydown', function(e) {
