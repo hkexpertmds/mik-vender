@@ -3106,7 +3106,7 @@
             pending.sort((a,b) => getSeq(a.c) - getSeq(b.c));
             completed.sort((a,b) => getSeq(a.c) - getSeq(b.c));
 
-            let finalFeedHtml = '';
+            let pendingHtml = '';
             let feedIndex = 0;
             
             const renderCard = (obj, isCompleted) => {
