@@ -3768,7 +3768,7 @@
                     } else {
                         displayItem = dayData.items.map(i => `${i.item} <span style="color:#94a3b8">(${i.qty})</span>`).join(', ');
                         dispQty = dayData.items.length + ' Items';
-                        dispRate = dayData.items.map(i => parseFloat(i.rate).toFixed(2)).join(' \ ');
+                        dispRate = dayData.items.map(i => parseFloat(i.rate).toFixed(2)).join(' / ');
                     }
                     monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${date}</td><td>${displayItem}</td><td>${dispQty}</td><td>${dispRate}</td><td>₹${dayData.total.toFixed(2)}</td></tr>`;
                 }
