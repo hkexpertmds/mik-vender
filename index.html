@@ -3021,8 +3021,17 @@
             if(!item) return alert("Select an item!");
             if(!qtyInput || qtyInput <= 0) return alert("Enter valid quantity!");
             
-            currentEditTransItems = currentEditTransItems.filter(i => i.item !== item);
-            currentEditTransItems.push({ item: item, qty: parseFloat(qtyInput), rate: parseFloat(rateInput), total: parseFloat(qtyInput) * parseFloat(rateInput) });
+            let qtyNum = parseFloat(qtyInput);
+            let rateNum = parseFloat(rateInput);
+            
+            let existingItem = currentEditTransItems.find(i => i.item === item);
+            if (existingItem) {
+                existingItem.qty += qtyNum;
+                existingItem.rate = rateNum;
+                existingItem.total = existingItem.qty * existingItem.rate;
+            } else {
+                currentEditTransItems.push({ item: item, qty: qtyNum, rate: rateNum, total: qtyNum * rateNum });
+            }
             renderEditTransItems();
             
             document.getElementById('tQtyAdd').value = ''; document.getElementById('tRateAdd').value = ''; document.getElementById('tItemAdd').value = '';
