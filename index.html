@@ -1292,6 +1292,16 @@
                 document.getElementById('cropModalTitle').innerText = title;
                 
                 const qrCropImage = document.getElementById('qrCropImage');
+                
+                // FIX: Ensure image is loaded before initializing cropper to prevent race conditions
+                qrCropImage.onload = () => {
+                    document.getElementById('qrCropModal').classList.remove('hidden');
+                    if (cropper) cropper.destroy();
+                    let aspectRatio = target === 'logo' ? NaN : 1; // Free crop for logo, Square for others
+                    cropper = new Cropper(qrCropImage, {
+                        aspectRatio: aspectRatio, viewMode: 1, autoCropArea: 0.8, background: false
+                    });
+                };
                 qrCropImage.src = evt.target.result;
 
                 document.getElementById('qrCropModal').classList.remove('hidden');
@@ -3770,6 +3780,7 @@
                         displayItem = dayData.items.map(i => `${i.item} <span style="color:#94a3b8">(${i.qty})</span>`).join(', ');
                         dispQty = dayData.items.length + ' Items';
                         dispRate = dayData.items.map(i => parseFloat(i.rate).toFixed(2)).join(', ');
+                        dispRate = dayData.items.map(i => parseFloat(i.rate).toFixed(2)).join(' / ');
                     }
                     monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${date}</td><td>${displayItem}</td><td>${dispQty}</td><td>${dispRate}</td><td>₹${dayData.total.toFixed(2)}</td></tr>`;
                 }
@@ -3805,11 +3816,15 @@
             }
             
             html += `
-                <div style="margin-top: 15px; padding: 12px 10px; border-top: 2px solid var(--primary); border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; font-size: 14px; background: rgba(0,0,0,0.1);">
-                    <span><b>Prev Bal:</b> <span style="color:${obColor}">${obText}</span></span>
-                    <span><b>+ Current Bill:</b> <span style="color:var(--danger)">₹${currentMonthPurchases.toFixed(2)}</span></span>
-                    <span><b>- Paid:</b> <span style="color:var(--success)">₹${currentMonthPaid.toFixed(2)}</span></span>
-                    <span style="font-size: 15px;"><b>Final Due:</b> <span style="color:${cbColor}; font-weight:bold;">${cbText}</span></span>
+                <div style="margin-top: 15px; padding: 12px 10px; border-top: 2px solid var(--primary); border-bottom: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; font-size: 14px; background: rgba(0,0,0,0.1);">
+                    <div>
+                        <span><b>Prev Bal:</b> <span style="color:${obColor}">${obText}</span></span><br>
+                        <span style="margin-top: 4px; display: inline-block;"><b>- Paid:</b> <span style="color:var(--success)">₹${currentMonthPaid.toFixed(2)}</span></span>
+                    </div>
+                    <div style="text-align: right; margin-left: auto;">
+                        <div style="font-size: 14px;"><b>Current Bill:</b> <span style="color:var(--danger)">₹${currentMonthPurchases.toFixed(2)}</span></div>
+                        <div style="font-size: 15px; margin-top: 4px;"><b>Final Due:</b> <span style="color:${cbColor}; font-weight:bold;">${cbText}</span></div>
+                    </div>
                 </div>
             `;
 
