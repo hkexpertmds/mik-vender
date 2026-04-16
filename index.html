@@ -3805,9 +3805,9 @@
             
             html += `
                 <div style="margin-top: 15px; padding: 12px 10px; border-top: 2px solid var(--primary); border-bottom: 2px solid var(--primary); display: flex; flex-direction: column; gap: 8px; font-size: 14px; background: rgba(0,0,0,0.1);">
-                    <div style="display:flex; justify-content:space-between;"><b>Prev Bal:</b> <span style="color:${obColor}">${obText}</span></div>
-                    <div style="display:flex; justify-content:space-between;"><b>- Paid:</b> <span style="color:var(--success)">₹${currentMonthPaid.toFixed(2)}</span></div>
                     <div style="display:flex; justify-content:space-between;"><b>Current Bill:</b> <span style="color:var(--danger)">₹${currentMonthPurchases.toFixed(2)}</span></div>
+                    <div style="display:flex; justify-content:space-between;"><b>Prev Bal:</b> <span style="color:${obColor}">${obText}</span></div>
+                    <div style="display:flex; justify-content:space-between;"><b>- Paid:</b> <span style="color:var(--success)">₹${currentMonthPaid.toFixed(2)}</span></div>  
                     <div style="display:flex; justify-content:space-between; font-size: 15px; border-top: 1px dashed #475569; padding-top: 8px; margin-top: 4px;"><b>Final Due:</b> <span style="color:${cbColor}; font-weight:bold;">${cbText}</span></div>                </div>
             `;
 
