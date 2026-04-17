@@ -175,8 +175,9 @@
         <button onclick="showView('profile-view'); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">👤 1. Profile</button>
         <button id="lang-btn" onclick="changeLanguage(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🌐 2. Language (हिंदी)</button>
         <button id="btn-help-dropdown" onclick="openHelpModal(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🆘 3. Need Help?</button>
+        <button id="btn-share-app" onclick="shareApp(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">📤 4. Share App</button>
         <button id="btn-dropdown-req" class="hidden" onclick="showView('request-master'); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">📝 Customer Requests</button>
-        <button onclick="logout()" style="background: transparent; color: var(--danger); padding: 12px 20px; text-align: left; border-radius: 0; width: 100%; border: none;">🚪 4. Logout</button>
+        <button onclick="logout()" style="background: transparent; color: var(--danger); padding: 12px 20px; text-align: left; border-radius: 0; width: 100%; border: none;">🚪 5. Logout</button>
     </div>
 
     <!-- LANDING PAGE -->
@@ -343,10 +344,6 @@
             <div class="profile-list-item" onclick="openMediaManager()">
                 <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Media & QR Codes</span><br><b style="font-size:15px; color:var(--text);">Manage Pictures</b></div>
                 <span style="color:var(--primary); font-size:18px;">🖼️</span>
-            </div>
-             <div class="profile-list-item" onclick="openShareModal()">
-                <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Share</span><br><b style="font-size:15px; color:var(--text);">Share App Links</b></div>
-                <span style="color:var(--primary); font-size:18px;">🔗</span>
             </div>
         </div>
         
@@ -1121,6 +1118,25 @@
             }
         }
 
+        function shareApp() {
+            const shareData = {
+                title: 'Dairy Ledger App',
+                text: 'Check out Dairy Ledger, the smart way to manage dairy deliveries and accounts!',
+                url: window.location.origin + window.location.pathname
+            };
+            if (navigator.share) {
+                navigator.share(shareData).catch((err) => {
+                    if(err.name !== "AbortError") console.error("Share failed:", err.message);
+                });
+            } else {
+                navigator.clipboard.writeText(shareData.url).then(() => {
+                    alert("App link copied to clipboard!", "success");
+                }).catch(err => {
+                    alert("Failed to copy link.", "error");
+                });
+            }
+        }
+
         const enFaqs = `<div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>❌ Login Failed / Wrong ID Password?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Please ensure you have selected the correct Role (Owner, Delivery Man, Customer). Check your ID and Password. If you forgot your password, contact your Owner.</div></div>
         <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🌐 Connection Failed / Network Error?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Check your internet connection. If you are on a local computer, ensure the Backend server (Python) is running.</div></div>
         <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>📅 How to pause/change tomorrow's order?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Go to your Customer dashboard, select the "My Order" (🛒) tab, choose tomorrow's date in "One-Time Change" and update the quantity to 0 or your desired amount, then save.</div></div>
@@ -1160,6 +1176,7 @@
                 'btnShiftM': '🌅 Morning', 'btnShiftE': '🌃 Evening',
                 'tabSelfStatement': '📊 Statement', 'tabSelfOrder': '🛒 My Order', 'tabSelfReq': '💬 Requests', 'tabSelfPay': '💸 Payment',
                 'btn-help-dropdown': '🆘 3. Need Help?',
+                'btn-share-app': '📤 4. Share App',
                 'btn-help-landing': '🆘 Need Help?',
                 'btn-dropdown-req': '📝 Customer Requests',
                 'help-modal-title': '🆘 Help & Support',
@@ -1183,6 +1200,7 @@
                 'btnShiftM': '🌅 सुबह', 'btnShiftE': '🌃 शाम',
                 'tabSelfStatement': '📊 मेरा खाता', 'tabSelfOrder': '🛒 मेरा ऑर्डर', 'tabSelfReq': '💬 मैसेज', 'tabSelfPay': '💸 पेमेंट',
                 'btn-help-dropdown': '🆘 3. मदद (Need Help)',
+                'btn-share-app': '📤 4. ऐप शेयर करें (Share App)',
                 'btn-help-landing': '🆘 मदद चाहिए?',
                 'btn-dropdown-req': '📝 कस्टमर रिक्वेस्ट',
                 'help-modal-title': '🆘 मदद और सपोर्ट',
@@ -1230,6 +1248,7 @@
             setHtml('tabSelfPay', dict['tabSelfPay']);
 
             setHtml('btn-help-dropdown', dict['btn-help-dropdown']);
+            setHtml('btn-share-app', dict['btn-share-app']);
             setHtml('btn-help-landing', dict['btn-help-landing']);
             setHtml('btn-dropdown-req', dict['btn-dropdown-req']);
             setHtml('help-modal-title', dict['help-modal-title']);
