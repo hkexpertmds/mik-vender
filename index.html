@@ -153,11 +153,11 @@
 
     <!-- GLOBAL HEADER -->
     <div id="app-header" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; background: var(--card); padding: 15px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; z-index: 999; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;">
+        <div id="header-company-name" style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; text-align: center;"></div>
         <div style="display: flex; align-items: center; gap: 15px; z-index: 10;">
             <button id="global-back-btn" class="hidden" onclick="goBack()" style="background: transparent; border: none; color: var(--text); font-size: 24px; padding: 0; cursor: pointer; outline: none;" title="Go Back">⬅️</button>
-            <div id="header-user-info" style="display:flex; align-items:center; font-weight: bold; font-size: 16px; cursor: pointer;" onclick="toggleProfileDropdown(event)" title="Profile Menu"></div>
+            <div id="header-user-info" style="display:flex; align-items:center; font-weight: bold; font-size: 15px; cursor: pointer;" onclick="toggleProfileDropdown(event)" title="Profile Menu"></div>
         </div>
-        <div id="header-company-name" style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; text-align: center;"></div>
         <div style="display: flex; align-items: center; gap: 15px; padding-right: 40px; z-index: 10;">
             <span id="header-role" style="background:var(--warning); color:black; padding:4px 10px; border-radius:10px; font-size:12px; font-weight:bold;"></span>
         </div>
@@ -380,7 +380,7 @@
 
     <div id="ledger-master" class="container hidden">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2>📖 Ledger & Records</h2>
+            <h2>📖 Customer Records</h2>
             <div><button id="tabCust" class="btn-tab active-tab" onclick="switchLedger('cust')">Customers</button><button id="tabTrans" class="btn-tab" onclick="switchLedger('trans')">Entries</button></div>
         </div>
         
