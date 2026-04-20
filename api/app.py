@@ -185,6 +185,25 @@ def sync_data():
     company = req_data.get('company')
     name = req_data.get('name')
     
+    # License Expiry Check for Owners
+    if role == 'Owner' and company != 'SuperAdmin':
+        user_res = supabase.table('sys_users').select('license_expiry').eq('login_id', login_id).execute()
+        if not user_res.data:
+            return jsonify({"success": False, "message": "Could not verify user license."}), 403
+        
+        expiry_str = user_res.data[0].get('license_expiry')
+        if not expiry_str:
+            return jsonify({"success": False, "message": "Your license is not active. Please contact support."}), 403
+
+        try:
+            expiry_date = datetime.datetime.fromisoformat(expiry_str)
+            if expiry_date.tzinfo is None:
+                expiry_date = expiry_date.replace(tzinfo=datetime.timezone.utc)
+            if datetime.datetime.now(datetime.timezone.utc) > expiry_date:
+                return jsonify({"success": False, "message": "Your license has expired. Please renew to continue access."}), 403
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "message": "Invalid license format. Please contact support."}), 403
+
     # 🚀 SPEED FIX: Removed heavy 'qr_code' from background fetching to reduce megabytes of payload
     u_cols = 'id, name, login_id, type, company, email, address, route, mobile, license_expiry'
     c_cols = 'id, name, addr, cid, defItem, defQty, defRate, company, milkman_id, route, shift, mobile, seq_no, seq_no_eve'
@@ -197,7 +216,7 @@ def sync_data():
             return []
 
     if role in ['Owner', 'Admin']:
-        with ThreadPoolExecutor(max_workers=6) as executor:
+        with ThreadPoolExecutor(max_workers=7) as executor:
             if company == 'SuperAdmin':
                 f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols).execute().data)
                 f_c = executor.submit(lambda: supabase.table('sys_customers').select(c_cols).execute().data)
@@ -214,7 +233,24 @@ def sync_data():
                 f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('company', company).order('id', desc=True).limit(20).execute().data)
                 f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
                 f_l = executor.submit(lambda: supabase.table('sys_licenses').select('*').eq('used_by', login_id).execute().data)
-        return jsonify({"success": True, "data": {"users": safe_get(f_u), "customers": safe_get(f_c), "transactions": safe_get(f_t), "products": safe_get(f_p), "requests": safe_get(f_r), "routes": safe_get(f_ro), "licenses": safe_get(f_l)}})
+        
+        users = safe_get(f_u)
+        customers = safe_get(f_c)
+        transactions = safe_get(f_t)
+        products = safe_get(f_p)
+        requests = safe_get(f_r)
+        routes = safe_get(f_ro)
+        licenses = safe_get(f_l)
+
+        if company == 'SuperAdmin':
+            user_map = {user['login_id']: user for user in users}
+            for lic in licenses:
+                if lic.get('used_by') in user_map:
+                    user_info = user_map[lic['used_by']]
+                    lic['used_by_name'] = user_info.get('name')
+                    lic['used_by_company'] = user_info.get('company')
+
+        return jsonify({"success": True, "data": {"users": users, "customers": customers, "transactions": transactions, "products": products, "requests": requests, "routes": routes, "licenses": licenses}})
         
     elif role == 'Milk Man':
         milkman_customers_res = supabase.table('sys_customers').select(c_cols).eq('company', company).eq('milkman_id', login_id).execute()
