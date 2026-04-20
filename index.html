@@ -1254,25 +1254,39 @@
                     body: JSON.stringify({ key: key, owner_id: currentUser.login_id }) 
                 });
                 const result = await res.json();
-                if (result.success) return result.duration_days || 30;
+                if (result.success) return { success: true, new_expiry: result.new_expiry };
             } catch (e) {
                 console.log("Using local verification fallback...");
             }
 
             const masterKey = "A1B2-C3D4-E5F6-G7H8";
+            let duration = 0;
             if (key.toUpperCase() === masterKey) {
-                return 30; // Key is considered valid for the demo
+                duration = 30; // Key is considered valid for the demo
+            } else {
+                let found = licenses.find(l => l.key_code === key.toUpperCase() && l.status !== 'Used');
+                if (found) {
+                    found.status = 'Used';
+                    found.used_by = currentUser.login_id;
+                    fetch(`${API_BASE}/licenses`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(found) }).catch(e => console.log(e));
+                    duration = found.duration_days || 30;
+                } else if (key.length >= 5) {
+                    duration = 30; // Legacy fallback
+                }
             }
             
-            let found = licenses.find(l => l.key_code === key.toUpperCase() && l.status !== 'Used');
-            if (found) {
-                found.status = 'Used';
-                found.used_by = currentUser.login_id;
-                fetch(`${API_BASE}/licenses`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(found) }).catch(e => console.log(e));
-                return found.duration_days || 30;
+            if (duration > 0) {
+                let baseDate = new Date();
+                if (currentUser.license_expiry) {
+                    let currentExpiry = new Date(currentUser.license_expiry);
+                    if (currentExpiry > baseDate) {
+                        baseDate = currentExpiry;
+                    }
+                }
+                baseDate.setDate(baseDate.getDate() + duration);
+                return { success: true, new_expiry: baseDate.toISOString() };
             }
-            if (key.length >= 5) return 30; // Legacy fallback
-            return false;
+            return { success: false };
         }
 
         async function enterLicenseKey() {
@@ -1292,11 +1306,10 @@
             btn.innerText = "Verifying...";
             btn.disabled = true;
 
-            const duration = await verifyLicenseKeyOnBackend(key);
+            const verification = await verifyLicenseKeyOnBackend(key);
 
-            if (duration) {
-                let newExpiry = new Date();
-                newExpiry.setDate(newExpiry.getDate() + duration); // Dynamic Duration limit
+            if (verification && verification.success) {
+                let newExpiry = new Date(verification.new_expiry);
                 
                 let data = { ...currentUser, license_expiry: newExpiry.toISOString() };
                 try {
