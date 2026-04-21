@@ -544,7 +544,9 @@ def get_opening_balance():
     
     return jsonify({"opening_balance": opening_balance, "transactions": month_transactions})
 
+# Vercel par app start hote hi admin user check karne aur banane ke liye isse yahan call karein
+ensure_admin()
+
 if __name__ == '__main__':
-    ensure_admin()
     print("Backend Chal Raha Hai... Browser Me Login Karein!")
     app.run(host='0.0.0.0', debug=True, port=5000)
