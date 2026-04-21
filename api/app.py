@@ -221,7 +221,7 @@ def sync_data():
 
     if role in ['Owner', 'Admin']:
         with ThreadPoolExecutor(max_workers=7) as executor:
-            if company == 'SuperAdmin':
+            if role == 'Admin' or company == 'SuperAdmin':
                 f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols).execute().data)
                 f_c = executor.submit(lambda: supabase.table('sys_customers').select(c_cols).execute().data)
                 f_t = executor.submit(lambda: supabase.table('sys_trans').select('*').order('id', desc=True).limit(300).execute().data)
@@ -246,7 +246,7 @@ def sync_data():
         routes = safe_get(f_ro)
         licenses = safe_get(f_l)
 
-        if company == 'SuperAdmin':
+        if role == 'Admin' or company == 'SuperAdmin':
             user_map = {user['login_id']: user for user in users}
             for lic in licenses:
                 if lic.get('used_by') in user_map:
