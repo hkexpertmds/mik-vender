@@ -2844,11 +2844,18 @@
                 const realIdx = licenses.length - 1 - i;
                 let statusColor = l.status === 'Active' ? 'var(--success)' : (l.status === 'Used' ? 'var(--danger)' : 'var(--text)');
                 let usedOnDate = l.used_on ? new Date(l.used_on).toLocaleDateString() : '-';
+                
+                let usedByDisplay = '-';
+                if (l.used_by) {
+                    usedByDisplay = l.used_by_name ? `<b>${l.used_by_name}</b><br><span style="font-size:11px; color:#94a3b8;">ID: ${l.used_by}</span>` : l.used_by;
+                    if (l.used_by_company) usedByDisplay += `<br><span style="font-size:11px; color:var(--primary);">${l.used_by_company}</span>`;
+                }
+                
                 html += `<tr style="animation-delay:${i * 0.04}s">
                     <td style="font-family:monospace; font-weight:bold; color:var(--primary);">${l.key_code}</td>
                     <td>${l.duration_days} Days</td>
                     <td style="color:${statusColor}; font-weight:bold;">${l.status || 'Active'}</td>
-                    <td>${l.used_by || '-'}</td>
+                    <td>${usedByDisplay}</td>
                     <td>${usedOnDate}</td>
                     <td><button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'license')">Del</button></td>
                 </tr>`;
