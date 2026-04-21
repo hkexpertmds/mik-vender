@@ -71,7 +71,8 @@ def favicon():
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.json
-    district_code = data.get('district', data.get('city', '00')).upper()[:2]
+    district_val = data.get('district') or data.get('city') or '00'
+    district_code = str(district_val).upper()[:2]
     
     username = (data.get('username') or '').strip()
     if not username:
@@ -148,7 +149,6 @@ def login():
     if pass_db:
         try: is_valid = check_password_hash(pass_db, password)
         except Exception: pass
-        if not is_valid and pass_db == password: is_valid = True
     if not is_valid:
         return jsonify({"success": False, "message": "Wrong ID or Password"})
 
@@ -185,24 +185,28 @@ def sync_data():
     company = req_data.get('company')
     name = req_data.get('name')
     
-    # License Expiry Check for Owners
-    if role == 'Owner' and company != 'SuperAdmin':
-        user_res = supabase.table('sys_users').select('license_expiry').eq('login_id', login_id).execute()
-        if not user_res.data:
-            return jsonify({"success": False, "message": "Could not verify user license."}), 403
-        
-        expiry_str = user_res.data[0].get('license_expiry')
-        if not expiry_str:
-            return jsonify({"success": False, "message": "Your license is not active. Please contact support."}), 403
+    # For Owner/Admin, fetch their true company from DB to decide data scope and check license
+    if role in ['Owner', 'Admin']:
+        user_details_res = supabase.table('sys_users').select('company, license_expiry').eq('login_id', login_id).execute()
+        if not user_details_res.data:
+            return jsonify({"success": False, "message": "Could not verify user."}), 403
 
-        try:
-            expiry_date = datetime.datetime.fromisoformat(expiry_str)
-            if expiry_date.tzinfo is None:
-                expiry_date = expiry_date.replace(tzinfo=datetime.timezone.utc)
-            if datetime.datetime.now(datetime.timezone.utc) > expiry_date:
-                return jsonify({"success": False, "message": "Your license has expired. Please renew to continue access."}), 403
-        except (ValueError, TypeError):
-            return jsonify({"success": False, "message": "Invalid license format. Please contact support."}), 403
+        user_details = user_details_res.data[0]
+        company = user_details.get('company')  # Use authoritative company from DB
+
+        if role == 'Owner' and company != 'SuperAdmin':
+            expiry_str = user_details.get('license_expiry')
+            if not expiry_str:
+                return jsonify({"success": False, "message": "Your license is not active. Please contact support."}), 403
+
+            try:
+                expiry_date = datetime.datetime.fromisoformat(expiry_str)
+                if expiry_date.tzinfo is None:
+                    expiry_date = expiry_date.replace(tzinfo=datetime.timezone.utc)
+                if datetime.datetime.now(datetime.timezone.utc) > expiry_date:
+                    return jsonify({"success": False, "message": "Your license has expired. Please renew to continue access."}), 403
+            except (ValueError, TypeError):
+                return jsonify({"success": False, "message": "Invalid license format. Please contact support."}), 403
 
     # 🚀 SPEED FIX: Removed heavy 'qr_code' from background fetching to reduce megabytes of payload
     u_cols = 'id, name, login_id, type, company, email, address, route, mobile, license_expiry'
@@ -440,14 +444,29 @@ def save_data(table_name):
 @app.route('/api/reset_password', methods=['POST'])
 def reset_password():
     data = request.json
-    if data.get('requester_type') == 'Admin' or (data.get('requester_type') == 'Owner' and data.get('target_type') in ['Milk Man', 'Customer']):
+    requester_id = data.get('requester_id')
+    target_id = data.get('target_id')
+    target_type = data.get('target_type')
+
+    if not requester_id or not target_id or not target_type:
+        return jsonify({"success": False, "message": "Invalid request. Missing parameters."}), 400
+
+    # SECURITY FIX: Don't trust requester_type from client. Fetch role from DB.
+    requester_res = supabase.table('sys_users').select('type').eq('login_id', requester_id).execute()
+    if not requester_res.data:
+        return jsonify({"success": False, "message": "Requester not found."}), 403
+    
+    requester_role = requester_res.data[0]['type']
+
+    if requester_role == 'Admin' or (requester_role == 'Owner' and target_type in ['Milk Man', 'Customer']):
         hashed_pass = generate_password_hash(data['new_password'])
-        if data.get('target_type') == 'Customer':
-            supabase.table('sys_customers').update({'cpass': hashed_pass}).eq('cid', data['target_id']).execute()
-        else:
-            supabase.table('sys_users').update({'pass': hashed_pass}).eq('login_id', data['target_id']).execute()
+        table_to_update = 'sys_customers' if target_type == 'Customer' else 'sys_users'
+        id_field = 'cid' if target_type == 'Customer' else 'login_id'
+        pass_field = 'cpass' if target_type == 'Customer' else 'pass'
+        supabase.table(table_to_update).update({pass_field: hashed_pass}).eq(id_field, target_id).execute()
         return jsonify({"success": True, "message": "Password reset successfully."})
-    return jsonify({"success": False, "message": "Access Denied."}), 403
+        
+    return jsonify({"success": False, "message": "Access Denied. You do not have permission to perform this action."}), 403
 
 @app.route('/api/<table_name>/<int:item_id>', methods=['DELETE'])
 def delete_data(table_name, item_id):
@@ -469,7 +488,14 @@ def verify_key():
     res = supabase.table('sys_licenses').select('*').eq('key_code', key).eq('status', 'Active').execute()
     if res.data:
         license_data = res.data[0]
-        duration_days = license_data.get('duration_days', 30)
+        duration_days = 30  # Default duration
+        try:
+            # Safely get duration from DB, handle None or invalid values
+            db_duration = license_data.get('duration_days')
+            if db_duration is not None:
+                duration_days = int(db_duration)
+        except (ValueError, TypeError):
+            pass  # If conversion fails, use the default 30 days
 
         owner_res = supabase.table('sys_users').select('license_expiry').eq('login_id', owner_id).execute()
         if not owner_res.data:
@@ -535,16 +561,23 @@ def get_opening_balance():
             
         if t_year > 0 and t_month > 0:
             if t_year < year or (t_year == year and t_month < month):
+                try:
+                    total_val = float(t.get('total') or 0)
+                except (ValueError, TypeError):
+                    total_val = 0.0
+
                 if t['item'] == 'Payment':
-                    opening_balance -= abs(float(t.get('total') or 0))
+                    opening_balance -= abs(total_val)
                 else:
-                    opening_balance += float(t.get('total') or 0)
+                    opening_balance += total_val
             elif t_year == year and t_month == month:
                 month_transactions.append(t)
     
     return jsonify({"opening_balance": opening_balance, "transactions": month_transactions})
 
+# Vercel par app start hote hi admin user check karne aur banane ke liye isse yahan call karein
+ensure_admin()
+
 if __name__ == '__main__':
-    ensure_admin()
     print("Backend Chal Raha Hai... Browser Me Login Karein!")
     app.run(host='0.0.0.0', debug=True, port=5000)
