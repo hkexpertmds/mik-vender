@@ -629,6 +629,7 @@
     <div id="accounts-user" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">💰 Accounts Summary</h2>
+            <input type="month" id="accMonthYear" onchange="renderAccounts()" style="padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px;">
             <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="searchTable(this, 'accTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
         </div>
         <div id="monthlyReport"></div>
@@ -4172,14 +4173,14 @@
                         dispQty = dayData.items[0].qty;
                         dispRate = parseFloat(dayData.items[0].rate).toFixed(2);
                     } else {
-                        displayItem = dayData.items.map(i => `${i.item}`).join('<br>');
-                        dispQty = dayData.items.map(i => i.qty).join('<br>');
-                        dispRate = dayData.items.map(i => parseFloat(i.rate).toFixed(2)).join('<br>');
+                        displayItem = dayData.items.map(i => `${i.item} <span style="color:#94a3b8">(${i.qty})</span>`).join(', ');
+                        dispQty = dayData.items.length + ' Items';
+                        dispRate = dayData.items.map(i => parseFloat(i.rate).toFixed(2)).join(' / ');
                     }
-                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td valign="top">${date}</td><td valign="top">${displayItem}</td><td valign="top">${dispQty}</td><td valign="top">${dispRate}</td><td valign="top" style="font-weight:bold; color:var(--text);">₹${dayData.total.toFixed(2)}</td></tr>`;
+                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td valign="top">${date}</td><td valign="top" style="white-space: normal; min-width: 150px; max-width: 250px; word-wrap: break-word;">${displayItem}</td><td valign="top">${dispQty}</td><td valign="top">${dispRate}</td><td valign="top" style="font-weight:bold; color:var(--text);">₹${dayData.total.toFixed(2)}</td></tr>`;
                 }
                 if (dayData.paid > 0) {
-                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td valign="top">${date}</td><td valign="top"><b style="color:var(--success)">Payment Done</b></td><td valign="top">-</td><td valign="top">-</td><td valign="top" style="color:var(--success); font-weight:bold;">-₹${dayData.paid.toFixed(2)}</td></tr>`;
+                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td valign="top">${date}</td><td valign="top" style="white-space: normal; min-width: 150px; max-width: 250px;"><b style="color:var(--success)">Payment Done</b></td><td valign="top">-</td><td valign="top">-</td><td valign="top" style="color:var(--success); font-weight:bold;">-₹${dayData.paid.toFixed(2)}</td></tr>`;
                 }
             });
 
