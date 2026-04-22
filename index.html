@@ -924,6 +924,14 @@
         </div>
     </div>
 
+    <!-- SCREENSHOT MODAL -->
+    <div id="screenshotModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:10015; display:flex; justify-content:center; align-items:center; padding:20px;" onclick="closeScreenshotModal()">
+        <div class="modal-box" style="position:relative; max-width:100%; max-height:90vh; display:flex; justify-content:center;" onclick="event.stopPropagation()">
+            <button onclick="closeScreenshotModal()" style="position:absolute; top:-15px; right:-15px; background:var(--danger); color:white; border:none; border-radius:50%; width:35px; height:35px; font-size:20px; font-weight:bold; cursor:pointer; z-index:10; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 6px rgba(0,0,0,0.3);">&times;</button>
+            <img id="screenshotImage" src="" style="max-width:100%; max-height:85vh; border-radius:8px; border:2px solid var(--primary); display:block; background:white; object-fit:contain;">
+        </div>
+    </div>
+
     <script>
         // --- NETWORK EVENT LISTENERS ---
         window.addEventListener('offline', () => alert("⚠️ Internet Disconnected! You are now offline.", "error"));
@@ -1627,6 +1635,16 @@
             }
         }
 
+        function openScreenshotModal(imgSrc) {
+            document.getElementById('screenshotImage').src = imgSrc;
+            document.getElementById('screenshotModal').classList.remove('hidden');
+        }
+        
+        function closeScreenshotModal() {
+            document.getElementById('screenshotModal').classList.add('hidden');
+            document.getElementById('screenshotImage').src = '';
+        }
+
         function openEditField(key, title, type) {
             document.getElementById('editFieldTitle').innerText = 'Edit ' + title;
             document.getElementById('editFieldKey').value = key;
@@ -1757,7 +1775,6 @@
             document.getElementById('btn-show-register').classList.toggle('hidden', role !== 'Owner');
             
             showView('login-page');
-            setTimeout(() => document.getElementById('loginId').focus(), 50);
         }
 
         async function registerOwner() {
@@ -1973,15 +1990,6 @@
             if(currentUser) { if(currentUser.type === 'Milk Man') homeId = 'ledger-master'; else if(currentUser.type === 'Customer') homeId = 'customer-self-view'; }
             document.getElementById('global-back-btn').classList.toggle('hidden', id === homeId);
             
-            // Auto Focus First Input
-            setTimeout(() => {
-                const container = document.getElementById(id);
-                if (container) {
-                    const firstInput = container.querySelector('input:not([type="hidden"]):not([readonly]), select');
-                    if (firstInput) firstInput.focus();
-                }
-            }, 50);
-
             if(id === 'profile-view') {
                 document.getElementById('mainProfilePic').src = currentUser.profile_pic || 'https://via.placeholder.com/100';
                 document.getElementById('mainProfileName').innerText = currentUser.name || '';
@@ -2660,11 +2668,16 @@
             let data = { cust_id: currentUser.login_id, cust_name: currentUser.name, req_date: requestDate, req_qty: `Payment of ₹${amount} via ${method}`, type: 'Payment', details: JSON.stringify({ amount, method, ...details }), company: currentUser.company, milkman_id: custObj ? custObj.milkman_id : '' };
             try {
                 const res = await fetch(`${API_BASE}/requests`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
-                requests.push(await res.json());
-                alert("Payment submitted for verification!");
-                document.getElementById('payAmount').value = ''; document.getElementById('payCashTo').value = ''; document.getElementById('payScreenshot').value = '';
-                renderCustomerRequests();
-            } catch (e) { alert("Error submitting payment. Please try again."); }
+                const saved = await res.json();
+                if (saved.success === false) {
+                    alert("Database Error: " + saved.message);
+                } else {
+                    requests.push(saved);
+                    alert("Payment submitted for verification!", "success");
+                    document.getElementById('payAmount').value = ''; document.getElementById('payCashTo').value = ''; document.getElementById('payScreenshot').value = '';
+                    renderCustomerRequests();
+                }
+            } catch (e) { console.error(e); alert("Error submitting payment: " + e.message); }
             if(btn) { btn.innerText = "Submit Payment"; btn.disabled = false; }
         }
 
@@ -2829,7 +2842,7 @@
                         const pDetails = JSON.parse(r.details);
                         detailsHtml = `<b>Payment: ₹${pDetails.amount}</b> (${pDetails.method})`;
                         if (pDetails.method === 'Cash') detailsHtml += `<br><small>Paid to: ${pDetails.paid_to}</small>`;
-                        if (pDetails.method === 'Online' && pDetails.screenshot) detailsHtml += `<br><a href="${pDetails.screenshot}" target="_blank" style="color:var(--primary); font-size:12px;">View Screenshot</a>`;
+                            if (pDetails.method === 'Online' && pDetails.screenshot) detailsHtml += `<br><a href="javascript:void(0)" onclick="openScreenshotModal('${pDetails.screenshot}')" style="color:var(--primary); font-size:12px; font-weight:bold; text-decoration:underline;">View Screenshot</a>`;
                     } catch(e) {}
                 }
                 html += `<tr style="animation-delay:${i * 0.04}s">
@@ -4405,15 +4418,6 @@
                 populateTransCustSelect();
                 renderTransFeed(); renderTrans(); 
             }
-            
-            // Auto Focus for sub-tabs
-            setTimeout(() => {
-                const container = document.getElementById(type === 'cust' ? 'ledger-cust-view' : 'ledger-trans-view');
-                if (container) {
-                    const firstInput = container.querySelector('input:not([type="hidden"]):not([readonly]), select');
-                    if (firstInput) firstInput.focus();
-                }
-            }, 50);
         }
 
         function switchLedgerTransTab(tab) {
