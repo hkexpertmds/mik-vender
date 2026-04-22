@@ -4354,34 +4354,91 @@
 
         function renderAccounts() {
             const div = document.getElementById('monthlyReport');
+            const monthInput = document.getElementById('accMonthYear');
+            
+            if(!monthInput.value) {
+                const today = new Date();
+                monthInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            }
+            
+            const [selYear, selMonth] = monthInput.value.split('-').map(Number);
             let summary = {};
             
             // Naye aur Purane sabhi customers ko by default 0 balance ke sath load karna
             customers.forEach(c => {
                 if(currentUser.type !== 'Admin' && c.company !== currentUser.company) return;
-                summary[c.name] = { purchases: 0, paid: 0 };
+                summary[c.name] = { prevBal: 0, currentBill: 0, paid: 0 };
             });
 
             transactions.forEach(t => { 
                 if (t.shift === 'General Bill') return; // Hide General Bills from Accounts
                 if(currentUser.type !== 'Admin' && t.company !== currentUser.company) return;
-                if(!summary[t.cust]) summary[t.cust] = { purchases: 0, paid: 0 };
-                if(t.item === 'Payment') summary[t.cust].paid += Math.abs(parseFloat(t.total));
-                else summary[t.cust].purchases += parseFloat(t.total);
+                if(!summary[t.cust]) summary[t.cust] = { prevBal: 0, currentBill: 0, paid: 0 };
+                
+                let tDate = parseDateToMonthYear(t.date);
+                let amt = parseFloat(t.total) || 0;
+                
+                let isPrev = (tDate.year < selYear) || (tDate.year === selYear && tDate.month < selMonth);
+                let isCurr = (tDate.year === selYear && tDate.month === selMonth);
+                
+                if(t.item === 'Payment') {
+                    if (isPrev) summary[t.cust].prevBal -= Math.abs(amt);
+                    else if (isCurr) summary[t.cust].paid += Math.abs(amt);
+                } else {
+                    if (isPrev) summary[t.cust].prevBal += amt;
+                    else if (isCurr) summary[t.cust].currentBill += amt;
+                }
             });
-            let html = `<table><thead><tr><th>Customer</th><th>Total Bill</th><th>Total Paid</th><th>Balance Due</th><th>Action</th></tr></thead><tbody id="accTableBody">`;
+
+            let sumPrevBal = 0, sumCurrentBill = 0, sumPaid = 0, sumFinalDue = 0;
+            
+            let html = `<div style="max-height: 60vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 10px;">
+                <table style="margin-top: 0; border-collapse: collapse;">
+                <thead style="position: sticky; top: 0; background: var(--card); z-index: 10;">
+                    <tr><th>Customer</th><th>Prev Bal</th><th>Current Bill</th><th>Paid</th><th>Total Due</th><th>Action</th></tr>
+                </thead>
+                <tbody id="accTableBody">`;
+                
             let accIndex = 0;
             for(let c in summary) {
-                let bal = summary[c].purchases - summary[c].paid;
+                let s = summary[c];
+                let finalDue = s.prevBal + s.currentBill - s.paid;
+                
+                sumPrevBal += s.prevBal;
+                sumCurrentBill += s.currentBill;
+                sumPaid += s.paid;
+                sumFinalDue += finalDue;
+                
+                let prevColor = s.prevBal > 0 ? 'var(--danger)' : (s.prevBal < 0 ? 'var(--success)' : 'var(--text)');
+                let finalColor = finalDue > 0 ? 'var(--danger)' : (finalDue < 0 ? 'var(--success)' : 'var(--text)');
+                
                 html += `<tr style="animation-delay:${(accIndex++) * 0.03}s">
                     <td>${c}</td>
-                    <td>₹${summary[c].purchases.toFixed(2)}</td>
-                    <td style="color:var(--success)">₹${summary[c].paid.toFixed(2)}</td>
-                    <td style="color:var(--danger)"><b>₹${bal.toFixed(2)}</b></td>
+                    <td style="color:${prevColor}">${s.prevBal !== 0 ? '₹' + s.prevBal.toFixed(2) : '-'}</td>
+                    <td>₹${s.currentBill.toFixed(2)}</td>
+                    <td style="color:var(--success)">₹${s.paid.toFixed(2)}</td>
+                    <td style="color:${finalColor}"><b>₹${finalDue.toFixed(2)}</b></td>
                     <td><button class="badge" style="background:#10b981; color:white; padding: 6px 12px;" data-cust="${c.replace(/"/g, '&quot;')}" onclick="openOwnerReport(this.getAttribute('data-cust'))">📄 Generate Bill</button></td>
                 </tr>`;
             }
-            div.innerHTML = html + "</tbody></table>";
+            
+            let sumPrevColor = sumPrevBal > 0 ? 'var(--danger)' : (sumPrevBal < 0 ? 'var(--success)' : 'var(--text)');
+            let sumFinalColor = sumFinalDue > 0 ? 'var(--danger)' : (sumFinalDue < 0 ? 'var(--success)' : 'var(--text)');
+
+            html += `</tbody>
+                <tfoot style="position: sticky; bottom: 0; background: var(--card); font-weight: bold; border-top: 2px solid var(--primary); box-shadow: 0 -2px 10px rgba(0,0,0,0.5); z-index: 10;">
+                    <tr>
+                        <td style="color:var(--primary);">TOTAL SUMMARY</td>
+                        <td style="color:${sumPrevColor};">₹${sumPrevBal.toFixed(2)}</td>
+                        <td style="color:var(--danger);">₹${sumCurrentBill.toFixed(2)}</td>
+                        <td style="color:var(--success);">₹${sumPaid.toFixed(2)}</td>
+                        <td style="color:${sumFinalColor}; font-size:16px;">₹${sumFinalDue.toFixed(2)}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table></div>`;
+
+            div.innerHTML = html;
         }
 
         let currentLedgerView = 'cust';
