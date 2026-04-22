@@ -157,7 +157,7 @@
             <button id="global-back-btn" class="hidden" onclick="goBack()" style="background: transparent; border: none; color: var(--text); font-size: 24px; padding: 0; cursor: pointer; outline: none;" title="Go Back">⬅️</button>
             <div id="header-user-info" style="display:flex; align-items:center; font-weight: bold; font-size: 16px; cursor: pointer;" onclick="toggleProfileDropdown(event)" title="Profile Menu"></div>
         </div>
-        <div id="header-company-name" style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; text-align: center;"></div>
+        <div id="header-company-name" style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; text-align: center;"></div>
         <div style="display: flex; align-items: center; gap: 15px; padding-right: 40px; z-index: 10;">
             <span id="header-role" style="background:var(--warning); color:black; padding:4px 10px; border-radius:10px; font-size:12px; font-weight:bold;"></span>
         </div>
@@ -388,17 +388,17 @@
     </div>
 
     <div id="ledger-master" class="container hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2>📖 Ledger & Records</h2>
-            <div><button id="tabCust" class="btn-tab active-tab" onclick="switchLedger('cust')">Customers</button><button id="tabTrans" class="btn-tab" onclick="switchLedger('trans')">Entries</button></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 id="ledger-heading" style="margin:0;">📖 Customer Records</h2>
+            <button id="btnLedgerToggle" class="btn-save" style="width:auto; padding:8px 15px; margin:0;" onclick="toggleLedgerView()">View Entries ➡️</button>
         </div>
         
         <div id="ledger-cust-view">
             
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap: 10px; flex-wrap: wrap;">
-                <select id="filterCustMilkManSelect" onchange="renderCustomers()" class="hidden" style="flex:1; max-width: 300px; background:var(--primary); color:white; border:none; font-weight:bold; padding: 8px; border-radius: 8px; margin:0;"></select>
-                <input type="text" id="searchCust" placeholder="🔍 Search Customer..." onkeyup="searchTable(this, 'customerTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; border-radius:8px; margin:0;">
-                <button class="btn-save" id="btnShowNewCust" style="width:auto; padding:8px 15px; margin:0;" onclick="openNewCustForm()">➕ New Customer</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap: 10px;">
+                <select id="filterCustMilkManSelect" onchange="renderCustomers()" class="hidden" style="flex:1; max-width: 150px; background:var(--primary); color:white; border:none; font-weight:bold; padding: 8px; border-radius: 8px; margin:0;"></select>
+                <input type="text" id="searchCust" placeholder="🔍 Search..." onkeyup="searchTable(this, 'customerTableBody')" style="flex:2; padding:8px; border-radius:8px; margin:0;">
+                <button class="btn-save" id="btnShowNewCust" style="width:auto; padding:8px 15px; margin:0; white-space:nowrap;" onclick="openNewCustForm()">➕ New</button>
             </div>
 
             <div id="cust-form-section" class="hidden">
@@ -660,7 +660,15 @@
         <!-- TAB: MY ORDER -->
         <div id="self-tab-order" class="hidden">
             <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-                <h3 style="margin-bottom:10px; font-size: 16px;">🛒 My Daily Milk/Item Requirements</h3>
+                <h3 style="margin-bottom:10px; font-size: 16px;">🛒 My Daily Requirements <span id="my-current-shift" style="font-size:12px; color:var(--warning);"></span></h3>
+                <div style="margin-bottom:15px; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
+                    <label style="font-size:13px; font-weight:bold; color:var(--primary);">My Regular Shift:</label>
+                    <select id="selfDailyShiftSelect" onchange="updateSelfShift()" style="padding:6px; flex:1; background:var(--input); color:white; border-radius:6px; border:1px solid #475569;">
+                        <option value="Morning">🌅 Morning</option>
+                        <option value="Evening">🌃 Evening</option>
+                        <option value="Both">🌅+🌃 Both</option>
+                    </select>
+                </div>
                 <ul id="selfItemList" style="font-size:13px; color:var(--text); padding-left:20px; margin-bottom:10px; max-height: 150px; overflow-y: auto; padding-right: 5px;"></ul>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:flex-end;">
                     <select id="selfItemAdd" style="flex:1; min-width:120px; padding:8px; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;" onchange="autoFillSelfProductRate()"></select>
@@ -2019,6 +2027,8 @@
                 
                 const custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
                 if (custObj) {
+                    document.getElementById('my-current-shift').innerText = `(${custObj.shift || 'Morning'})`;
+                    document.getElementById('selfDailyShiftSelect').value = custObj.shift || 'Morning';
                     const milkman = users.find(u => u.login_id === custObj.milkman_id);
                     if (milkman) document.getElementById('payCashTo').value = milkman.name;
                     
@@ -2030,11 +2040,13 @@
                 }
 
                 const owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
+                let qrSrc = 'https://via.placeholder.com/200?text=QR+Not+Available';
                 if (owner && owner.qr_code) {
-                    document.getElementById('paymentQrCode').src = owner.qr_code;
-                } else {
-                    document.getElementById('paymentQrCode').src = 'https://via.placeholder.com/200?text=QR+Not+Available';
+                    qrSrc = owner.qr_code;
+                } else if (currentUser.owner_qr) { 
+                    qrSrc = currentUser.owner_qr; 
                 }
+                document.getElementById('paymentQrCode').src = qrSrc;
 
                 togglePaymentFields();
             }
@@ -3059,6 +3071,17 @@
             if(opt && opt.dataset.rate) document.getElementById('selfRateAdd').value = opt.dataset.rate; else document.getElementById('selfRateAdd').value = '';
         }
         
+        async function updateSelfShift() {
+            let custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
+            if(!custObj) return;
+            const newShift = document.getElementById('selfDailyShiftSelect').value;
+            custObj.shift = newShift;
+            await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+            alert("Shift updated successfully!", "success");
+            document.getElementById('my-current-shift').innerText = `(${newShift})`;
+            renderTempChangeItems();
+        }
+        
         async function addSelfCustItem() {
             let custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
             if(!custObj) return;
@@ -3186,14 +3209,15 @@
             const dateStr = convertToDDMMYYYY(dateEl.value);
             const custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
 
-            let defItems = getCustItems(custObj);
             let itemsToSave = []; let grandTotal = 0;
-            defItems.forEach((d, itemIdx) => {
-                let el = document.getElementById(`temp-qty-${itemIdx}`);
-                if (el && el.value !== '' && parseFloat(el.value) > 0) {
+            
+            let qtyInputs = document.querySelectorAll(`input[id^="temp-qty-"]`);
+            qtyInputs.forEach((el) => {
+                if (el.value !== '' && parseFloat(el.value) > 0) {
                     let q = parseFloat(el.value);
-                    itemsToSave.push({ item: d.item, qty: q, rate: d.rate, total: q * d.rate });
-                    grandTotal += (q * d.rate);
+                    let rate = parseFloat(el.dataset.rate) || 0;
+                    itemsToSave.push({ item: el.dataset.item, qty: q, rate: rate, total: q * rate });
+                    grandTotal += (q * rate);
                 }
             });
             let payAmt = parseFloat(document.getElementById('temp-pay').value) || 0;
@@ -3416,18 +3440,33 @@
                     }
                 }
                 
-                let defItems = getCustItems(c);
-                let itemsHtml = defItems.map((d, itemIdx) => {
-                        let preFillQty = (entry && entry.itemsTrans) ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
+                let itemsToShow = getCustItems(c);
+                if (entry && entry.itemsTrans) {
+                    Object.keys(savedItemsMap).forEach(savedItem => {
+                        if (!itemsToShow.find(d => d.item === savedItem)) {
+                            let prod = products.find(p => p.item_name === savedItem);
+                            itemsToShow.push({ item: savedItem, qty: 0, rate: prod ? prod.rate : 0 });
+                        }
+                    });
+                }
+
+                let itemsHtml = itemsToShow.map((d, itemIdx) => {
+                    let preFillQty = (entry && entry.itemsTrans) ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
                     return `
                     <div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.1);">
                         <span style="font-size:12px; font-weight:bold; max-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${d.item}">${d.item}</span>
                         <input type="number" id="feed-qty-${i}-${itemIdx}" value="${preFillQty}" style="width:50px; padding:4px; margin:0; font-size:12px; text-align:center;" placeholder="Qty">
+                        <input type="number" id="feed-qty-${i}-${itemIdx}" data-item="${d.item}" data-rate="${d.rate}" value="${preFillQty}" style="width:50px; padding:4px; margin:0; font-size:12px; text-align:center;" placeholder="Qty">
                     </div>`;
                 }).join('');
 
                 let isOld = false;
                 if (isMilkMan() && currentFeedOffset < -1) isOld = true;
+                
+                let extraBtn = '';
+                if (currentFeedOffset >= 0 && !isOld) {
+                    extraBtn = `<div style="padding:4px; display:flex; align-items:center;"><button type="button" class="badge" style="background:var(--primary); font-size:14px; padding:2px 8px; border-radius:50%;" onclick="addExtraFeedItem(${i}, this)" title="Add Extra Item">+</button></div>`;
+                }
                 
                 let actionButton = '';
                 if (isOld) {
@@ -3457,8 +3496,11 @@
                         </div>
                         ${actionButton}
                     </div>
-                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
-                        ${itemsHtml || '<span style="font-size:12px; color:#94a3b8;">No default items set.</span>'}
+                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; width:100%;">
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; flex:1;" id="feed-items-container-${i}">
+                            ${itemsHtml || '<span style="font-size:12px; color:#94a3b8;">No default items.</span>'}
+                            ${extraBtn}
+                        </div>
                         <div style="background:rgba(16, 185, 129, 0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(16, 185, 129, 0.3);">
                             <span style="font-size:11px; color:var(--success); font-weight:bold;">Pay ₹</span>
                             <input type="number" id="feed-pay-${i}" value="${savedPayAmt}" placeholder="Amt" style="width:60px; padding:4px; margin:0; font-size:12px; text-align:center;">
@@ -3471,6 +3513,13 @@
                 finalFeedHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(251, 191, 36, 0.3); margin-bottom:20px;">
                     <h4 style="margin-top:0; margin-bottom:15px; color:var(--warning); border-bottom:1px dashed rgba(251, 191, 36, 0.3); padding-bottom:8px;">⏳ Pending</h4>`;
                 pending.forEach(obj => { finalFeedHtml += renderCard(obj, false); });
+                finalFeedHtml += `</div>`;
+            }
+            
+            if (completed.length > 0) {
+                finalFeedHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(16, 185, 129, 0.3); margin-bottom:20px;">
+                    <h4 style="margin-top:0; margin-bottom:15px; color:var(--success); border-bottom:1px dashed rgba(16, 185, 129, 0.3); padding-bottom:8px;">✅ Completed</h4>`;
+                completed.forEach(obj => { finalFeedHtml += renderCard(obj, true); });
                 finalFeedHtml += `</div>`;
             }
 
@@ -3662,18 +3711,46 @@
             closeSeqModal();
         }
 
+        function addExtraFeedItem(idx, btn) {
+            let container = btn.parentElement.parentElement;
+            let itemIdx = container.querySelectorAll('input[id^="feed-extra-qty-"]').length;
+            let productOptions = products.map(p => `<option value="${p.item_name}" data-rate="${p.rate}">${p.item_name}</option>`).join('');
+            let newRow = document.createElement('div');
+            newRow.style = "background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.1); width:100%; margin-top:4px;";
+            newRow.innerHTML = `
+                <select id="feed-extra-item-${idx}-${itemIdx}" style="flex:1; padding:4px; margin:0; font-size:11px;" onchange="this.nextElementSibling.dataset.rate = this.options[this.selectedIndex].dataset.rate">
+                    <option value="">-- Select Item --</option>
+                    ${productOptions}
+                </select>
+                <input type="number" id="feed-extra-qty-${idx}-${itemIdx}" data-rate="0" style="width:60px; padding:4px; margin:0; font-size:12px; text-align:center;" placeholder="Qty">
+                <button type="button" class="badge" style="background:var(--danger);" onclick="this.parentElement.remove()">X</button>
+            `;
+            container.insertBefore(newRow, btn.parentElement);
+        }
+
         async function saveFeedEntry(idx, btn) {
             btn.innerText = "Saving..."; btn.disabled = true;
             const c = customers[idx];
-            let defItems = getCustItems(c);
             let itemsToSave = []; let grandTotal = 0;
 
-            defItems.forEach((d, itemIdx) => {
-                let el = document.getElementById(`feed-qty-${idx}-${itemIdx}`);
-                if (el && el.value !== '' && parseFloat(el.value) > 0) {
+            let qtyInputs = document.querySelectorAll(`input[id^="feed-qty-${idx}-"]`);
+            qtyInputs.forEach((el) => {
+                if (el.value !== '' && parseFloat(el.value) > 0) {
                     let q = parseFloat(el.value);
-                    let rate = parseFloat(d.rate) || 0;
-                    itemsToSave.push({item: d.item, qty: q, rate: rate, total: q * rate});
+                    let rate = parseFloat(el.dataset.rate) || 0;
+                    itemsToSave.push({item: el.dataset.item, qty: q, rate: rate, total: q * rate});
+                    grandTotal += (q * rate);
+                }
+            });
+            
+            let extraSelects = document.querySelectorAll(`select[id^="feed-extra-item-${idx}-"]`);
+            extraSelects.forEach((sel) => {
+                let item = sel.value;
+                let qtyInput = sel.nextElementSibling;
+                if (item && qtyInput && qtyInput.value !== '' && parseFloat(qtyInput.value) > 0) {
+                    let q = parseFloat(qtyInput.value);
+                    let rate = parseFloat(qtyInput.dataset.rate) || 0;
+                    itemsToSave.push({item: item, qty: q, rate: rate, total: q * rate});
                     grandTotal += (q * rate);
                 }
             });
@@ -4102,11 +4179,13 @@
             }
             
             html += `
-                <div style="margin-top: 15px; padding: 12px 10px; border-top: 2px solid var(--primary); border-bottom: 2px solid var(--primary); display: flex; flex-direction: column; gap: 8px; font-size: 14px; background: rgba(0,0,0,0.1);">
-                    <div style="display:flex; justify-content:space-between;"><b>Current Bill:</b> <span style="color:var(--danger)">₹${currentMonthPurchases.toFixed(2)}</span></div>
-                    <div style="display:flex; justify-content:space-between;"><b>Prev Bal:</b> <span style="color:${obColor}">${obText}</span></div>
-                    <div style="display:flex; justify-content:space-between;"><b>- Paid:</b> <span style="color:var(--success)">₹${currentMonthPaid.toFixed(2)}</span></div>  
-                    <div style="display:flex; justify-content:space-between; font-size: 15px; border-top: 1px dashed #475569; padding-top: 8px; margin-top: 4px;"><b>Final Due:</b> <span style="color:${cbColor}; font-weight:bold;">${cbText}</span></div>                </div>
+                <div style="margin-top: 15px; padding: 12px 10px; border-radius: 8px; border: 1px solid #475569; display: flex; flex-direction: column; gap: 8px; font-size: 14px; background: rgba(0,0,0,0.2);">
+                    <div style="display:flex; justify-content:space-between;"><span>Previous Balance:</span> <strong style="color:${obColor}">${obText}</strong></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Current Month Bill (+):</span> <strong style="color:var(--danger)">₹${currentMonthPurchases.toFixed(2)}</strong></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Total Paid (-):</span> <strong style="color:var(--success)">₹${currentMonthPaid.toFixed(2)}</strong></div>
+                    <hr style="border:1px dashed #475569; margin: 4px 0;">
+                    <div style="display:flex; justify-content:space-between; font-size: 16px;"><span>Final Balance:</span> <strong style="color:${cbColor};">${cbText}</strong></div>
+                </div>
             `;
 
             return html;
@@ -4269,11 +4348,25 @@
             div.innerHTML = html + "</tbody></table>";
         }
 
+        let currentLedgerView = 'cust';
+        function toggleLedgerView() {
+            if (currentLedgerView === 'cust') {
+                switchLedger('trans');
+            } else {
+                switchLedger('cust');
+            }
+        }
+
         function switchLedger(type) {
             document.getElementById('ledger-cust-view').classList.toggle('hidden', type !== 'cust');
             document.getElementById('ledger-trans-view').classList.toggle('hidden', type !== 'trans');
-            document.getElementById('tabCust').classList.toggle('active-tab', type === 'cust');
-            document.getElementById('tabTrans').classList.toggle('active-tab', type === 'trans');
+            
+            let btnToggle = document.getElementById('btnLedgerToggle');
+            if(btnToggle) {
+                if(type === 'cust') btnToggle.innerText = 'View Entries ➡️';
+                else btnToggle.innerText = '⬅️ View Customers';
+                currentLedgerView = type;
+            }
             
             if(type === 'cust') {
                 closeCustForm();
@@ -4390,6 +4483,7 @@
             const elements = document.querySelectorAll('input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"]):not([type="file"]), select');
             elements.forEach(el => {
                 if (['selfReportMonthYear', 'feedCustomDate', 'tPaymentAmt'].includes(el.id)) return;
+                if (el.id.toLowerCase().includes('search')) return;
                 
                 let labelText = el.getAttribute('placeholder') || el.getAttribute('title');
                 if (!labelText && el.tagName === 'SELECT' && el.options.length > 0) {
