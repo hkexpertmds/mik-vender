@@ -632,6 +632,7 @@
             <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="searchTable(this, 'accTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
         </div>
         <div id="monthlyReport"></div>
+        <button class="btn-back" onclick="showView('main-menu')">⬅️ Back to Menu</button>
     </div>
 
     <div id="customer-self-view" class="container hidden">
@@ -816,6 +817,9 @@
             </div>
             
             <div id="owner-report-data" style="overflow-y:auto; flex:1; padding-right:10px;"></div>
+            <div style="margin-top:15px; display:flex; justify-content:flex-end;">
+                <button class="btn-back" style="width:auto; margin:0;" onclick="closeOwnerReportModal()">⬅️ Back</button>
+            </div>
         </div>
     </div>
 
@@ -2520,10 +2524,12 @@
                     <div class="no-print" style="text-align:right; margin-bottom:10px;">
                         <button onclick="window.print()" style="padding:8px 15px; background:#4f46e5; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer;">🖨️ Print Receipt</button>
                     </div>
-                    ${ownerLogo ? `<img src="${ownerLogo}" style="max-width:150px; max-height:80px; display:block; margin: 0 auto 5px auto;">` : ''}
-                    <h2>${companyName.toUpperCase()}</h2>
-                    ${ownerAddress ? `<p style="text-align:center; margin:2px 0; font-size:12px;">${ownerAddress}</p>` : ''}
-                    ${ownerMobile ? `<p style="text-align:center; margin:2px 0 10px 0; font-size:12px;"><b>Mob:</b> ${ownerMobile}</p>` : ''}
+                    <div style="position:relative; text-align:center; min-height:60px;">
+                        ${ownerLogo ? `<img src="${ownerLogo}" style="max-width:80px; max-height:60px; position:absolute; left:0; top:0; object-fit:contain;">` : ''}
+                        <h2 style="margin-top:0;">${companyName.toUpperCase()}</h2>
+                        ${ownerAddress ? `<p style="text-align:center; margin:2px 0; font-size:12px;">${ownerAddress}</p>` : ''}
+                        ${ownerMobile ? `<p style="text-align:center; margin:2px 0 10px 0; font-size:12px;"><b>Mob:</b> ${ownerMobile}</p>` : ''}
+                    </div>
                     <h4>General Bill / Cash Memo</h4>
                     <hr>
                 <p style="margin:5px 0; font-size:14px;"><b>Bill No:</b> GB-${serialNo}</p>
@@ -4165,14 +4171,14 @@
                         dispQty = dayData.items[0].qty;
                         dispRate = parseFloat(dayData.items[0].rate).toFixed(2);
                     } else {
-                        displayItem = dayData.items.map(i => `${i.item} <span style="color:#94a3b8">(${i.qty})</span>`).join(', ');
-                        dispQty = dayData.items.length + ' Items';
-                        dispRate = dayData.items.map(i => parseFloat(i.rate).toFixed(2)).join(' / ');
+                        displayItem = dayData.items.map(i => `${i.item}`).join('<br>');
+                        dispQty = dayData.items.map(i => i.qty).join('<br>');
+                        dispRate = dayData.items.map(i => parseFloat(i.rate).toFixed(2)).join('<br>');
                     }
-                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${date}</td><td>${displayItem}</td><td>${dispQty}</td><td>${dispRate}</td><td>₹${dayData.total.toFixed(2)}</td></tr>`;
+                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td valign="top">${date}</td><td valign="top">${displayItem}</td><td valign="top">${dispQty}</td><td valign="top">${dispRate}</td><td valign="top" style="font-weight:bold; color:var(--text);">₹${dayData.total.toFixed(2)}</td></tr>`;
                 }
                 if (dayData.paid > 0) {
-                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td>${date}</td><td><b style="color:var(--success)">Payment Done</b></td><td>-</td><td>-</td><td style="color:var(--success)">-₹${dayData.paid.toFixed(2)}</td></tr>`;
+                    monthlyTransactionsHtml += `<tr style="animation-delay:${(tbIndex++) * 0.03}s"><td valign="top">${date}</td><td valign="top"><b style="color:var(--success)">Payment Done</b></td><td valign="top">-</td><td valign="top">-</td><td valign="top" style="color:var(--success); font-weight:bold;">-₹${dayData.paid.toFixed(2)}</td></tr>`;
                 }
             });
 
@@ -4294,7 +4300,7 @@
             printWindow.document.write('<style>');
             printWindow.document.write('body { font-family: "Inter", sans-serif; padding: 10px 20px; color: #000; background: #fff; font-size: 12px; margin: 0; }');
             printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 5px !important; font-size: 12px; }');
-            printWindow.document.write('th, td { border: 1px solid #cbd5e1; padding: 4px 6px; text-align: left; line-height: 1.1; }');
+            printWindow.document.write('th, td { border: 1px solid #cbd5e1; padding: 4px 6px; text-align: left; line-height: 1.1; vertical-align: top; }');
             printWindow.document.write('th { background: #eff6ff; color: #1e3a8a; text-transform: uppercase; font-size: 11px; }');
             printWindow.document.write('h2 { color: #1e40af; margin-bottom: 2px; margin-top: 0; text-align: center; font-size: 18px; }');
             printWindow.document.write('p { margin: 2px 0; font-size: 12px !important; }');
@@ -4312,10 +4318,13 @@
             let ownerAddress = currentUser.address || currentUser.addr || '';
             let ownerMobile = currentUser.mobile || '';
             let companyLogo = currentUser.company_logo || '';
-            printWindow.document.write('<h2>' + companyName.toUpperCase() + '</h2>');
+            
+            printWindow.document.write('<div style="position:relative; text-align:center; min-height:70px;">');
+            if (companyLogo) printWindow.document.write('<img src="' + companyLogo + '" style="max-width:90px; max-height:70px; position:absolute; left:0; top:0; object-fit:contain;">');
+            printWindow.document.write('<h2 style="margin-top:0;">' + companyName.toUpperCase() + '</h2>');
             if (ownerAddress) printWindow.document.write('<p style="text-align:center; margin:2px 0; font-size:14px;">' + ownerAddress + '</p>');
-            if (ownerMobile) printWindow.document.write('<p style="text-align:center; margin:2px 0 15px 0; font-size:14px;"><b>Mob:</b> ' + ownerMobile + '</p>');
-            if (companyLogo) printWindow.document.write('<img src="' + companyLogo + '" style="max-width:150px; max-height:80px; display:block; margin: 0 auto 10px auto;">');
+            if (ownerMobile) printWindow.document.write('<p style="text-align:center; margin:2px 0 10px 0; font-size:14px;"><b>Mob:</b> ' + ownerMobile + '</p>');
+            printWindow.document.write('</div>');
             
             printWindow.document.write('<h3>Invoice : ' + custName + ' (' + monthName + ')</h3>');
             
