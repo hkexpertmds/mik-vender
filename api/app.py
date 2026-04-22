@@ -171,6 +171,14 @@ def login():
         user_to_return['type'] = 'Customer'
         user_to_return['login_id'] = user_to_return.get('cid')
         
+        # Fetch Owner's QR code so it shows correctly on frontend payment page
+        try:
+            owner_res = supabase.table('sys_users').select('qr_code').eq('type', 'Owner').eq('company', company).execute()
+            if owner_res.data:
+                user_to_return['owner_qr'] = owner_res.data[0].get('qr_code', '')
+        except Exception:
+            pass
+        
     if 'pass' in user_to_return:
         del user_to_return['pass']
     if 'cpass' in user_to_return:
@@ -285,7 +293,10 @@ def sync_data():
             f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('cust_id', login_id).eq('company', company).order('id', desc=True).limit(15).execute().data)
             f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
             f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols + ', qr_code').eq('company', company).eq('type', 'Owner').execute().data)
-        return jsonify({"success": True, "data": {"users": safe_get(f_u), "customers": [], "transactions": safe_get(f_t), "products": safe_get(f_p), "requests": safe_get(f_r), "routes": safe_get(f_ro), "licenses": []}})
+        
+        owner_users = safe_get(f_u)
+        owner_qr = owner_users[0].get('qr_code', '') if owner_users else ''
+        return jsonify({"success": True, "data": {"users": owner_users, "customers": [], "transactions": safe_get(f_t), "products": safe_get(f_p), "requests": safe_get(f_r), "routes": safe_get(f_ro), "licenses": [], "owner_qr": owner_qr}})
     return jsonify({"success": False})
 
 
