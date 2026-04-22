@@ -403,8 +403,11 @@ def save_data(table_name):
                             }).execute()
                     except Exception: pass
         
-        res = supabase.table(db_table).update(data).eq('id', item_id).execute()
-        return jsonify(res.data[0] if res.data else data)
+        try:
+            res = supabase.table(db_table).update(data).eq('id', item_id).execute()
+            return jsonify(res.data[0] if res.data else data)
+        except Exception as e:
+            return jsonify({"success": False, "message": str(e)})
         
     # 🛡️ BUG FIX: Add server-side check to prevent duplicate transaction entries
     if not data.get('id') and table_name == 'transactions':
