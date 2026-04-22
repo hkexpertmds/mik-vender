@@ -1572,8 +1572,19 @@
             let table = currentUser.type === 'Customer' ? 'customers' : 'users';
             try {
                 const res = await fetch(`${API_BASE}/${table}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-                const saved = await res.json();
-                if (saved.success === false) { alert(saved.message); btn.innerText = "Save Changes"; return; }
+                
+                let saved;
+                try {
+                    saved = await res.json();
+                } catch(err) {
+                    throw new Error("Server response invalid. Image might be too large.");
+                }
+                
+                if (saved.success === false) { 
+                    alert("Database Error: " + saved.message); 
+                    btn.innerText = "Save Changes"; 
+                    return; 
+                }
                 
                 currentUser = { ...data, ...saved };
                 localStorage.setItem('sessionUser', JSON.stringify(currentUser));
@@ -1582,7 +1593,7 @@
                 closeMediaManager();
                 alert("Pictures Saved Successfully!", "success");
                 setupUI();
-            } catch(e) { alert("Error saving pictures!"); }
+            } catch(e) { console.error(e); alert("Error saving pictures! " + e.message); }
             btn.innerText = "Save Changes";
         }
 
@@ -1592,7 +1603,7 @@
                 let height = currentCropTarget === 'logo' ? 150 : 200;
 
                 const croppedCanvas = cropper.getCroppedCanvas({ width: width, height: height, fillColor: '#fff' });
-                const croppedBase64 = croppedCanvas.toDataURL('image/png');
+                const croppedBase64 = croppedCanvas.toDataURL('image/jpeg', 0.6); // Compress to JPEG
                 if (currentCropTarget === 'profile') {
                     currentProfilePicBase64 = croppedBase64;
                     document.getElementById('mmProfilePic').src = currentProfilePicBase64;
