@@ -2413,7 +2413,7 @@
                     <td>${t.cust}</td>
                     <td>${displayItem}</td>
                     <td style="color:var(--success); font-weight:bold;">₹${parseFloat(t.total).toFixed(2)}</td>
-                    <td>
+                    <td style="white-space:nowrap;">
                         <button class="badge" style="background:var(--warning); color:black" onclick="editGb(${realIdx})">Edit</button>
                         <button class="badge" style="background:#4f46e5; color:white" onclick="reprintGb(${realIdx})">Print</button>
                         <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
@@ -2721,7 +2721,7 @@
                 let displayRoute = u.route;
                 if(!displayRoute || displayRoute === 'undefined') displayRoute = 'Unnamed Route';
                 
-            html += `<tr style="animation-delay:${i * 0.04}s"><td>${u.name}</td><td>${u.login_id}</td><td>${displayRoute}</td><td>${u.mobile||'-'}</td><td style="display:flex; gap:4px; flex-wrap:wrap;">
+            html += `<tr style="animation-delay:${i * 0.04}s"><td>${u.name}</td><td>${u.login_id}</td><td>${displayRoute}</td><td>${u.mobile||'-'}</td><td style="display:flex; gap:4px; flex-wrap:nowrap;">
                     <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Milk Man')">Pass</button>
                     <button class="badge" style="background:var(--warning); color:black" onclick="editUser(${i})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'user')">Del</button>
@@ -2769,7 +2769,7 @@
                         <td>${c.route||'-'}<br><span style="font-size:11px; color:#94a3b8;">${c.shift||'-'}</span></td>
                         <td>${c.milkman_id||'-'}</td>
                     <td>${c.mobile||'-'}<br><span style="font-size:11px; color:#94a3b8;">ID: ${c.cid}</span><br><span style="font-size:11px; color:var(--primary);">User: ${c.username||'-'}</span></td>
-                        <td style="display:flex; gap:4px; flex-wrap:wrap;">
+                        <td style="display:flex; gap:4px; flex-wrap:nowrap;">
                             ${!isMilkMan() ? `<button class="badge" style="background:var(--primary)" onclick="resetPassword('${c.cid}', 'Customer')">Pass</button>` : ''}
                             <button class="badge" style="background:var(--warning); color:black" onclick="editCust(${realIdx})">Edit</button>
                             <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'cust')">Del</button>
@@ -2784,7 +2784,7 @@
             const tbody = document.getElementById('productTableBody'); 
             let html = '';
             products.forEach((p, i) => { 
-                html += `<tr style="animation-delay:${i * 0.04}s"><td>${p.item_name} <span style="font-size:11px; color:#94a3b8;">(${p.unit || '-'})</span></td><td>₹${parseFloat(p.rate).toFixed(2)}</td><td>
+                html += `<tr style="animation-delay:${i * 0.04}s"><td>${p.item_name} <span style="font-size:11px; color:#94a3b8;">(${p.unit || '-'})</span></td><td>₹${parseFloat(p.rate).toFixed(2)}</td><td style="white-space:nowrap;">
                     <button class="badge" style="background:var(--warning); color:black" onclick="editProduct(${i})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'product')">Del</button>
                 </td></tr>`; 
@@ -2808,7 +2808,7 @@
                 
                 let badge = assigned ? `<span style="font-size:11px; background:var(--success); color:white; padding:2px 6px; border-radius:4px; margin-left:8px;">🛵 ${assigned}</span>` : `<span style="font-size:11px; background:#64748b; color:white; padding:2px 6px; border-radius:4px; margin-left:8px;">Unassigned</span>`;
 
-                html += `<tr style="animation-delay:${i * 0.04}s"><td>${rName} <div style="margin-top:5px;">${badge}</div></td><td>
+                html += `<tr style="animation-delay:${i * 0.04}s"><td>${rName} <div style="margin-top:5px;">${badge}</div></td><td style="white-space:nowrap;">
                     <button class="badge" style="background:var(--warning); color:black" onclick="editRoute(${i})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'route')">Del</button>
                 </td></tr>`; 
@@ -2856,7 +2856,7 @@
                 html += `<tr style="animation-delay:${i * 0.04}s">
                     <td>${r.req_date}</td><td>${r.cust_name}</td>
                     <td>${detailsHtml}</td><td>${status}</td>
-                    <td>${actionsHtml} <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'request')">Del</button>
+                    <td style="white-space:nowrap;">${actionsHtml} <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'request')">Del</button>
                     </td></tr>`;
             });
             if(tbody) tbody.innerHTML = html;
@@ -2872,7 +2872,7 @@
                     <td>${u.company || '-'}</td>
                     <td>${u.login_id}</td>
                     <td>${u.email || '-'}</td>
-                    <td>
+                    <td style="white-space:nowrap;">
                         <button class="badge" style="background:var(--danger)" onclick="resetPassword('${u.login_id}', 'Owner')">Reset Pass</button>
                     </td>
                 </tr>`;
@@ -3001,7 +3001,7 @@
                 const totalDisplay = t.item === 'Payment' ? `<span style="color:var(--success)">-₹${Math.abs(parseFloat(t.total)).toFixed(2)}</span>` : `₹${parseFloat(t.total).toFixed(2)}`;
                 const displayItem = formatItemDisplay(t.item);
                 
-                html += `<tr style="animation-delay:${Math.min(i * 0.02, 0.5)}s"><td>${t.date}</td><td>${t.cust}</td><td>${displayItem}</td><td>${totalDisplay}</td><td>
+                html += `<tr style="animation-delay:${Math.min(i * 0.02, 0.5)}s"><td>${t.date}</td><td>${t.cust}</td><td>${displayItem}</td><td>${totalDisplay}</td><td style="white-space:nowrap;">
                     <button class="badge ${hideClass}" style="background:var(--warning); color:black" onclick="editTrans(${realIdx})">Edit</button>
                     <button class="badge ${hideClass}" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
                 </td></tr>`; 
@@ -4306,7 +4306,7 @@
             printWindow.document.write('th { background: #eff6ff; color: #1e3a8a; text-transform: uppercase; font-size: 11px; }');
             printWindow.document.write('h2 { color: #1e40af; margin-bottom: 2px; margin-top: 0; text-align: center; font-size: 18px; }');
             printWindow.document.write('p { margin: 2px 0; font-size: 12px !important; }');
-            printWindow.document.write('h3 { color: #334155; margin-top: 4px; text-align: center; margin-bottom: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; font-size: 14px;}');
+            printWindow.document.write('h3 { color: #334155; margin-top: 4px; text-align: center; margin-bottom: 8px; font-size: 14px;}');
             printWindow.document.write('div[style*="border-top: 2px solid"] { padding: 6px 10px !important; margin-top: 5px !important; font-size: 12px !important; gap: 5px !important; }');
             printWindow.document.write('@media print { .no-print { display: none !important; } @page { margin: 0.5cm; } }');
             printWindow.document.write('</style>');
@@ -4329,7 +4329,18 @@
             if (ownerMobile) printWindow.document.write('<p style="text-align:center; margin:2px 0 10px 0; font-size:14px;"><b>Mob:</b> ' + ownerMobile + '</p>');
             printWindow.document.write('</div>');
             
-            printWindow.document.write('<h3>Invoice : ' + custName + ' (' + monthName + ')</h3>');
+            printWindow.document.write('<div style="text-align:center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 8px;">');
+            printWindow.document.write('<h3 style="margin:0 0 4px 0;">Invoice : ' + custName + ' (' + monthName + ')</h3>');
+            let cObj = customers.find(c => c.name === custName);
+            if (cObj) {
+                let details = [];
+                if (cObj.mobile) details.push('<b>Mob:</b> ' + cObj.mobile);
+                if (cObj.addr) details.push('<b>Addr:</b> ' + cObj.addr);
+                if (details.length > 0) {
+                    printWindow.document.write('<p style="margin:0; font-size:12px; color:#475569;">' + details.join(' &nbsp;|&nbsp; ') + '</p>');
+                }
+            }
+            printWindow.document.write('</div>');
             
             let cleanContent = printContent.replace(/color:var\(--success\)/g, 'color:#15803d; font-weight:bold;')
                                            .replace(/color:var\(--danger\)/g, 'color:#b91c1c; font-weight:bold;')
