@@ -173,6 +173,21 @@
         <h2 id="global-loading-title" style="font-size: 24px; color: var(--primary); margin-top: 25px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Loading...</h2>
         <p id="global-loading-text" style="color: #e2e8f0; font-size: 14px; font-weight: 500;">Please wait</p>
     </div>
+    
+    <!-- PRINT PREVIEW MODAL -->
+    <div id="printPreviewModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10020; display:flex; justify-content:center; align-items:center; padding:20px;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:450px; padding:0; border-radius:12px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; border:1px solid #475569;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding: 15px; background: rgba(0,0,0,0.2); border-bottom: 1px solid #475569;">
+                <h3 style="margin:0; color:var(--primary); font-size:16px;">📄 Print Preview</h3>
+                <button onclick="closePrintPreview()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            <iframe id="printPreviewFrame" style="flex:1; width:100%; height:60vh; border:none; background: white;"></iframe>
+            <div style="padding: 15px; background: rgba(0,0,0,0.2); border-top: 1px solid #475569; display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn-save" style="width:auto; margin:0;" id="modalPrintBtn" onclick="executePrintFrame()">🖨️ Print / Save PDF</button>
+                <button class="btn-back" style="width:auto; margin:0;" onclick="closePrintPreview()">Close</button>
+            </div>
+        </div>
+    </div>
 
     <!-- PROFILE DROPDOWN MENU -->
     <div id="profile-dropdown" class="hidden" style="position: fixed; top: 60px; left: 20px; background: var(--card); border: 1px solid #475569; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); z-index: 1000; overflow: hidden; display: flex; flex-direction: column; min-width: 180px;">
@@ -446,13 +461,11 @@
         <div id="ledger-trans-view" class="hidden">
             <!-- FEED CONTROLS (DATES & SHIFTS) -->
             <div style="display:flex; gap:10px; margin-bottom: 15px; background:rgba(0,0,0,0.15); padding:8px; border-radius:10px;">
-                <!-- NEW TABS FOR ENTRIES VIEW -->
                 <button id="tabTransFeed" class="btn-tab active-tab" style="flex:1; margin:0; font-size:13px;" onclick="switchLedgerTransTab('feed')">🗓️ Daily Feed</button>
                 <button id="tabTransAll" class="btn-tab" style="flex:1; margin:0; font-size:13px;" onclick="switchLedgerTransTab('all')">✅ Completed</button>
             </div>
 
-            <div id="trans-tab-feed">
-                <!-- UNIFIED FEED CONTROLS PANEL -->
+            <!-- UNIFIED FEED CONTROLS PANEL -->
             <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #475569; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                 <div style="display:flex; gap:10px; align-items:center; flex: 1 1 200px;">
                     <select id="filterMilkMan" onchange="populateTransCustSelect(); renderTransFeed(); renderTrans();" class="hidden" style="flex:1; padding: 8px; background:var(--primary); color:white; border:none; border-radius: 6px; font-weight:bold; margin:0;"></select>
@@ -470,6 +483,7 @@
                 </div>
             </div>
 
+            <div id="trans-tab-feed">
             <!-- FINAL DAILY REPORT (OUTSIDE SCROLL) -->
             <div id="daily-feed-report" style="margin-bottom: 15px;"></div>
 
@@ -478,10 +492,6 @@
             </div>
             
             <div id="trans-tab-all" class="hidden">
-                <div style="display:flex; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">
-                    <label for="transAllDate" style="font-weight:bold; color:var(--primary);">Select Date:</label>
-                    <input type="date" id="transAllDate" onchange="renderTrans()" style="padding:8px; margin:0; flex:1; max-width:180px;">
-                </div>
                 <table><thead><tr><th>Date</th><th>Customer</th><th>Item</th><th>Total</th><th>Actions</th></tr></thead><tbody id="transTableBody"></tbody></table>
             </div>
         </div>
@@ -1530,7 +1540,7 @@
         
         // Android Hardware Back Button Hook
         window.onAndroidBack = function() {
-            let modals = ['profile-dropdown', 'seqModal', 'editTransModal', 'ownerReportModal', 'helpModal', 'licenseModal', 'editFieldModal', 'mediaManagerModal', 'qrCropModal', 'screenshotModal'];
+            let modals = ['profile-dropdown', 'seqModal', 'editTransModal', 'ownerReportModal', 'helpModal', 'licenseModal', 'editFieldModal', 'mediaManagerModal', 'qrCropModal', 'screenshotModal', 'printPreviewModal'];
             for(let m of modals) { let el = document.getElementById(m); if(el && !el.classList.contains('hidden')) { el.classList.add('hidden'); return true; } }
             let hash = window.location.hash.replace('#', '');
             let homeViews = ['main-menu', 'ledger-master', 'customer-self-view', 'landing-page', 'login-page'];
@@ -1669,6 +1679,16 @@
         function closeScreenshotModal() {
             document.getElementById('screenshotModal').classList.add('hidden');
             document.getElementById('screenshotImage').src = '';
+        }
+        
+        function closePrintPreview() {
+            document.getElementById('printPreviewModal').classList.add('hidden');
+            document.getElementById('printPreviewFrame').srcdoc = '';
+        }
+        
+        function executePrintFrame() {
+            let frame = document.getElementById('printPreviewFrame');
+            if (window.Android && window.Android.printReceipt) { window.Android.printReceipt(frame.contentDocument.documentElement.outerHTML); } else { frame.contentWindow.print(); }
         }
 
         function openEditField(key, title, type) {
@@ -2556,10 +2576,6 @@
                     .total { text-align: right; font-size: 18px; margin-top: 15px; }
                     @media print { .no-print { display: none; } }
                 </style></head><body>
-                    <div class="no-print" style="text-align:right; margin-bottom:10px;">
-                        <button onclick="window.close()" style="padding:8px 15px; background:#64748b; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer; margin-right:10px;">⬅️ Back</button>
-                        <button onclick="${backendPrintCmd} if(window.Android && window.Android.printReceipt) { window.Android.printReceipt(document.documentElement.outerHTML); } else { window.print(); }" style="padding:8px 15px; background:#4f46e5; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer;">🖨️ Print Receipt</button>
-                    </div>
                     <div style="position:relative; text-align:center; min-height:60px;">
                         ${ownerLogo ? `<img src="${ownerLogo}" style="max-width:60px; max-height:50px; position:absolute; left:0; top:0; object-fit:contain;">` : ''}
                         <h2 style="margin-top:0;">${companyName.toUpperCase()}</h2>
@@ -2587,10 +2603,9 @@
                     fetch(`${API_BASE}/print_command`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'General Bill Direct Print'})}).catch(e=>{});
                     return;
                 }
-                const printWin = window.open('', '', 'width=400,height=600');
-                printWin.document.write(printHtml);
-                printWin.document.close();
-                printWin.focus();
+                
+                document.getElementById('printPreviewFrame').srcdoc = printHtml;
+                document.getElementById('printPreviewModal').classList.remove('hidden');
         }
 
         // --- PRODUCTS ---
@@ -3003,11 +3018,7 @@
             const tbody = document.getElementById('transTableBody');
             if (!tbody) return; // Exit if the element isn't in the DOM
             
-            const dateInput = document.getElementById('transAllDate');
-            if (dateInput && !dateInput.value) {
-                dateInput.value = new Date().toISOString().split('T')[0];
-            }
-            const filterDate = convertToDDMMYYYY(dateInput.value);
+            const filterDate = currentFeedDateStr;
 
             let html = '';
             
@@ -3029,6 +3040,10 @@
                 if (convertToDDMMYYYY(t.date) !== filterDate) return;
                 
                 if (t.shift === 'General Bill') return; // Hide General Bills from main ledger
+                
+                let tShift = (t.shift || '').trim().toLowerCase();
+                let targetShift = currentFeedShift.toLowerCase();
+                if (tShift !== '' && tShift !== targetShift) return; // Apply unified shift filter
                 if (selectedMM) {
                     let cObj = customers.find(c => (c.name || '').trim() === (t.cust || '').trim());
                     if (cObj && cObj.milkman_id !== selectedMM) return;
@@ -3526,9 +3541,8 @@
                 let itemsHtml = itemsToShow.map((d, itemIdx) => {
                     let preFillQty = (entry && entry.itemsTrans) ? (savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : '') : (d.qty || '');
                     return `
-                    <div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.1);">
+                    <div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.1); flex-shrink: 0;">
                         <span style="font-size:12px; font-weight:bold; max-width:70px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${d.item}">${d.item}</span>
-                        <input type="number" id="feed-qty-${i}-${itemIdx}" value="${preFillQty}" style="width:50px; padding:4px; margin:0; font-size:12px; text-align:center;" placeholder="Qty">
                         <input type="number" id="feed-qty-${i}-${itemIdx}" data-item="${d.item}" data-rate="${d.rate}" value="${preFillQty}" style="width:50px; padding:4px; margin:0; font-size:12px; text-align:center;" placeholder="Qty">
                     </div>`;
                 }).join('');
@@ -3570,7 +3584,7 @@
                         ${actionButton}
                     </div>
                     <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; width:100%;">
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; flex:1;" id="feed-items-container-${i}">
+                        <div style="display:flex; flex-wrap:nowrap; gap:8px; flex:1; overflow-x:auto; padding-bottom:5px;" id="feed-items-container-${i}">
                             ${itemsHtml || '<span style="font-size:12px; color:#94a3b8;">No default items.</span>'}
                             ${extraBtn}
                         </div>
@@ -3589,13 +3603,6 @@
                 finalFeedHtml += `</div>`;
             }
             
-            if (completed.length > 0) {
-                finalFeedHtml += `<div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; border:1px solid rgba(16, 185, 129, 0.3); margin-bottom:20px;">
-                    <h4 style="margin-top:0; margin-bottom:15px; color:var(--success); border-bottom:1px dashed rgba(16, 185, 129, 0.3); padding-bottom:8px;">✅ Completed</h4>`;
-                completed.forEach(obj => { finalFeedHtml += renderCard(obj, true); });
-                finalFeedHtml += `</div>`;
-            }
-
         let targetItems = {};
         let deliveredItems = {};
         let deliveredAmount = {};
@@ -4350,42 +4357,34 @@
             const [year, month] = monthVal.split('-');
             const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
             let safeCustName = custName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-            let backendPrintCmd = `fetch('${API_BASE}/print_command', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'Monthly Ledger ${safeCustName}'})}).catch(e=>{});`;
             
-            const printWindow = window.open('', '', 'height=800,width=800');
-            printWindow.document.write('<html><head><title>Statement_' + custName + '_' + monthVal + '</title>');
-            printWindow.document.write('<style>');
-            printWindow.document.write('body { font-family: "Inter", sans-serif; padding: 10px 20px; color: #000; background: #fff; font-size: 12px; margin: 0; }');
-            printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 5px !important; font-size: 12px; }');
-            printWindow.document.write('th, td { border: 1px solid #cbd5e1; padding: 4px 6px; text-align: left; line-height: 1.1; vertical-align: top; }');
-            printWindow.document.write('th { background: #eff6ff; color: #1e3a8a; text-transform: uppercase; font-size: 11px; }');
-            printWindow.document.write('h2 { color: #1e40af; margin-bottom: 2px; margin-top: 0; text-align: center; font-size: 18px; }');
-            printWindow.document.write('p { margin: 2px 0; font-size: 12px !important; }');
-            printWindow.document.write('h3 { color: #334155; margin-top: 4px; text-align: center; margin-bottom: 8px; font-size: 14px;}');
-            printWindow.document.write('div[style*="border-top: 2px solid"] { padding: 6px 10px !important; margin-top: 5px !important; font-size: 12px !important; gap: 5px !important; }');
-            printWindow.document.write('@media print { .no-print { display: none !important; } @page { margin: 0.5cm; } }');
-            printWindow.document.write('</style>');
-            printWindow.document.write('</head><body>');
-            
-            printWindow.document.write('<div class="no-print" style="text-align:right; margin-bottom:20px;">');
-            printWindow.document.write('<button onclick="window.close()" style="background:#64748b; color:white; border:none; padding:10px 20px; font-size:16px; border-radius:8px; cursor:pointer; margin-right:10px; box-shadow:0 4px 6px rgba(0,0,0,0.2);">⬅️ Back</button>');
-            printWindow.document.write('<button onclick="' + backendPrintCmd + ' if(window.Android && window.Android.printReceipt) { window.Android.printReceipt(document.documentElement.outerHTML); } else { window.print(); }" style="background:#4f46e5; color:white; border:none; padding:10px 20px; font-size:16px; border-radius:8px; cursor:pointer; box-shadow:0 4px 6px rgba(0,0,0,0.2);">🖨️ Print / Save PDF</button>');
-            printWindow.document.write('</div>');
+            let printHtml = `<html><head><title>Statement_${custName}_${monthVal}</title>
+            <style>
+                body { font-family: "Inter", sans-serif; padding: 10px 20px; color: #000; background: #fff; font-size: 12px; margin: 0; }
+                table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 5px !important; font-size: 12px; }
+                th, td { border: 1px solid #cbd5e1; padding: 4px 6px; text-align: left; line-height: 1.1; vertical-align: top; }
+                th { background: #eff6ff; color: #1e3a8a; text-transform: uppercase; font-size: 11px; }
+                h2 { color: #1e40af; margin-bottom: 2px; margin-top: 0; text-align: center; font-size: 18px; }
+                p { margin: 2px 0; font-size: 12px !important; }
+                h3 { color: #334155; margin-top: 4px; text-align: center; margin-bottom: 8px; font-size: 14px;}
+                div[style*="border-top: 2px solid"] { padding: 6px 10px !important; margin-top: 5px !important; font-size: 12px !important; gap: 5px !important; }
+                @page { margin: 0.5cm; }
+            </style></head><body>`;
 
             let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
             let ownerAddress = currentUser.address || currentUser.addr || '';
             let ownerMobile = currentUser.mobile || '';
             let companyLogo = currentUser.company_logo || '';
             
-            printWindow.document.write('<div style="position:relative; text-align:center; min-height:70px;">');
-            if (companyLogo) printWindow.document.write('<img src="' + companyLogo + '" style="max-width:65px; max-height:55px; position:absolute; left:0; top:0; object-fit:contain;">');
-            printWindow.document.write('<h2 style="margin-top:0;">' + companyName.toUpperCase() + '</h2>');
-            if (ownerAddress) printWindow.document.write('<p style="text-align:center; margin:2px 0; font-size:14px;">' + ownerAddress + '</p>');
-            if (ownerMobile) printWindow.document.write('<p style="text-align:center; margin:2px 0 10px 0; font-size:14px;"><b>Mob:</b> ' + ownerMobile + '</p>');
-            printWindow.document.write('</div>');
+            printHtml += `<div style="position:relative; text-align:center; min-height:70px;">`;
+            if (companyLogo) printHtml += `<img src="${companyLogo}" style="max-width:65px; max-height:55px; position:absolute; left:0; top:0; object-fit:contain;">`;
+            printHtml += `<h2 style="margin-top:0;">${companyName.toUpperCase()}</h2>`;
+            if (ownerAddress) printHtml += `<p style="text-align:center; margin:2px 0; font-size:14px;">${ownerAddress}</p>`;
+            if (ownerMobile) printHtml += `<p style="text-align:center; margin:2px 0 10px 0; font-size:14px;"><b>Mob:</b> ${ownerMobile}</p>`;
+            printHtml += `</div>`;
             
-            printWindow.document.write('<div style="text-align:center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 8px;">');
-            printWindow.document.write('<h3 style="margin:0 0 4px 0;">Invoice : ' + custName + ' (' + monthName + ')</h3>');
+            printHtml += `<div style="text-align:center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 8px;">`;
+            printHtml += `<h3 style="margin:0 0 4px 0;">Invoice : ${custName} (${monthName})</h3>`;
             let details = [];
             if (currentReportCustomerDetails && currentReportCustomerDetails.mobile) details.push('<b>Mob:</b> ' + currentReportCustomerDetails.mobile);
             if (currentReportCustomerDetails && currentReportCustomerDetails.addr) details.push('<b>Addr:</b> ' + currentReportCustomerDetails.addr);
@@ -4397,9 +4396,9 @@
                 }
             }
             if (details.length > 0) {
-                printWindow.document.write('<p style="margin:0; font-size:12px; color:#475569;">' + details.join(' &nbsp;|&nbsp; ') + '</p>');
+                printHtml += `<p style="margin:0; font-size:12px; color:#475569;">${details.join(' &nbsp;|&nbsp; ')}</p>`;
             }
-            printWindow.document.write('</div>');
+            printHtml += `</div>`;
             
             let cleanContent = printContent.replace(/<div id="ui-cust-info"[^>]*>[\s\S]*?<\/div>/, '')
                                            .replace(/color:var\(--success\)/g, 'color:#15803d; font-weight:bold;')
@@ -4409,20 +4408,18 @@
                                            .replace(/color:white;/g, 'color:black;')
                                            .replace(/var\(--primary\)/g, '#4f46e5');
             
-            printWindow.document.write(cleanContent);
-            printWindow.document.write('<div style="margin-top:20px; text-align:right; font-weight:bold; font-size: 12px;">Authorized Signature / Stamp<br><br><br>_________________________</div>');
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
+            printHtml += cleanContent;
+            printHtml += `<div style="margin-top:20px; text-align:right; font-weight:bold; font-size: 12px;">Authorized Signature / Stamp<br><br><br>_________________________</div>`;
+            printHtml += `</body></html>`;
             
             if (window.Android && window.Android.printReceipt) {
-                setTimeout(() => {
-                    window.Android.printReceipt(printWindow.document.documentElement.outerHTML);
-                    fetch(`${API_BASE}/print_command`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'Monthly Ledger Direct Print'})}).catch(e=>{});
-                    printWindow.close();
-                }, 500);
+                window.Android.printReceipt(printHtml);
+                fetch(`${API_BASE}/print_command`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'Monthly Ledger Direct Print'})}).catch(e=>{});
                 return;
             }
-            printWindow.focus();
+            
+            document.getElementById('printPreviewFrame').srcdoc = printHtml;
+            document.getElementById('printPreviewModal').classList.remove('hidden');
         }
 
         function downloadSelfReport() {
@@ -4586,10 +4583,6 @@
             if(activeBtn) activeBtn.classList.add('active-tab');
 
             if(tab === 'all') {
-                const dateInput = document.getElementById('transAllDate');
-                if (dateInput && !dateInput.value) {
-                    dateInput.value = new Date().toISOString().split('T')[0];
-                }
                 renderTrans(); // Render the table when tab is switched to
             }
         }
