@@ -489,9 +489,9 @@
 
     <!-- GENERAL BILL VIEW -->
     <div id="general-bill-view" class="container hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>🧾 General Bills</h2>
-            <div><button id="tabGbNew" class="btn-tab active-tab" onclick="clearGbForm(); switchGbTab('new')">➕ New Bill</button><button id="tabGbOld" class="btn-tab" onclick="switchGbTab('old')">📋 Old Bills</button></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <h2 style="margin:0; min-width: 250px;">🧾 General Bills</h2>
+            <div style="display: flex; gap: 10px;"><button id="tabGbNew" class="btn-tab active-tab" style="margin:0;" onclick="clearGbForm(); switchGbTab('new')">➕ New Bill</button><button id="tabGbOld" class="btn-tab" style="margin:0;" onclick="switchGbTab('old')">📋 Old Bills</button></div>
         </div>
 
         <div id="gb-tab-new">
@@ -4243,7 +4243,7 @@
                 let parts = [];
                 if(currentReportCustomerDetails.mobile) parts.push(`📞 ${currentReportCustomerDetails.mobile}`);
                 if(currentReportCustomerDetails.addr) parts.push(`📍 ${currentReportCustomerDetails.addr}`);
-                custInfoHtml = `<div style="font-size:13px; color:#94a3b8; margin-bottom: 10px; text-align:center;">${parts.join(' | ')}</div>`;
+                custInfoHtml = `<div id="ui-cust-info" style="font-size:13px; color:#94a3b8; margin-bottom: 10px; text-align:center;">${parts.join(' | ')}</div>`;
             }
 
             let html = custInfoHtml;
@@ -4401,7 +4401,8 @@
             }
             printWindow.document.write('</div>');
             
-            let cleanContent = printContent.replace(/color:var\(--success\)/g, 'color:#15803d; font-weight:bold;')
+            let cleanContent = printContent.replace(/<div id="ui-cust-info"[^>]*>[\s\S]*?<\/div>/, '')
+                                           .replace(/color:var\(--success\)/g, 'color:#15803d; font-weight:bold;')
                                            .replace(/color:var\(--danger\)/g, 'color:#b91c1c; font-weight:bold;')
                                            .replace(/color:var\(--text\)/g, 'color:#0f172a;')
                                            .replace(/background:\s*rgba[^;]+;/g, 'background:#f8fafc;')
