@@ -500,6 +500,7 @@
                 <input type="date" id="gbDate" required>
                 <input type="text" id="gbCustName" placeholder="Customer Name" required>
                 <input type="text" id="gbMobile" placeholder="Mobile Number (Optional)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <input type="text" id="gbAddress" placeholder="Address (Optional)">
             </div>
             <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid #475569; margin-top: 10px;">
                 <h4 style="margin-top:0; margin-bottom:15px; color:var(--primary); font-size:15px;">🛒 Add Items to Bill</h4>
@@ -1507,15 +1508,35 @@
         });
 
         function goBack() {
+            fetch(API_BASE + '/back_command', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({page: window.location.hash})}).catch(e=>{});
             if (window.history.length > 1 && window.location.hash) {
                 history.back();
             } else {
-                if (!currentUser) return showView('landing-page');
+                if (!currentUser) {
+                    if(window.Android && window.Android.goBack) { window.Android.goBack(); return; }
+                    return showView('landing-page');
+                }
                 if (currentUser.type === 'Milk Man') showView('ledger-master');
                 else if (currentUser.type === 'Customer') showView('customer-self-view');
                 else showView('main-menu');
+                
+                // If already at home and Android exists, let the app handle exit
+                let homeViews = ['main-menu', 'ledger-master', 'customer-self-view'];
+                if (homeViews.includes(sessionStorage.getItem('lastView'))) {
+                    if(window.Android && window.Android.goBack) { window.Android.goBack(); }
+                }
             }
         }
+        
+        // Android Hardware Back Button Hook
+        window.onAndroidBack = function() {
+            let modals = ['profile-dropdown', 'seqModal', 'editTransModal', 'ownerReportModal', 'helpModal', 'licenseModal', 'editFieldModal', 'mediaManagerModal', 'qrCropModal', 'screenshotModal'];
+            for(let m of modals) { let el = document.getElementById(m); if(el && !el.classList.contains('hidden')) { el.classList.add('hidden'); return true; } }
+            let hash = window.location.hash.replace('#', '');
+            let homeViews = ['main-menu', 'ledger-master', 'customer-self-view', 'landing-page', 'login-page'];
+            if (homeViews.includes(hash) || !hash) { if(window.Android && window.Android.goBack) window.Android.goBack(); return false; }
+            else { goBack(); return true; }
+        };
 
         
         let cropper; // Global variable for Cropper instance
@@ -2333,6 +2354,7 @@
             if(document.getElementById('gbDate')) document.getElementById('gbDate').value = dObj.toISOString().split('T')[0];
             if(document.getElementById('gbCustName')) document.getElementById('gbCustName').value = '';
             if(document.getElementById('gbMobile')) document.getElementById('gbMobile').value = '';
+            if(document.getElementById('gbAddress')) document.getElementById('gbAddress').value = '';
             currentGbItems = [];
             renderGbItems();
         }
@@ -2436,9 +2458,14 @@
             }
             
             let serialNo = t.id || (idx + 1);
-            let mobileNum = (t.qty !== '-' && t.qty) ? t.qty : '';
+            let mobileNum = ''; let address = '';
+            if (t.qty && t.qty.startsWith('{')) {
+                try { let info = JSON.parse(t.qty); mobileNum = info.mobile || ''; address = info.address || ''; } catch(e){}
+            } else {
+                mobileNum = (t.qty !== '-' && t.qty) ? t.qty : '';
+            }
 
-            printBillHTML(serialNo, t.date, t.cust, mobileNum, itemsArr, parseFloat(t.total));
+            printBillHTML(serialNo, t.date, t.cust, mobileNum, address, itemsArr, parseFloat(t.total));
         }
 
         function editGb(idx) {
@@ -2458,7 +2485,13 @@
             if(!isNaN(dObj)) document.getElementById('gbDate').value = dObj.toISOString().split('T')[0];
             
             document.getElementById('gbCustName').value = t.cust;
-            document.getElementById('gbMobile').value = (t.qty !== '-' && t.qty) ? t.qty : '';
+            let mobileNum = ''; let address = '';
+            if (t.qty && t.qty.startsWith('{')) {
+                try { let info = JSON.parse(t.qty); mobileNum = info.mobile || ''; address = info.address || ''; } catch(e){}
+            } else { mobileNum = (t.qty !== '-' && t.qty) ? t.qty : ''; }
+            
+            document.getElementById('gbMobile').value = mobileNum;
+            if(document.getElementById('gbAddress')) document.getElementById('gbAddress').value = address;
             
             try {
                 currentGbItems = JSON.parse(t.item);
@@ -2501,7 +2534,7 @@
                 
                 let serialNo = savedData.id || Math.floor(Math.random() * 9000 + 1000);
                 
-                printBillHTML(serialNo, dateStr, custName, mobileNum, currentGbItems, grandTotal);
+                printBillHTML(serialNo, dateStr, custName, mobileNum, address, currentGbItems, grandTotal);
                 clearGbForm();
                 
                 switchGbTab('old'); // Switch to old bills tab automatically
@@ -2509,11 +2542,12 @@
             btn.innerText = editIdx !== "" ? "Update & Print Bill" : "Generate & Print Bill";
         }
         
-        function printBillHTML(serialNo, dateStr, custName, mobileNum, itemsArr, total) {
+        function printBillHTML(serialNo, dateStr, custName, mobileNum, address, itemsArr, total) {
             let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
             let ownerAddress = currentUser.address || currentUser.addr || '';
             let ownerMobile = currentUser.mobile || '';
             let ownerLogo = currentUser.company_logo || '';
+            let backendPrintCmd = `fetch('${API_BASE}/print_command', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'General Bill ${serialNo}'})}).catch(e=>{});`;
                 let printHtml = `<html><head><title>Cash Memo</title><style>
                     body { font-family: sans-serif; padding: 20px; color: black; max-width: 400px; margin: auto; }
                     h2, h4 { text-align: center; margin: 5px 0; }
@@ -2524,7 +2558,7 @@
                 </style></head><body>
                     <div class="no-print" style="text-align:right; margin-bottom:10px;">
                         <button onclick="window.close()" style="padding:8px 15px; background:#64748b; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer; margin-right:10px;">⬅️ Back</button>
-                        <button onclick="window.print()" style="padding:8px 15px; background:#4f46e5; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer;">🖨️ Print Receipt</button>
+                        <button onclick="${backendPrintCmd} if(window.Android && window.Android.printReceipt) { window.Android.printReceipt(document.documentElement.outerHTML); } else { window.print(); }" style="padding:8px 15px; background:#4f46e5; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer;">🖨️ Print Receipt</button>
                     </div>
                     <div style="position:relative; text-align:center; min-height:60px;">
                         ${ownerLogo ? `<img src="${ownerLogo}" style="max-width:60px; max-height:50px; position:absolute; left:0; top:0; object-fit:contain;">` : ''}
@@ -2538,6 +2572,7 @@
                     <p style="margin:5px 0; font-size:14px;"><b>Date:</b> ${dateStr}</p>
                     <p style="margin:5px 0; font-size:14px;"><b>Customer:</b> ${custName}</p>
                     ${mobileNum ? `<p style="margin:5px 0; font-size:14px;"><b>Mobile:</b> ${mobileNum}</p>` : ''}
+                    ${address ? `<p style="margin:5px 0; font-size:14px;"><b>Address:</b> ${address}</p>` : ''}
                     <table>
                         <tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
                         ${itemsArr.map(it => `<tr><td>${it.item}</td><td>${it.qty}</td><td>₹${it.rate}</td><td>₹${(it.total || (it.qty*it.rate)).toFixed(2)}</td></tr>`).join('')}
@@ -2546,6 +2581,12 @@
                     <hr style="margin-top:20px;">
                     <p style="text-align:center; font-size:12px;">Thank you for your visit!</p>
                 </body></html>`;
+                
+                if (window.Android && window.Android.printReceipt) {
+                    window.Android.printReceipt(printHtml);
+                    fetch(`${API_BASE}/print_command`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'General Bill Direct Print'})}).catch(e=>{});
+                    return;
+                }
                 const printWin = window.open('', '', 'width=400,height=600');
                 printWin.document.write(printHtml);
                 printWin.document.close();
@@ -4102,6 +4143,8 @@
             return { year: currentYear, month: 0 };
         }
 
+        let currentReportCustomerDetails = {};
+
         async function buildStatementHTML(custName, company, reportMonth, reportYear) {
             let openingBalance = 0;
             let currentMonthTransactions = []; // Initialize as empty array
@@ -4113,6 +4156,7 @@
                 }
                 openingBalance = data.opening_balance || 0;
                 currentMonthTransactions = data.transactions || []; // Get transactions from the new API
+                currentReportCustomerDetails = data.customer_details || {};
             } catch (e) {
                 console.error("Error fetching statement data:", e);
                 return "<p>Error loading statement. Please check your connection.</p>";
@@ -4193,7 +4237,16 @@
             let cbColor = closingBalance > 0 ? 'var(--danger)' : (closingBalance < 0 ? 'var(--success)' : 'var(--text)');
 
             let monthName = new Date(reportYear, reportMonth - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-            let html = '';
+            
+            let custInfoHtml = '';
+            if(currentReportCustomerDetails.mobile || currentReportCustomerDetails.addr) {
+                let parts = [];
+                if(currentReportCustomerDetails.mobile) parts.push(`📞 ${currentReportCustomerDetails.mobile}`);
+                if(currentReportCustomerDetails.addr) parts.push(`📍 ${currentReportCustomerDetails.addr}`);
+                custInfoHtml = `<div style="font-size:13px; color:#94a3b8; margin-bottom: 10px; text-align:center;">${parts.join(' | ')}</div>`;
+            }
+
+            let html = custInfoHtml;
 
             if (monthlyTransactionsHtml) {
                 html += `
@@ -4296,6 +4349,8 @@
             
             const [year, month] = monthVal.split('-');
             const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+            let safeCustName = custName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+            let backendPrintCmd = `fetch('${API_BASE}/print_command', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'Monthly Ledger ${safeCustName}'})}).catch(e=>{});`;
             
             const printWindow = window.open('', '', 'height=800,width=800');
             printWindow.document.write('<html><head><title>Statement_' + custName + '_' + monthVal + '</title>');
@@ -4314,7 +4369,7 @@
             
             printWindow.document.write('<div class="no-print" style="text-align:right; margin-bottom:20px;">');
             printWindow.document.write('<button onclick="window.close()" style="background:#64748b; color:white; border:none; padding:10px 20px; font-size:16px; border-radius:8px; cursor:pointer; margin-right:10px; box-shadow:0 4px 6px rgba(0,0,0,0.2);">⬅️ Back</button>');
-            printWindow.document.write('<button onclick="window.print()" style="background:#4f46e5; color:white; border:none; padding:10px 20px; font-size:16px; border-radius:8px; cursor:pointer; box-shadow:0 4px 6px rgba(0,0,0,0.2);">🖨️ Print / Save PDF</button>');
+            printWindow.document.write('<button onclick="' + backendPrintCmd + ' if(window.Android && window.Android.printReceipt) { window.Android.printReceipt(document.documentElement.outerHTML); } else { window.print(); }" style="background:#4f46e5; color:white; border:none; padding:10px 20px; font-size:16px; border-radius:8px; cursor:pointer; box-shadow:0 4px 6px rgba(0,0,0,0.2);">🖨️ Print / Save PDF</button>');
             printWindow.document.write('</div>');
 
             let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
@@ -4331,14 +4386,18 @@
             
             printWindow.document.write('<div style="text-align:center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 8px;">');
             printWindow.document.write('<h3 style="margin:0 0 4px 0;">Invoice : ' + custName + ' (' + monthName + ')</h3>');
-            let cObj = customers.find(c => c.name === custName);
-            if (cObj) {
-                let details = [];
-                if (cObj.mobile) details.push('<b>Mob:</b> ' + cObj.mobile);
-                if (cObj.addr) details.push('<b>Addr:</b> ' + cObj.addr);
-                if (details.length > 0) {
-                    printWindow.document.write('<p style="margin:0; font-size:12px; color:#475569;">' + details.join(' &nbsp;|&nbsp; ') + '</p>');
+            let details = [];
+            if (currentReportCustomerDetails && currentReportCustomerDetails.mobile) details.push('<b>Mob:</b> ' + currentReportCustomerDetails.mobile);
+            if (currentReportCustomerDetails && currentReportCustomerDetails.addr) details.push('<b>Addr:</b> ' + currentReportCustomerDetails.addr);
+            if (details.length === 0) {
+                let cObj = customers.find(c => c.name === custName);
+                if (cObj) {
+                    if (cObj.mobile) details.push('<b>Mob:</b> ' + cObj.mobile);
+                    if (cObj.addr) details.push('<b>Addr:</b> ' + cObj.addr);
                 }
+            }
+            if (details.length > 0) {
+                printWindow.document.write('<p style="margin:0; font-size:12px; color:#475569;">' + details.join(' &nbsp;|&nbsp; ') + '</p>');
             }
             printWindow.document.write('</div>');
             
@@ -4353,6 +4412,15 @@
             printWindow.document.write('<div style="margin-top:20px; text-align:right; font-weight:bold; font-size: 12px;">Authorized Signature / Stamp<br><br><br>_________________________</div>');
             printWindow.document.write('</body></html>');
             printWindow.document.close();
+            
+            if (window.Android && window.Android.printReceipt) {
+                setTimeout(() => {
+                    window.Android.printReceipt(printWindow.document.documentElement.outerHTML);
+                    fetch(`${API_BASE}/print_command`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'Monthly Ledger Direct Print'})}).catch(e=>{});
+                    printWindow.close();
+                }, 500);
+                return;
+            }
             printWindow.focus();
         }
 
