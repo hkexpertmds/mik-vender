@@ -452,8 +452,11 @@ def save_data(table_name):
         if data.get('cpass'): data['cpass'] = generate_password_hash(data['cpass'])
         else: data['cpass'] = None
 
-    res = supabase.table(db_table).insert(data).execute()
-    return jsonify(res.data[0] if res.data else data)
+    try:
+        res = supabase.table(db_table).insert(data).execute()
+        return jsonify(res.data[0] if res.data else data)
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)})
 
 @app.route('/api/reset_password', methods=['POST'])
 def reset_password():
@@ -552,6 +555,16 @@ def get_opening_balance():
     except (TypeError, ValueError):
         return jsonify({"opening_balance": 0, "transactions": [], "error": "Invalid month or year parameters"}), 400
 
+    # Bill ke liye customer ka address aur mobile fetch karein
+    customer_details = {}
+    if cust_name and company:
+        try:
+            customer_res = supabase.table('sys_customers').select('addr, mobile').eq('name', cust_name).eq('company', company).limit(1).execute()
+            if customer_res.data:
+                customer_details = customer_res.data[0]
+        except Exception as e:
+            print(f"Error fetching customer details for bill: {e}")
+
     # Fetch all transactions to avoid string comparison issues with dates
     transactions_res = supabase.table('sys_trans').select('*').eq('cust', cust_name).eq('company', company).neq('shift', 'General Bill').execute()
     transactions_all = transactions_res.data if transactions_res.data else []
@@ -587,7 +600,30 @@ def get_opening_balance():
             elif t_year == year and t_month == month:
                 month_transactions.append(t)
     
-    return jsonify({"opening_balance": opening_balance, "transactions": month_transactions})
+    return jsonify({
+        "opening_balance": opening_balance, 
+        "transactions": month_transactions,
+        "customer_details": customer_details
+    })
+
+# Android App se communication ke liye functions
+@app.route('/api/print_command', methods=['POST'])
+def print_command():
+    # Yeh endpoint Android app se print command receive karne ke liye hai.
+    # Asli printing client-side (Android app me) hi handle honi chahiye.
+    # Iska istemal server par log karne ke liye kiya ja sakta hai ki print action kab hua.
+    data = request.json or {}
+    print(f"ANDROID PRINT COMMAND RECEIVED: {data.get('info', 'No info')}")
+    return jsonify({"success": True, "message": "Print command received by server."})
+
+@app.route('/api/back_command', methods=['POST'])
+def back_command():
+    # Yeh endpoint Android app se back command receive karne ke liye hai.
+    # 'Back' action client-side (Android app) navigation ka hissa hai.
+    # Iska istemal user navigation ko track karne ke liye kiya ja sakta hai.
+    data = request.json or {}
+    print(f"ANDROID BACK COMMAND RECEIVED: From page {data.get('page', 'Unknown')}")
+    return jsonify({"success": True, "message": "Back command received by server."})
 
 # Vercel par app start hote hi admin user check karne aur banane ke liye isse yahan call karein
 ensure_admin()
