@@ -1894,8 +1894,21 @@
                     if(!currentUser.company) currentUser.company = 'Default';
                     
                     // Empty initialize for fast render
+                    let offlineData = localStorage.getItem('dairyOfflineData_' + currentUser.login_id);
                     users = []; customers = []; transactions = []; products = []; requests = []; routes = []; licenses = [];
                     if (currentUser.type === 'Customer') customers.push(currentUser);
+                    
+                    if (offlineData) {
+                        try {
+                            let parsed = JSON.parse(offlineData);
+                            users = parsed.users || []; customers = parsed.customers || [];
+                            transactions = parsed.transactions || []; products = parsed.products || [];
+                            requests = parsed.requests || []; routes = parsed.routes || [];
+                            licenses = parsed.licenses || [];
+                        } catch(e){}
+                    }
+                    if (currentUser.type === 'Customer' && !customers.find(c => String(c.cid) === String(currentUser.login_id))) customers.push(currentUser);
+                    
                     populateProductDropdowns();
                     setupUI(); 
                     
@@ -1947,8 +1960,15 @@
                 });
                 const result = await res.json();
                 if (result.success) {
+                    try {
+                        localStorage.setItem('dairyOfflineData_' + currentUser.login_id, JSON.stringify(result.data)); // Cache data locally
+                    } catch (e) {
+                        console.warn("Local storage full, skipping offline cache update", e);
+                    }
+                    
                     users = result.data.users || []; customers = result.data.customers || [];
                     if (currentUser.type === 'Customer') customers.push(currentUser);
+                    if (currentUser.type === 'Customer' && !customers.find(c => String(c.cid) === String(currentUser.login_id))) customers.push(currentUser);
                     transactions = result.data.transactions || []; products = result.data.products || [];
                     requests = result.data.requests || []; routes = result.data.routes || [];
                     licenses = result.data.licenses || [];
@@ -4706,6 +4726,19 @@
                 
                 users = []; customers = []; transactions = []; products = []; requests = []; routes = [];
                 if (currentUser.type === 'Customer') customers.push(currentUser);
+                let offlineData = localStorage.getItem('dairyOfflineData_' + currentUser.login_id);
+                users = []; customers = []; transactions = []; products = []; requests = []; routes = []; licenses = [];
+                if (offlineData) {
+                    try {
+                        let parsed = JSON.parse(offlineData);
+                        users = parsed.users || []; customers = parsed.customers || [];
+                        transactions = parsed.transactions || []; products = parsed.products || [];
+                        requests = parsed.requests || []; routes = parsed.routes || [];
+                        licenses = parsed.licenses || [];
+                    } catch(e){}
+                }
+                if (currentUser.type === 'Customer' && !customers.find(c => String(c.cid) === String(currentUser.login_id))) customers.push(currentUser);
+                
                 populateProductDropdowns();
                 setupUI();
                 
