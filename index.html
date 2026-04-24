@@ -1688,14 +1688,7 @@
         
         function executePrintFrame() {
             let frame = document.getElementById('printPreviewFrame');
-            //if (window.Android && window.Android.printReceipt) { window.Android.printReceipt(frame.contentDocument.documentElement.outerHTML); } else { frame.contentWindow.print(); }
-            if (window.AndroidPrint) {
-                // Agar App ke andar hai toh interface call karein
-                AndroidPrint.performPrint(frame.contentDocument.documentElement.outerHTML);
-            } else {
-                // Agar normal browser mein hai
-                window.print(frame.contentDocument.documentElement.outerHTML);
-            }
+            if (window.AndroidPrint && window.print) { window.Android.printReceipt(frame.contentDocument.documentElement.outerHTML); } else { frame.contentWindow.print(); }
         }
 
         function openEditField(key, title, type) {
