@@ -433,7 +433,7 @@
                     <input type="password" id="cPass" placeholder="Set Customer Password" style="margin: 0; padding-right: 35px;">
                     <span onclick="togglePasswordVisibility('cPass', 'cPassEyeIcon')" id="cPassEyeIcon" title="Show/Hide Password" style="position: absolute; right: 12px; top: 10px; cursor: pointer; user-select: none; font-size: 16px;">👁️</span>
                 </div>
-                <input type="text" id="cMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+                <input type="text" id="cMobile" placeholder="Mobile Number (Optional)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                 <input type="text" id="cAddr" placeholder="Address">
                 <div style="grid-column: 1 / -1; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #475569;">
                     <h4 style="margin-top:0; margin-bottom:10px; color:var(--primary); font-size:14px;">Assign Items & Fixed Rates</h4>
@@ -1707,8 +1707,8 @@
             const val = document.getElementById('editFieldValue').value.trim();
             const btn = document.getElementById('btnSaveField');
             
-            if (key !== 'pass' && key !== 'cpass' && !val && key !== 'username' && key !== 'email') { return alert("This field cannot be empty!"); }
-            if (key === 'mobile' && val.length !== 10) { return alert("Mobile Number must be exactly 10 digits!"); }
+            if (key !== 'pass' && key !== 'cpass' && !val && key !== 'username' && key !== 'email' && key !== 'mobile') { return alert("This field cannot be empty!"); }
+            if (key === 'mobile' && val && val.length !== 10) { return alert("Mobile Number must be exactly 10 digits!"); }
 
             btn.innerText = "Updating...";
             let data = { ...currentUser };
@@ -2235,8 +2235,8 @@
                 company: currentUser.company
             };
             
-            if(!data.name || !data.route || !data.shift || !data.mobile) return alert("Name, Mobile, Route and Shift are mandatory!");
-            if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
+            if(!data.name || !data.route || !data.shift) return alert("Name, Route and Shift are mandatory!");
+            if(data.mobile && data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             
             let parsedSeq = parseInt(document.getElementById('cSeq').value);
             let parsedSeqEve = parseInt(document.getElementById('cSeqEve').value);
@@ -2436,19 +2436,21 @@
             let totalAmt = 0;
             
             let gbDisplayList = [];
+            let gbCount = 0;
             transactions.forEach((t, i) => {
                 if (t.shift === 'General Bill') {
-                    gbDisplayList.push({ t, realIdx: i });
+                    gbCount++;
+                    gbDisplayList.push({ t, realIdx: i, serialNo: gbCount });
                 }
             });
             
-            gbDisplayList.reverse().forEach(({ t, realIdx }) => {
+            gbDisplayList.reverse().forEach(({ t, realIdx, serialNo }) => {
                 if (filterDateStr && t.date !== filterDateStr) return;
                 
                 totalAmt += parseFloat(t.total || 0);
                 
                 let displayItem = formatItemDisplay(t.item);
-                let billNo = t.id || (realIdx + 1);
+                let billNo = serialNo;
                 
                 html += `<tr>
                     <td><b>GB-${billNo}</b><br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
@@ -2477,7 +2479,11 @@
                 itemsArr = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
             }
             
-            let serialNo = t.id || (idx + 1);
+            let serialNo = 0;
+            for (let i = 0; i <= idx; i++) {
+                if (transactions[i].shift === 'General Bill') serialNo++;
+            }
+            
             let mobileNum = ''; let address = '';
             if (t.qty && t.qty.startsWith('{')) {
                 try { let info = JSON.parse(t.qty); mobileNum = info.mobile || ''; address = info.address || ''; } catch(e){}
@@ -2534,6 +2540,7 @@
             const dateStr = convertToDDMMYYYY(dateVal);
             const custName = document.getElementById('gbCustName').value.trim();
             const mobileNum = document.getElementById('gbMobile').value.trim();
+            const address = document.getElementById('gbAddress').value.trim();
             const shift = 'General Bill'; // STRICT SHIFT FLAG FOR ISOLATION
             
             if(!custName) return alert("Please fill customer name.");
@@ -2541,7 +2548,8 @@
             
             let grandTotal = currentGbItems.reduce((sum, i) => sum + i.total, 0);
 
-            let data = { date: dateStr, cust: custName, item: JSON.stringify(currentGbItems), qty: mobileNum || '-', rate: grandTotal, total: grandTotal, company: currentUser.company, shift: shift };
+            let qtyField = JSON.stringify({ mobile: mobileNum, address: address });
+            let data = { date: dateStr, cust: custName, item: JSON.stringify(currentGbItems), qty: qtyField, rate: grandTotal, total: grandTotal, company: currentUser.company, shift: shift };
             if(editIdx !== "") data.id = transactions[editIdx].id;
 
             const btn = document.getElementById('btnSaveGbMain'); btn.innerText = "Saving...";
@@ -2552,8 +2560,10 @@
                 renderGeneralBills(); 
                 alert(editIdx !== "" ? "General Bill Updated Successfully!" : "General Bill Created Successfully!");
                 
-                let serialNo = savedData.id || Math.floor(Math.random() * 9000 + 1000);
                 
+                let serialNo = 0;
+                transactions.forEach(t => { if(t.shift === 'General Bill') serialNo++; });
+
                 printBillHTML(serialNo, dateStr, custName, mobileNum, address, currentGbItems, grandTotal);
                 clearGbForm();
                 
@@ -2568,13 +2578,13 @@
             let ownerMobile = currentUser.mobile || '';
             let ownerLogo = currentUser.company_logo || '';
             let backendPrintCmd = `fetch('${API_BASE}/print_command', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'General Bill ${serialNo}'})}).catch(e=>{});`;
-                let printHtml = `<html><head><title>Cash Memo</title><style>
-                    body { font-family: sans-serif; padding: 20px; color: black; max-width: 400px; margin: auto; }
+                let printHtml = `<html><head><title>Cash Memo - GB-${serialNo}</title><style>
+                    body { font-family: sans-serif; padding: 20px; color: black; max-width: 800px; margin: auto; }
                     h2, h4 { text-align: center; margin: 5px 0; }
                     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+                    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 15px; }
                     .total { text-align: right; font-size: 18px; margin-top: 15px; }
-                    @media print { .no-print { display: none; } }
+                    @media print { .no-print { display: none; } @page { size: A4; margin: 15mm; } body { max-width: 100%; padding: 0; } }
                 </style></head><body>
                     <div style="position:relative; text-align:center; min-height:60px;">
                         ${ownerLogo ? `<img src="${ownerLogo}" style="max-width:60px; max-height:50px; position:absolute; left:0; top:0; object-fit:contain;">` : ''}
@@ -3552,7 +3562,7 @@
                 
                 let extraBtn = '';
                 if (currentFeedOffset >= 0 && !isOld) {
-                    extraBtn = `<div style="padding:4px; display:flex; align-items:center;"><button type="button" class="badge" style="background:var(--primary); font-size:14px; padding:2px 8px; border-radius:50%;" onclick="addExtraFeedItem(${i}, this)" title="Add Extra Item">+</button></div>`;
+                    extraBtn = `<div style="padding:4px; display:flex; align-items:center; flex-shrink:0;"><button type="button" class="badge" style="background:var(--primary); font-size:14px; padding:2px 8px; border-radius:50%;" onclick="addExtraFeedItem(${i}, this)" title="Add Extra Item">+</button></div>`;
                 }
                 
                 let actionButton = '';
@@ -3570,6 +3580,12 @@
                     actionButton = `<button class="btn-save" style="width:auto; padding:6px 12px; font-size:13px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
                 }
 
+                let payInputHtml = `
+                <div style="background:rgba(16, 185, 129, 0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(16, 185, 129, 0.3); flex-shrink:0;">
+                    <span style="font-size:11px; color:var(--success); font-weight:bold;">Pay ₹</span>
+                    <input type="number" id="feed-pay-${i}" value="${savedPayAmt}" placeholder="Amt" style="width:60px; padding:4px; margin:0; font-size:12px; text-align:center;">
+                </div>`;
+
                 let cardBorder = entry ? '1px solid var(--success)' : '1px solid #475569';
                 let titleColor = isCompleted ? 'var(--success)' : 'var(--text)'; // Only green if completed
                 let amountBadge = entry && savedTotalAmt > 0 ? `<span style="font-size:11px; background:rgba(16, 185, 129, 0.15); color:var(--success); padding:2px 6px; border-radius:4px; margin-left:5px;">₹${savedTotalAmt.toFixed(2)}</span>` : '';
@@ -3583,15 +3599,10 @@
                         </div>
                         ${actionButton}
                     </div>
-                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; width:100%;">
-                        <div style="display:flex; flex-wrap:nowrap; gap:8px; flex:1; overflow-x:auto; padding-bottom:5px;" id="feed-items-container-${i}">
-                            ${itemsHtml || '<span style="font-size:12px; color:#94a3b8;">No default items.</span>'}
-                            ${extraBtn}
-                        </div>
-                        <div style="background:rgba(16, 185, 129, 0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(16, 185, 129, 0.3);">
-                            <span style="font-size:11px; color:var(--success); font-weight:bold;">Pay ₹</span>
-                            <input type="number" id="feed-pay-${i}" value="${savedPayAmt}" placeholder="Amt" style="width:60px; padding:4px; margin:0; font-size:12px; text-align:center;">
-                        </div>
+                    <div style="display:flex; flex-wrap:nowrap; gap:8px; margin-top:10px; width:100%; overflow-x:auto; padding-bottom:5px;" id="feed-items-container-${i}">
+                        ${extraBtn}
+                        ${itemsHtml || '<span style="font-size:12px; color:#94a3b8; padding-top:4px;">No default items.</span>'}
+                        ${payInputHtml}
                     </div>
                 </div>`;
             };
@@ -3796,16 +3807,16 @@
             let itemIdx = container.querySelectorAll('input[id^="feed-extra-qty-"]').length;
             let productOptions = products.map(p => `<option value="${p.item_name}" data-rate="${p.rate}">${p.item_name}</option>`).join('');
             let newRow = document.createElement('div');
-            newRow.style = "background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.1); width:100%; margin-top:4px;";
+            newRow.style = "background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,0.1); flex-shrink:0;";
             newRow.innerHTML = `
-                <select id="feed-extra-item-${idx}-${itemIdx}" style="flex:1; padding:4px; margin:0; font-size:11px;" onchange="this.nextElementSibling.dataset.rate = this.options[this.selectedIndex].dataset.rate">
+                <select id="feed-extra-item-${idx}-${itemIdx}" style="width:100px; padding:4px; margin:0; font-size:11px;" onchange="this.nextElementSibling.dataset.rate = this.options[this.selectedIndex].dataset.rate">
                     <option value="">-- Select Item --</option>
                     ${productOptions}
                 </select>
                 <input type="number" id="feed-extra-qty-${idx}-${itemIdx}" data-rate="0" style="width:60px; padding:4px; margin:0; font-size:12px; text-align:center;" placeholder="Qty">
                 <button type="button" class="badge" style="background:var(--danger);" onclick="this.parentElement.remove()">X</button>
             `;
-            container.insertBefore(newRow, btn.parentElement);
+            container.insertBefore(newRow, btn.parentElement.nextSibling);
         }
 
         async function saveFeedEntry(idx, btn) {
