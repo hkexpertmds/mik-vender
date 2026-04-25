@@ -1177,12 +1177,22 @@
 
         // --- SESSION LOGIC ---
         function logout() {
-            // localStorage.removeItem('sessionAuth');
+            // Sabhi storage clear karein
             localStorage.removeItem('sessionAuth');
             localStorage.removeItem('sessionUser');
             sessionStorage.removeItem('lastView');
-            window.location.hash = ''; // Clear routing hash
-            location.reload();
+            
+            // Hash clear karein
+            window.location.hash = ''; 
+
+            // Sabse important change:
+            // location.reload() ki jagah seedha main page ya login page par redirect karein
+            window.location.href = "https://mik-vender-qi3b.vercel.app/"; 
+            
+            // Agar aapne Android interface banaya hai toh usey bhi call kar sakte hain
+            if (window.Android) {
+                window.Android.clearAppCache(); // Agar aap cache clear function banayein
+            }
         }
 
         function toggleProfileDropdown(event) {
