@@ -1709,12 +1709,13 @@
         function executePrintFrame() {
             let frame = document.getElementById('printPreviewFrame');
             let htmlToPrint = frame.contentDocument.documentElement.outerHTML;
+            let customerName = typeof custName !== 'undefined' ? custName : "Guest";
             //if (window.AndroidPrint && window.print) { window.Android.printReceipt(frame.contentDocument.documentElement.outerHTML); } else { frame.contentWindow.print(); }
             //if (window.AndroidPrint && window.print) { AndroidPrint.performPrint(frame.contentDocument.documentElement.outerHTML); } else { frame.contentWindow.print(); }
             
             if (window.AndroidPrint) { 
                 // Android App ke liye
-                AndroidPrint.performPrint(htmlToPrint, custName); 
+                AndroidPrint.performPrint(htmlToPrint, customerName); 
             } else { 
                 // Normal Browser ke liye
                 frame.contentWindow.print(); 
