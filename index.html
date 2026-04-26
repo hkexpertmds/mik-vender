@@ -201,8 +201,8 @@
 
     <!-- LANDING PAGE -->
     <div id="landing-page" class="container hidden" style="max-width: 600px; margin-top: 50px; text-align: center;">
-        <h2 style="font-size: 28px;">Welcome to Dairy Ledger</h2>
-        <p style="color: #94a3b8; margin-bottom: 30px;">Select your portal to continue</p>
+        <h2 style="font-size: 28px;">Welcome to My Vender</h2>
+        <p style="color: #94a3b8; margin-bottom: 30px;">Select your Role to continue</p>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
             <div class="role-card" onclick="showLogin('Owner')"><h3>👑</h3><h4>Owner</h4></div>
             <div class="role-card" onclick="showLogin('Milk Man')"><h3>🛵</h3><h4>Delivery Man</h4></div>
@@ -1211,23 +1211,29 @@
         }
 
         function shareApp() {
-            const shareData = {
-                title: 'Dairy Ledger App',
-                text: 'Check out Dairy Ledger, the smart way to manage dairy deliveries and accounts!',
-                url: window.location.origin + window.location.pathname
-            };
-            if (navigator.share) {
-                navigator.share(shareData).catch((err) => {
-                    if(err.name !== "AbortError") console.error("Share failed:", err.message);
-                });
-            } else {
-                navigator.clipboard.writeText(shareData.url).then(() => {
-                    alert("App link copied to clipboard!", "success");
-                }).catch(err => {
-                    alert("Failed to copy link.", "error");
-                });
-            }
-        }
+    const shareData = {
+        title: 'My Vender App',
+        text: 'Check out My Vender, the smart way to manage daily deliveries and Monthly Bills!',
+        url: window.location.origin + window.location.pathname
+    };
+
+    // Pehle check karein ki kya Android interface available hai
+    if (window.AndroidPrint && window.AndroidPrint.shareApp) {
+        window.AndroidPrint.shareApp(shareData.title, shareData.text, shareData.url);
+    } 
+    // Agar Android nahi hai (browser hai), toh normal Web Share try karein
+    else if (navigator.share) {
+        navigator.share(shareData).catch((err) => {
+            if(err.name !== "AbortError") console.error("Share failed:", err.message);
+        });
+    } 
+    // Kuch nahi toh clipboard
+    else {
+        navigator.clipboard.writeText(shareData.url).then(() => {
+            alert("App link copied to clipboard!");
+        });
+    }
+}
 
         // --- SUBSCRIPTION & LICENSE KEY LOGIC ---
         function isLicenseValid() {
@@ -1378,6 +1384,8 @@
             btn.disabled = false;
         }
 
+        let currentLang = localStorage.getItem('appLang') || 'en';
+
         const enFaqs = `<div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>❌ Login Failed / Wrong ID Password?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Please ensure you have selected the correct Role (Owner, Delivery Man, Customer). Check your ID and Password. If you forgot your password, contact your Owner.</div></div>
         <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>🌐 Connection Failed / Network Error?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Check your internet connection. If you are on a local computer, ensure the Backend server (Python) is running.</div></div>
         <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)"><span>📅 How to pause/change tomorrow's order?</span><span class="faq-icon">▼</span></div><div class="faq-answer">Go to your Customer dashboard, select the "My Order" (🛒) tab, choose tomorrow's date in "One-Time Change" and update the quantity to 0 or your desired amount, then save.</div></div>
@@ -1453,7 +1461,7 @@
             }
         };
 
-        let currentLang = localStorage.getItem('appLang') || 'en';
+        //let currentLang = localStorage.getItem('appLang') || 'en';
 
         function changeLanguage() {
             currentLang = currentLang === 'en' ? 'hi' : 'en';
