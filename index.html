@@ -1714,7 +1714,7 @@
             
             if (window.AndroidPrint) { 
                 // Android App ke liye
-                AndroidPrint.performPrint(htmlToPrint); 
+                AndroidPrint.performPrint(htmlToPrint, custName); 
             } else { 
                 // Normal Browser ke liye
                 frame.contentWindow.print(); 
