@@ -403,9 +403,9 @@
     </div>
 
     <div id="ledger-master" class="container hidden">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h2 id="ledger-heading" style="margin:0;">📖 Customer Records</h2>
-            <button id="btnLedgerToggle" class="btn-save" style="width:auto; padding:8px 15px; margin:0;" onclick="toggleLedgerView()">View Entries ➡️</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <h2 id="ledger-heading" style="margin:0;">📖 Customer Rec.</h2>
+            <button id="btnLedgerToggle" class="btn-save" style="width:auto; padding:8px 15px; margin:0;" onclick="toggleLedgerView()">Entries ➡️</button>
         </div>
         
         <div id="ledger-cust-view">
@@ -4595,8 +4595,8 @@
             
             let btnToggle = document.getElementById('btnLedgerToggle');
             if(btnToggle) {
-                if(type === 'cust') btnToggle.innerText = 'View Entries ➡️';
-                else btnToggle.innerText = '⬅️ View Customers';
+                if(type === 'cust') btnToggle.innerText = 'Entries ➡️';
+                else btnToggle.innerText = '⬅️ Customers';
                 currentLedgerView = type;
             }
             
