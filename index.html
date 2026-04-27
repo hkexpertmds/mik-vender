@@ -175,13 +175,13 @@
     </div>
     
     <!-- PRINT PREVIEW MODAL -->
-    <div id="printPreviewModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10020; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:850px; padding:0; border-radius:12px; max-height:95vh; display:flex; flex-direction:column; overflow:hidden; border:1px solid #475569;">
+    <div id="printPreviewModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:var(--card); z-index:10020; display:flex; flex-direction:column; padding:0;">
+        <div class="modal-box" style="width:100%; height:100%; max-width:none; max-height:none; padding:0; border-radius:0; border:none; display:flex; flex-direction:column; box-sizing:border-box;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding: 15px; background: rgba(0,0,0,0.2); border-bottom: 1px solid #475569;">
                 <h3 style="margin:0; color:var(--primary); font-size:16px;">📄 Print Preview</h3>
                 <button onclick="closePrintPreview()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
             </div>
-            <iframe id="printPreviewFrame" style="flex:1; width:100%; height:75vh; border:none; background: white;"></iframe>
+            <iframe id="printPreviewFrame" style="flex:1; width:100%; border:none; background: white;"></iframe>
             <div style="padding: 15px; background: rgba(0,0,0,0.2); border-top: 1px solid #475569; display:flex; gap:10px; justify-content:flex-end;">
                 <button class="btn-save" style="width:auto; margin:0;" id="modalPrintBtn" onclick="executePrintFrame()">🖨️ Print / Save PDF</button>
                 <button class="btn-back" style="width:auto; margin:0;" onclick="closePrintPreview()">Close</button>
@@ -814,8 +814,8 @@
     </div>
 
     <!-- OWNER REPORT MODAL -->
-    <div id="ownerReportModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:850px; padding:20px; border-radius:12px; max-height:95vh; display:flex; flex-direction:column; border:1px solid #475569;">
+    <div id="ownerReportModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:var(--card); z-index:10000; display:flex; flex-direction:column; padding:0;">
+        <div class="modal-box" style="width:100%; height:100%; max-width:none; max-height:none; padding:20px; border-radius:0; display:flex; flex-direction:column; border:none; box-sizing:border-box;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
                 <h3 id="ownerReportTitle" style="margin:0;">📄 Customer Bill</h3>
                 <button onclick="closeOwnerReportModal()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -1719,8 +1719,11 @@
                 window.AndroidPrint.performPrint(htmlToPrint, fileName); 
             } else { 
                 // Normal Browser ke liye
+                let originalTitle = document.title;
+                document.title = fileName;
                 frame.contentDocument.title = fileName;
                 frame.contentWindow.print(); 
+                setTimeout(() => { document.title = originalTitle; }, 2000);
             }
         }
 
@@ -2644,6 +2647,8 @@
                     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
                     th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 15px; }
                     .total { text-align: right; font-size: 18px; margin-top: 15px; }
+                    .info-table { width: 100%; margin: 10px 0; border: none; }
+                    .info-table td { border: none; padding: 2px 0; font-size: 14px; }
                     @media print { .no-print { display: none; } @page { size: A4; margin: 15mm; } body { max-width: 100%; padding: 0; } }
                 </style></head><body>
                     <div style="position:relative; text-align:center; min-height:60px;">
@@ -2653,11 +2658,11 @@
                     </div>
                     <h4>General Bill / Cash Memo</h4>
                     <hr>
-                <p style="margin:5px 0; font-size:14px;"><b>Bill No:</b> GB-${serialNo}</p>
-                    <p style="margin:5px 0; font-size:14px;"><b>Date:</b> ${dateStr}</p>
-                    <p style="margin:5px 0; font-size:14px;"><b>Customer:</b> ${custName}</p>
-                    ${mobileNum ? `<p style="margin:5px 0; font-size:14px;"><b>Mobile:</b> ${mobileNum}</p>` : ''}
-                    ${address ? `<p style="margin:5px 0; font-size:14px;"><b>Address:</b> ${address}</p>` : ''}
+                    <table class="info-table">
+                        <tr><td><b>Bill No:</b> GB-${serialNo}</td><td style="text-align:right;"><b>Date:</b> ${dateStr}</td></tr>
+                        <tr><td><b>Customer:</b> ${custName}</td><td style="text-align:right;">${mobileNum ? `<b>Mobile:</b> ${mobileNum}` : ''}</td></tr>
+                        ${address ? `<tr><td colspan="2"><b>Address:</b> ${address}</td></tr>` : ''}
+                    </table>
                     <table>
                         <tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
                         ${itemsArr.map(it => `<tr><td>${it.item}</td><td>${it.qty}</td><td>₹${it.rate}</td><td>₹${(it.total || (it.qty*it.rate)).toFixed(2)}</td></tr>`).join('')}
@@ -2893,7 +2898,7 @@
                 let mmName = '-';
                 if (c.milkman_id) {
                     let mmObj = users.find(u => String(u.login_id) === String(c.milkman_id));
-                    if (mmObj) mmName = `<b>${mmObj.name}</b><br><span style="font-size:11px; color:#94a3b8;">ID: ${c.milkman_id}</span>`;
+                    if (mmObj) mmName = `<b>${mmObj.name}</b><br><span style="font-size:11px; color:#94a3b8;">ID: ${c.milkman_id}</span><br><span style="font-size:11px; color:#94a3b8;">Mob: ${mmObj.mobile || '-'}</span>`;
                     else mmName = c.milkman_id;
                 }
                 
@@ -2977,12 +2982,17 @@
             }
             if(isMilkMan() && String(r_milkman_id) !== String(currentUser.login_id)) return;
                 let detailsHtml = r.req_qty; let actionsHtml = ''; let status = r.status || 'Pending';
+            let color = status === 'Pending' ? 'var(--warning)' : (status === 'Approved' ? 'var(--success)' : 'var(--danger)');
+            if (isMilkMan()) {
+                actionsHtml = `<span style="color:${color}; font-weight:bold;">${status}</span>`;
+            } else {
                 if (status === 'Pending') {
                     actionsHtml = `<button class="badge" style="background:var(--success)" onclick="approveRequest(${realIdx})">Approve</button> <button class="badge" style="background:var(--danger)" onclick="rejectRequest(${realIdx})">Reject</button>`;
                 } else {
-                    let color = status === 'Approved' ? 'var(--success)' : 'var(--danger)';
                     actionsHtml = `<span style="color:${color}; font-weight:bold;">${status}</span>`;
                 }
+            }
+            let delBtn = isMilkMan() ? '' : ` <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'request')">Del</button>`;
                 if (r.type === 'Payment') {
                     try {
                         const pDetails = JSON.parse(r.details);
@@ -2994,7 +3004,7 @@
                 html += `<tr style="animation-delay:${i * 0.04}s">
                     <td>${r.req_date}</td><td>${r.cust_name}</td>
                     <td>${detailsHtml}</td><td>${status}</td>
-                    <td style="white-space:nowrap;">${actionsHtml} <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'request')">Del</button>
+                <td style="white-space:nowrap;">${actionsHtml}${delBtn}
                     </td></tr>`;
             });
             if(tbody) tbody.innerHTML = html;
@@ -4376,7 +4386,7 @@
             let mmInfo = '';
             if (custObj && custObj.milkman_id) {
                 let mmObj = users.find(u => String(u.login_id) === String(custObj.milkman_id));
-                if (mmObj) mmInfo = ` | 🛵 Delivery Man: ${mmObj.name} (Mob: ${mmObj.mobile || 'N/A'})`;
+                if (mmObj) mmInfo = `<br><span style="color:var(--primary); font-size:14px; font-weight:bold; margin-top:6px; display:inline-block;">🛵 Delivery Man: ${mmObj.name} &nbsp;|&nbsp; 📞 ${mmObj.mobile || 'N/A'}</span>`;
             }
             addrPara.innerHTML = custObj ? "📍 Address: " + (custObj.addr || 'N/A') + mmInfo : ""; 
             
@@ -4448,9 +4458,9 @@
             const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
             let safeCustName = custName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
             
-            const shortMonth = new Date(year, month - 1).toLocaleString('en-US', { month: 'short' });
+            const fullMonth = new Date(year, month - 1).toLocaleString('en-US', { month: 'long' });
             let safeCustNameStr = custName.replace(/[^a-zA-Z0-9]/g, '_');
-            let docTitle = `${safeCustNameStr}_${shortMonth}_${year}`;
+            let docTitle = `${safeCustNameStr}_${fullMonth}_${year}`;
             
             let printHtml = `<html><head><title>${docTitle}</title>
             <style>
@@ -4473,6 +4483,7 @@
             if (!companyLogo && currentUser.type === 'Customer') {
                 let owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
                 if (owner && owner.company_logo) companyLogo = owner.company_logo;
+                else if (currentUser.owner_logo) companyLogo = currentUser.owner_logo;
             }
             
             printHtml += `<div style="position:relative; text-align:center; min-height:70px;">`;
@@ -4779,6 +4790,7 @@
         // --- ON PAGE LOAD (AUTO LOGIN) ---
         window.onload = () => {
             injectAutoLabels(); // Build dynamic labels before login executes
+            applyTranslations(); // FAQ Content Setup Before Login
             const session = localStorage.getItem('sessionAuth');
             const cachedUser = localStorage.getItem('sessionUser');
             
