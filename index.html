@@ -176,12 +176,12 @@
     
     <!-- PRINT PREVIEW MODAL -->
     <div id="printPreviewModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10020; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:450px; padding:0; border-radius:12px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; border:1px solid #475569;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:850px; padding:0; border-radius:12px; max-height:95vh; display:flex; flex-direction:column; overflow:hidden; border:1px solid #475569;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding: 15px; background: rgba(0,0,0,0.2); border-bottom: 1px solid #475569;">
                 <h3 style="margin:0; color:var(--primary); font-size:16px;">📄 Print Preview</h3>
                 <button onclick="closePrintPreview()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
             </div>
-            <iframe id="printPreviewFrame" style="flex:1; width:100%; height:60vh; border:none; background: white;"></iframe>
+            <iframe id="printPreviewFrame" style="flex:1; width:100%; height:75vh; border:none; background: white;"></iframe>
             <div style="padding: 15px; background: rgba(0,0,0,0.2); border-top: 1px solid #475569; display:flex; gap:10px; justify-content:flex-end;">
                 <button class="btn-save" style="width:auto; margin:0;" id="modalPrintBtn" onclick="executePrintFrame()">🖨️ Print / Save PDF</button>
                 <button class="btn-back" style="width:auto; margin:0;" onclick="closePrintPreview()">Close</button>
@@ -210,8 +210,8 @@
         </div>
 
         <!-- Help Option -->
-        <div style="margin-top: 30px; text-align: center;">
-            <button id="btn-help-landing" class="btn-save" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); width: auto; padding: 10px 25px;" onclick="openHelpModal()">🆘 Need Help?</button>
+        <div style="margin-top: 30px; text-align: center; display: flex; justify-content: center;">
+            <button id="btn-help-landing" class="btn-save" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); width: 100%; max-width: 250px; padding: 10px 20px; font-size: 16px;" onclick="openHelpModal()">🆘 Need Help?</button>
         </div>
     </div>
 
@@ -815,7 +815,7 @@
 
     <!-- OWNER REPORT MODAL -->
     <div id="ownerReportModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:700px; padding:20px; border-radius:12px; max-height:90vh; display:flex; flex-direction:column; border:1px solid #475569;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:850px; padding:20px; border-radius:12px; max-height:95vh; display:flex; flex-direction:column; border:1px solid #475569;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
                 <h3 id="ownerReportTitle" style="margin:0;">📄 Customer Bill</h3>
                 <button onclick="closeOwnerReportModal()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -1709,15 +1709,17 @@
         function executePrintFrame() {
             let frame = document.getElementById('printPreviewFrame');
             let htmlToPrint = frame.contentDocument.documentElement.outerHTML;
-            let customerName = typeof custName !== 'undefined' ? custName : "Guest";
             //if (window.AndroidPrint && window.print) { window.Android.printReceipt(frame.contentDocument.documentElement.outerHTML); } else { frame.contentWindow.print(); }
             //if (window.AndroidPrint && window.print) { AndroidPrint.performPrint(frame.contentDocument.documentElement.outerHTML); } else { frame.contentWindow.print(); }
             
-            if (window.AndroidPrint) { 
+            let fileName = window.currentPrintFileName || "Receipt";
+            
+            if (window.AndroidPrint && window.AndroidPrint.performPrint) { 
                 // Android App ke liye
-                AndroidPrint.performPrint(htmlToPrint, customerName); 
+                window.AndroidPrint.performPrint(htmlToPrint, fileName); 
             } else { 
                 // Normal Browser ke liye
+                frame.contentDocument.title = fileName;
                 frame.contentWindow.print(); 
             }
         }
@@ -2043,7 +2045,7 @@
             let headerUserInfo = document.getElementById('header-user-info');
             if(headerUserInfo) headerUserInfo.innerHTML = headPic + "Hi, " + currentUser.name;
             let headerRole = document.getElementById('header-role');
-            if(headerRole) headerRole.innerText = currentUser.type;
+            if(headerRole) headerRole.innerText = currentUser.type === 'Milk Man' ? 'Delivery Man' : currentUser.type;
             let headerCompany = document.getElementById('header-company-name');
             if(headerCompany) headerCompany.innerText = currentUser.company || 'DAIRY LEDGER';
             
@@ -2628,8 +2630,15 @@
             let ownerAddress = currentUser.address || currentUser.addr || '';
             let ownerMobile = currentUser.mobile || '';
             let ownerLogo = currentUser.company_logo || '';
+            
+            let contactParts = [];
+            if (ownerAddress) contactParts.push(ownerAddress);
+            if (ownerMobile) contactParts.push(`<b>Mob:</b> ${ownerMobile}`);
+            let contactHtml = contactParts.length > 0 ? `<p style="text-align:center; margin:2px 0 10px 0; font-size:12px;">${contactParts.join(' | ')}</p>` : '';
+
+            let docTitle = `GB-${serialNo}`;
             let backendPrintCmd = `fetch('${API_BASE}/print_command', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'General Bill ${serialNo}'})}).catch(e=>{});`;
-                let printHtml = `<html><head><title>Cash Memo - GB-${serialNo}</title><style>
+                let printHtml = `<html><head><title>${docTitle}</title><style>
                     body { font-family: sans-serif; padding: 20px; color: black; max-width: 800px; margin: auto; }
                     h2, h4 { text-align: center; margin: 5px 0; }
                     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -2640,8 +2649,7 @@
                     <div style="position:relative; text-align:center; min-height:60px;">
                         ${ownerLogo ? `<img src="${ownerLogo}" style="max-width:60px; max-height:50px; position:absolute; left:0; top:0; object-fit:contain;">` : ''}
                         <h2 style="margin-top:0;">${companyName.toUpperCase()}</h2>
-                        ${ownerAddress ? `<p style="text-align:center; margin:2px 0; font-size:12px;">${ownerAddress}</p>` : ''}
-                        ${ownerMobile ? `<p style="text-align:center; margin:2px 0 10px 0; font-size:12px;"><b>Mob:</b> ${ownerMobile}</p>` : ''}
+                        ${contactHtml}
                     </div>
                     <h4>General Bill / Cash Memo</h4>
                     <hr>
@@ -2665,6 +2673,7 @@
                     return;
                 }
                 
+                window.currentPrintFileName = docTitle;
                 document.getElementById('printPreviewFrame').srcdoc = printHtml;
                 document.getElementById('printPreviewModal').classList.remove('hidden');
         }
@@ -2881,10 +2890,17 @@
                 else if(c.shift === 'Evening') seqDisp = `E:${c.seq_no_eve||'-'}`;
                 else seqDisp = `M:${c.seq_no||'-'} | E:${c.seq_no_eve||'-'}`;
                 
+                let mmName = '-';
+                if (c.milkman_id) {
+                    let mmObj = users.find(u => String(u.login_id) === String(c.milkman_id));
+                    if (mmObj) mmName = `<b>${mmObj.name}</b><br><span style="font-size:11px; color:#94a3b8;">ID: ${c.milkman_id}</span>`;
+                    else mmName = c.milkman_id;
+                }
+                
             html += `<tr style="animation-delay:${Math.min(i * 0.03, 0.5)}s">
                         <td><span style="font-size:11px; color:#94a3b8;">[${seqDisp}]</span><br><b>${c.name}</b></td>
                         <td>${c.route||'-'}<br><span style="font-size:11px; color:#94a3b8;">${c.shift||'-'}</span></td>
-                        <td>${c.milkman_id||'-'}</td>
+                        <td>${mmName}</td>
                     <td>${c.mobile||'-'}<br><span style="font-size:11px; color:#94a3b8;">ID: ${c.cid}</span><br><span style="font-size:11px; color:var(--primary);">User: ${c.username||'-'}</span></td>
                         <td style="display:flex; gap:4px; flex-wrap:nowrap;">
                             ${!isMilkMan() ? `<button class="badge" style="background:var(--primary)" onclick="resetPassword('${c.cid}', 'Customer')">Pass</button>` : ''}
@@ -2954,7 +2970,12 @@
             let html = '';
             requests.slice().reverse().forEach((r, i) => {
                 const realIdx = requests.length - 1 - i;
-                if(isMilkMan() && r.milkman_id !== currentUser.login_id) return;
+            let r_milkman_id = r.milkman_id;
+            if (!r_milkman_id) {
+                let cObj = customers.find(c => String(c.cid) === String(r.cust_id));
+                if (cObj) r_milkman_id = cObj.milkman_id;
+            }
+            if(isMilkMan() && String(r_milkman_id) !== String(currentUser.login_id)) return;
                 let detailsHtml = r.req_qty; let actionsHtml = ''; let status = r.status || 'Pending';
                 if (status === 'Pending') {
                     actionsHtml = `<button class="badge" style="background:var(--success)" onclick="approveRequest(${realIdx})">Approve</button> <button class="badge" style="background:var(--danger)" onclick="rejectRequest(${realIdx})">Reject</button>`;
@@ -3362,7 +3383,7 @@
             
             let qtyInputs = document.querySelectorAll(`input[id^="temp-qty-"]`);
             qtyInputs.forEach((el) => {
-                if (el.value !== '' && parseFloat(el.value) > 0) {
+                if (el.value !== '' && parseFloat(el.value) >= 0) {
                     let q = parseFloat(el.value);
                     let rate = parseFloat(el.dataset.rate) || 0;
                     itemsToSave.push({ item: el.dataset.item, qty: q, rate: rate, total: q * rate });
@@ -3494,6 +3515,7 @@
             document.getElementById('btnShiftM').classList.toggle('active-tab', s === 'Morning');
             document.getElementById('btnShiftE').classList.toggle('active-tab', s === 'Evening');
             renderTransFeed();
+                renderTrans(); // Fix for "Completed" tab not refreshing when Morning/Evening toggled
         }
         function setFeedDate(offset) {
             let d = new Date(); d.setDate(d.getDate() + offset);
@@ -3877,7 +3899,7 @@
 
             let qtyInputs = document.querySelectorAll(`input[id^="feed-qty-${idx}-"]`);
             qtyInputs.forEach((el) => {
-                if (el.value !== '' && parseFloat(el.value) > 0) {
+                if (el.value !== '' && parseFloat(el.value) >= 0) {
                     let q = parseFloat(el.value);
                     let rate = parseFloat(el.dataset.rate) || 0;
                     itemsToSave.push({item: el.dataset.item, qty: q, rate: rate, total: q * rate});
@@ -3889,7 +3911,7 @@
             extraSelects.forEach((sel) => {
                 let item = sel.value;
                 let qtyInput = sel.nextElementSibling;
-                if (item && qtyInput && qtyInput.value !== '' && parseFloat(qtyInput.value) > 0) {
+                if (item && qtyInput && qtyInput.value !== '' && parseFloat(qtyInput.value) >= 0) {
                     let q = parseFloat(qtyInput.value);
                     let rate = parseFloat(qtyInput.dataset.rate) || 0;
                     itemsToSave.push({item: item, qty: q, rate: rate, total: q * rate});
@@ -4350,7 +4372,13 @@
             const addrPara = document.getElementById('self-address');
             document.getElementById('self-heading').innerText = "Dashboard: " + currentUser.name;
             const custObj = customers.find(c => c.name === currentUser.name && c.company === currentUser.company);
-            addrPara.innerText = custObj ? "📍 Address: " + custObj.addr : ""; 
+            
+            let mmInfo = '';
+            if (custObj && custObj.milkman_id) {
+                let mmObj = users.find(u => String(u.login_id) === String(custObj.milkman_id));
+                if (mmObj) mmInfo = ` | 🛵 Delivery Man: ${mmObj.name} (Mob: ${mmObj.mobile || 'N/A'})`;
+            }
+            addrPara.innerHTML = custObj ? "📍 Address: " + (custObj.addr || 'N/A') + mmInfo : ""; 
             
             const monthYearInput = document.getElementById('selfReportMonthYear');
             let selectedMonthYear = monthYearInput.value;
@@ -4420,7 +4448,11 @@
             const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
             let safeCustName = custName.replace(/'/g, "\\'").replace(/"/g, "&quot;");
             
-            let printHtml = `<html><head><title>Statement_${custName}_${monthVal}</title>
+            const shortMonth = new Date(year, month - 1).toLocaleString('en-US', { month: 'short' });
+            let safeCustNameStr = custName.replace(/[^a-zA-Z0-9]/g, '_');
+            let docTitle = `${safeCustNameStr}_${shortMonth}_${year}`;
+            
+            let printHtml = `<html><head><title>${docTitle}</title>
             <style>
                 body { font-family: "Inter", sans-serif; padding: 10px 20px; color: #000; background: #fff; font-size: 12px; margin: 0; }
                 table { width: 100%; border-collapse: collapse; margin-top: 5px; margin-bottom: 5px !important; font-size: 12px; }
@@ -4437,6 +4469,11 @@
             let ownerAddress = currentUser.address || currentUser.addr || '';
             let ownerMobile = currentUser.mobile || '';
             let companyLogo = currentUser.company_logo || '';
+            
+            if (!companyLogo && currentUser.type === 'Customer') {
+                let owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
+                if (owner && owner.company_logo) companyLogo = owner.company_logo;
+            }
             
             printHtml += `<div style="position:relative; text-align:center; min-height:70px;">`;
             if (companyLogo) printHtml += `<img src="${companyLogo}" style="max-width:65px; max-height:55px; position:absolute; left:0; top:0; object-fit:contain;">`;
@@ -4480,6 +4517,7 @@
                 return;
             }
             
+            window.currentPrintFileName = docTitle;
             document.getElementById('printPreviewFrame').srcdoc = printHtml;
             document.getElementById('printPreviewModal').classList.remove('hidden');
         }
@@ -4802,9 +4840,8 @@
                 showView('landing-page');
             }
         };
-    </script>
-    <script>
-        // New function to handle password reset
+
+        // Global function to handle password reset
         async function resetPassword(targetId, targetType) {
             const newPassword = prompt(`Enter new password for ${targetId} (${targetType}):`);
             if (!newPassword) return; // User cancelled or entered empty password
