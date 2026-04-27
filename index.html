@@ -1521,94 +1521,51 @@
         });
 
         // --- BROWSER / PHONE BACK BUTTON LOGIC ---
-        function askExitConfirm() {
-            document.getElementById('exitConfirmModal').classList.remove('hidden');
-        }
-
-        function confirmExitApp() {
-            document.getElementById('exitConfirmModal').classList.add('hidden');
-            if (window.Android && window.Android.exitApp) { window.Android.exitApp(); } 
-            else if (window.history.length > 1) { history.back(); } 
-            else { window.close(); }
-        }
-
         window.addEventListener('popstate', function(event) {
-            let targetView = event.state ? event.state.view : window.location.hash.replace('#', '');
-            let currentView = sessionStorage.getItem('lastView') || 'landing-page';
-            let homeViews = ['main-menu', 'ledger-master', 'customer-self-view'];
-            let preLoginViews = ['landing-page', 'login-page', 'register-page'];
-
-            let exitModal = document.getElementById('exitConfirmModal');
-            if(exitModal && !exitModal.classList.contains('hidden')) {
-                exitModal.classList.add('hidden');
-                history.pushState({ view: currentView }, '', `#${currentView}`);
-                return;
-            }
-
-            if (currentUser && (preLoginViews.includes(targetView) || !targetView)) {
-                let homeId = currentUser.type === 'Milk Man' ? 'ledger-master' : (currentUser.type === 'Customer' ? 'customer-self-view' : 'main-menu');
-                if (homeViews.includes(currentView)) {
-                    askExitConfirm();
-                    history.pushState({ view: homeId }, '', `#${homeId}`);
-                } else {
-                    history.pushState({ view: homeId }, '', `#${homeId}`);
-                    showView(homeId, true);
-                }
-                return;
-            }
-
-            if (!currentUser && currentView === 'landing-page' && !targetView) {
-                askExitConfirm();
-                history.pushState({ view: 'landing-page' }, '', `#landing-page`);
-                return;
-            }
-
-            if (targetView && document.getElementById(targetView)) {
-                showView(targetView, true);
-            } else if (currentUser) {
-                let homeId = currentUser.type === 'Milk Man' ? 'ledger-master' : (currentUser.type === 'Customer' ? 'customer-self-view' : 'main-menu');
-                showView(homeId, true);
+            if (event.state && event.state.view) {
+                showView(event.state.view, true);
             } else {
-                showView('landing-page', true);
+                let hash = window.location.hash.replace('#', '');
+                if (hash && document.getElementById(hash)) {
+                    showView(hash, true);
+                } else if (currentUser) {
+                    let homeId = currentUser.type === 'Milk Man' ? 'ledger-master' : (currentUser.type === 'Customer' ? 'customer-self-view' : 'main-menu');
+                    showView(homeId, true);
+                } else {
+                    showView('landing-page', true);
+                }
             }
         });
 
         function goBack() {
             fetch(API_BASE + '/back_command', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({page: window.location.hash})}).catch(e=>{});
-            
-            let currentView = sessionStorage.getItem('lastView');
-            let exitViews = currentUser ? ['main-menu', 'ledger-master', 'customer-self-view'] : ['landing-page'];
-
-            if (exitViews.includes(currentView)) {
-                askExitConfirm();
-                return;
+            if (window.history.length > 1 && window.location.hash) {
+                history.back();
+            } else {
+                if (!currentUser) {
+                    if(window.Android && window.Android.goBack) { window.Android.goBack(); return; }
+                    return showView('landing-page');
+                }
+                if (currentUser.type === 'Milk Man') showView('ledger-master');
+                else if (currentUser.type === 'Customer') showView('customer-self-view');
+                else showView('main-menu');
+                
+                // If already at home and Android exists, let the app handle exit
+                let homeViews = ['main-menu', 'ledger-master', 'customer-self-view'];
+                if (homeViews.includes(sessionStorage.getItem('lastView'))) {
+                    if(window.Android && window.Android.goBack) { window.Android.goBack(); }
+                }
             }
-
-            let homeId = 'landing-page';
-            if(currentUser) {
-                if (currentUser.type === 'Milk Man') homeId = 'ledger-master';
-                else if (currentUser.type === 'Customer') homeId = 'customer-self-view';
-                else homeId = 'main-menu';
-            }
-            history.pushState({ view: homeId }, '', `#${homeId}`);
-            showView(homeId, true);
         }
         
         // Android Hardware Back Button Hook
         window.onAndroidBack = function() {
-            let modals = ['profile-dropdown', 'seqModal', 'editTransModal', 'ownerReportModal', 'helpModal', 'licenseModal', 'editFieldModal', 'mediaManagerModal', 'qrCropModal', 'screenshotModal', 'printPreviewModal', 'exitConfirmModal'];
+            let modals = ['profile-dropdown', 'seqModal', 'editTransModal', 'ownerReportModal', 'helpModal', 'licenseModal', 'editFieldModal', 'mediaManagerModal', 'qrCropModal', 'screenshotModal', 'printPreviewModal'];
             for(let m of modals) { let el = document.getElementById(m); if(el && !el.classList.contains('hidden')) { el.classList.add('hidden'); return true; } }
-            
-            let currentView = sessionStorage.getItem('lastView');
-            let exitViews = currentUser ? ['main-menu', 'ledger-master', 'customer-self-view'] : ['landing-page'];
-            
-            if (exitViews.includes(currentView)) { 
-                askExitConfirm();
-                return true; 
-            } else { 
-                goBack(); 
-                return true; 
-            }
+            let hash = window.location.hash.replace('#', '');
+            let homeViews = ['main-menu', 'ledger-master', 'customer-self-view', 'landing-page', 'login-page'];
+            if (homeViews.includes(hash) || !hash) { if(window.Android && window.Android.goBack) window.Android.goBack(); return false; }
+            else { goBack(); return true; }
         };
 
         
@@ -2021,7 +1978,7 @@
             if (isAutoLogin) showView('landing-page');
             } finally {
                 clearTimeout(slowNetTimer);
-                hideGlobalLoading(); // Login verify hote hi turant loading hata dega
+                if(!currentUser) hideGlobalLoading();
             }
         if (btn) btn.innerText = "Login";
         }
@@ -2066,6 +2023,7 @@
                 alert("Data sync failed. Please check connection.", "error");
             } finally {
                 clearTimeout(slowDataTimer);
+                 hideGlobalLoading();
             }
         }
         
