@@ -173,9 +173,10 @@ def login():
         
         # Fetch Owner's QR code so it shows correctly on frontend payment page
         try:
-            owner_res = supabase.table('sys_users').select('qr_code').eq('type', 'Owner').eq('company', company).execute()
+            owner_res = supabase.table('sys_users').select('qr_code, company_logo').eq('type', 'Owner').eq('company', company).execute()
             if owner_res.data:
                 user_to_return['owner_qr'] = owner_res.data[0].get('qr_code', '')
+                user_to_return['owner_logo'] = owner_res.data[0].get('company_logo', '')
         except Exception:
             pass
         
@@ -268,6 +269,7 @@ def sync_data():
         milkman_customers_res = supabase.table('sys_customers').select(c_cols).eq('company', company).eq('milkman_id', login_id).execute()
         milkman_customers = milkman_customers_res.data if milkman_customers_res.data else []
         customer_names = [c['name'] for c in milkman_customers]
+        customer_ids = [c['cid'] for c in milkman_customers]
 
         def get_mm_trans():
             if not customer_names: return []
@@ -278,7 +280,14 @@ def sync_data():
         with ThreadPoolExecutor(max_workers=4) as executor:
             f_t = executor.submit(get_mm_trans)
             f_p = executor.submit(lambda: supabase.table('sys_products').select('*').eq('company', company).execute().data)
-            f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('company', company).eq('milkman_id', login_id).order('id', desc=True).limit(10).execute().data)
+            
+            def get_mm_requests():
+                if not customer_ids: return []
+                if len(customer_ids) > 40:
+                    return supabase.table('sys_requests').select('*').eq('company', company).order('id', desc=True).limit(20).execute().data
+                return supabase.table('sys_requests').select('*').eq('company', company).in_('cust_id', customer_ids).order('id', desc=True).limit(20).execute().data
+                
+            f_r = executor.submit(get_mm_requests)
             f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
             
         try: milkman_trans = f_t.result()
@@ -292,7 +301,7 @@ def sync_data():
             f_p = executor.submit(lambda: supabase.table('sys_products').select('*').eq('company', company).execute().data)
             f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('cust_id', login_id).eq('company', company).order('id', desc=True).limit(15).execute().data)
             f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
-            f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols + ', qr_code').eq('company', company).eq('type', 'Owner').execute().data)
+            f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols + ', qr_code, company_logo').in_('type', ['Owner', 'Milk Man']).eq('company', company).execute().data)
         
         owner_users = safe_get(f_u)
         owner_qr = owner_users[0].get('qr_code', '') if owner_users else ''
@@ -631,3 +640,4 @@ ensure_admin()
 if __name__ == '__main__':
     print("Backend Chal Raha Hai... Browser Me Login Karein!")
     app.run(host='0.0.0.0', debug=True, port=5000)
+    
