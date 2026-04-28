@@ -562,15 +562,13 @@
             <div class="grid-form">
                 <input type="hidden" id="editProdIdx">
                 <input type="text" id="pName" placeholder="Item Name (e.g. Cow Milk)" required>
-                <div style="display:flex; gap:10px;">
-                    <input type="number" id="pRate" placeholder="Rate (₹)" style="flex:1;" required>
-                    <select id="pUnit" style="width:100px;">
-                        <option value="Ltr">Ltr</option>
-                        <option value="Kg">Kg</option>
-                        <option value="Pkt">Pkt</option>
-                        <option value="Piece">Piece</option>
-                    </select>
-                </div>
+                <input type="number" id="pRate" placeholder="Rate (₹)" required>
+                <select id="pUnit" title="Unit">
+                    <option value="Ltr">Ltr</option>
+                    <option value="Kg">Kg</option>
+                    <option value="Pkt">Pkt</option>
+                    <option value="Piece">Piece</option>
+                </select>
                 <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
                     <button id="btnProdSave" class="btn-save" style="flex:1;" onclick="saveProduct()">Save Product</button>
                     <button class="btn-back" style="flex:1; margin:0;" onclick="closeProductForm()">Cancel</button>
@@ -2726,9 +2724,19 @@
             let data = { item_name: pName, rate: pRate, unit: pUnit, company: currentUser.company };
             if(idx !== "") data.id = products[idx].id;
 
-            const res = await fetch(`${API_BASE}/products`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            const savedData = await res.json();
-            if(idx === "") products.push(savedData); else products[idx] = savedData;
+            try {
+                const res = await fetch(`${API_BASE}/products`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                const savedData = await res.json();
+                if(savedData.success === false) {
+                    alert(savedData.message);
+                    document.getElementById('btnProdSave').innerText = idx === "" ? "Save Product" : "Update Product";
+                    return;
+                }
+                const finalData = { ...data, ...savedData };
+                if(idx === "") products.push(finalData); else products[idx] = finalData;
+            } catch(e) {
+                if(idx === "") products.push(data); else products[idx] = data;
+            }
             resetForm('product'); renderProducts(); populateProductDropdowns();
             closeProductForm();
         }
