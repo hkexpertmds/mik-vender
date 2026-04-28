@@ -109,7 +109,8 @@ def register():
         "company": data['company'],
         "email": data.get('email', ''),
         "address": data.get('address', ''),
-        "mobile": data.get('mobile', '')
+        "mobile": data.get('mobile', ''),
+        "license_expiry": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=15)).isoformat()
     }
     
     supabase.table('sys_users').insert(insert_data).execute()
@@ -494,6 +495,51 @@ def reset_password():
         
     return jsonify({"success": False, "message": "Access Denied. You do not have permission to perform this action."}), 403
 
+@app.route('/api/delete_account', methods=['POST'])
+def delete_account():
+    data = request.json
+    login_id = data.get('login_id')
+    password = data.get('pass')
+    
+    if not login_id or not password:
+        return jsonify({"success": False, "message": "Please provide Login ID and Password!"})
+        
+    try:
+        user_res = supabase.table('sys_users').select('id, pass, type, company').eq('login_id', login_id).execute()
+        if not user_res.data:
+            return jsonify({"success": False, "message": "Account not found!"})
+            
+        user = user_res.data[0]
+        if user.get('type') != 'Owner':
+            return jsonify({"success": False, "message": "Only Owner can delete the company account!"})
+            
+        pass_db = user.get('pass', '')
+        is_valid = False
+        if pass_db:
+            try: is_valid = check_password_hash(pass_db, password)
+            except Exception: pass
+            
+        if not is_valid:
+            return jsonify({"success": False, "message": "Incorrect Password! Account deletion failed."})
+            
+        company = user.get('company')
+        if company == 'SuperAdmin':
+            return jsonify({"success": False, "message": "SuperAdmin account cannot be deleted!"})
+            
+        # Delete associated data for this company
+        supabase.table('sys_trans').delete().eq('company', company).execute()
+        supabase.table('sys_requests').delete().eq('company', company).execute()
+        supabase.table('sys_routes').delete().eq('company', company).execute()
+        supabase.table('sys_products').delete().eq('company', company).execute()
+        supabase.table('sys_customers').delete().eq('company', company).execute()
+        supabase.table('sys_users').delete().eq('company', company).execute()
+        supabase.table('sys_licenses').delete().eq('used_by', login_id).execute()
+        
+        return jsonify({"success": True, "message": "Account and all associated company data deleted successfully!"})
+    except Exception as e:
+        print("Delete Account Error:", e)
+        return jsonify({"success": False, "message": f"An error occurred: {str(e)}"})
+
 @app.route('/api/<table_name>/<int:item_id>', methods=['DELETE'])
 def delete_data(table_name, item_id):
     if table_name not in ['users', 'customers', 'transactions', 'products', 'requests', 'routes', 'licenses']:
@@ -640,4 +686,3 @@ ensure_admin()
 if __name__ == '__main__':
     print("Backend Chal Raha Hai... Browser Me Login Karein!")
     app.run(host='0.0.0.0', debug=True, port=5000)
-    
