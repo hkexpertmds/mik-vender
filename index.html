@@ -369,6 +369,10 @@
                 <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Media & QR Codes</span><br><b style="font-size:15px; color:var(--text);">Manage Pictures</b></div>
                 <span style="color:var(--primary); font-size:18px;">🖼️</span>
             </div>
+            <div class="profile-list-item" id="row-delete-account" onclick="openDeleteAccountModal()">
+                <div style="flex:1;"><span style="font-size:12px; color:var(--danger); text-transform:uppercase; letter-spacing:0.5px;">Danger Zone</span><br><b style="font-size:15px; color:var(--danger);">Delete Account & Company</b></div>
+                <span style="color:var(--danger); font-size:18px;">🗑️</span>
+            </div>
         </div>
         
         <button class="btn-back" style="border-color:var(--danger); color:var(--danger);" onclick="logout()">Logout / Switch User</button>
@@ -871,6 +875,22 @@
             <div style="display:flex; gap:10px;">
                 <button class="btn-save" id="btnSubmitLicense" onclick="submitLicenseKey()">Verify & Unlock</button>
                 <button class="btn-back" style="margin:0;" onclick="closeLicenseModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE ACCOUNT MODAL -->
+    <div id="deleteAccountModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10025; display:flex; justify-content:center; align-items:center; padding:20px;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid var(--danger); text-align:center;">
+            <h3 style="margin-top:0; margin-bottom: 10px; color:var(--danger); font-size: 22px;">⚠️ Delete Account</h3>
+            <p style="color:#94a3b8; font-size:13px; margin-top:0; margin-bottom:20px;">This will permanently delete your account, delivery men, customers, and all entries. <b>This cannot be undone!</b></p>
+            <div style="position:relative; margin-bottom: 20px; text-align: left;">
+                <label style="font-size:12px; color:var(--danger); font-weight:bold; margin-bottom: 5px; display:block;">Enter Password to Confirm:</label>
+                <input type="password" id="delAccountPass" placeholder="Your Password" style="width:100%; margin:0;" required>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-save" id="btnConfirmDeleteAccount" style="background:var(--danger);" onclick="executeAccountDeletion()">Delete Everything</button>
+                <button class="btn-back" style="margin:0;" onclick="closeDeleteAccountModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -1865,19 +1885,23 @@
             const pin = document.getElementById('regPincode').value;
             if (pin && !finalAddress.includes(pin)) finalAddress += ` - Pincode: ${pin}`;
 
+            let expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + 15);
+
             const data = {
                 name: document.getElementById('regName').value, company: document.getElementById('regCompany').value,
                 username: document.getElementById('regUsername').value, city: document.getElementById('regCity').value, 
                 pass: document.getElementById('regPass').value, email: document.getElementById('regEmail').value, 
                 address: finalAddress,
-                mobile: document.getElementById('regMobile').value
+                mobile: document.getElementById('regMobile').value,
+                license_expiry: expiryDate.toISOString()
             };
             if(!data.name || !data.username || !data.city || data.city.length !== 2 || !data.pass || !data.company || !data.mobile) return alert("Please fill all required fields and select a State / District!");
             if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             
             const res = await fetch(`${API_BASE}/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             const result = await res.json();
-            if(result.success) { alert(`Account Created Successfully!\n\nYour Unique Login ID is: ${result.login_id}\n\nPlease note this ID to login.`); showLogin('Owner'); }
+            if(result.success) { alert(`Account Created Successfully!\n\n🎁 15-Days Free Trial Activated!\n\nYour Unique Login ID is: ${result.login_id}\n\nPlease note this ID to login.`); showLogin('Owner'); }
             else alert(result.message);
         }
 
@@ -2102,6 +2126,8 @@
                 document.getElementById('lbl-email').innerText = currentUser.email || '-';
                 document.getElementById('lbl-addr').innerText = currentUser.address || currentUser.addr || '-';
                 
+                let rowDelAcc = document.getElementById('row-delete-account');
+                if(rowDelAcc) rowDelAcc.classList.toggle('hidden', currentUser.type !== 'Owner');
                 document.getElementById('row-email').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
                 document.getElementById('row-addr').classList.toggle('hidden', currentUser.type === 'Milk Man');
                 document.getElementById('row-pass').classList.toggle('hidden', currentUser.type === 'Customer');
@@ -4211,6 +4237,55 @@
             if(type==='route') { 
                 document.getElementById('editRouteIdx').value = ""; document.getElementById('btnRouteSave').innerText = "Save Route"; 
                 document.getElementById('rName').value = ""; 
+            }
+        }
+
+        function openDeleteAccountModal() {
+            document.getElementById('delAccountPass').value = '';
+            document.getElementById('deleteAccountModal').classList.remove('hidden');
+        }
+
+        function closeDeleteAccountModal() {
+            document.getElementById('deleteAccountModal').classList.add('hidden');
+        }
+
+        async function executeAccountDeletion() {
+            let enteredPass = document.getElementById('delAccountPass').value;
+            if (!enteredPass) return alert("Please enter your password!", "error");
+
+            let auth = JSON.parse(localStorage.getItem('sessionAuth'));
+            let validPass = auth ? auth.pass : (currentUser ? currentUser.pass : null);
+            
+            if (enteredPass !== validPass) {
+                return alert("❌ Incorrect Password! Account deletion aborted.", "error");
+            }
+
+            if (!confirm("FINAL WARNING: Are you absolutely sure you want to permanently delete your entire company and all data?")) return;
+
+            const btn = document.getElementById('btnConfirmDeleteAccount');
+            btn.innerText = "Deleting..."; btn.disabled = true;
+
+            try {
+                let promises = [];
+                
+                if (users) users.filter(u => u.company === currentUser.company).forEach(u => promises.push(fetch(`${API_BASE}/users/${u.id}`, {method: 'DELETE'})));
+                if (customers) customers.filter(c => c.company === currentUser.company).forEach(c => promises.push(fetch(`${API_BASE}/customers/${c.id}`, {method: 'DELETE'})));
+                if (transactions) transactions.filter(t => t.company === currentUser.company).forEach(t => promises.push(fetch(`${API_BASE}/transactions/${t.id}`, {method: 'DELETE'})));
+                if (products) products.filter(p => p.company === currentUser.company).forEach(p => promises.push(fetch(`${API_BASE}/products/${p.id}`, {method: 'DELETE'})));
+                if (routes) routes.filter(r => r.company === currentUser.company).forEach(r => promises.push(fetch(`${API_BASE}/routes/${r.id}`, {method: 'DELETE'})));
+                if (requests) requests.filter(r => r.company === currentUser.company).forEach(r => promises.push(fetch(`${API_BASE}/requests/${r.id}`, {method: 'DELETE'})));
+
+                promises.push(fetch(`${API_BASE}/delete_account`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ login_id: currentUser.login_id, company: currentUser.company, pass: enteredPass }) }));
+
+                await Promise.allSettled(promises);
+                
+                alert("✅ Account and all related data deleted successfully.", "success");
+                closeDeleteAccountModal();
+                logout();
+            } catch (e) {
+                console.error(e);
+                alert("⚠️ Some data may not have been deleted due to network error.", "error");
+                btn.innerText = "Delete Everything"; btn.disabled = false;
             }
         }
 
