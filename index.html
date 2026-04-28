@@ -298,10 +298,6 @@
                 <input type="password" id="regPass" placeholder="Create Password" style="margin: 0; padding-right: 35px;" required>
                 <span onclick="togglePasswordVisibility('regPass', 'regEyeIcon')" id="regEyeIcon" title="Show/Hide Password" style="position: absolute; right: 12px; top: 10px; cursor: pointer; user-select: none; font-size: 16px;">👁️</span>
             </div>
-            <div style="position: relative;">
-                <input type="password" id="regPassConfirm" placeholder="Confirm Password" style="margin: 0; padding-right: 35px;" required>
-                <span onclick="togglePasswordVisibility('regPassConfirm', 'regConfirmEyeIcon')" id="regConfirmEyeIcon" title="Show/Hide Password" style="position: absolute; right: 12px; top: 10px; cursor: pointer; user-select: none; font-size: 16px;">👁️</span>
-            </div>
             <button class="btn-save" style="margin-top: 10px;" onclick="registerOwner()">Sign Up</button>
             <button class="btn-back" onclick="showView('login-page')">Back</button>
         </div>
@@ -375,10 +371,7 @@
             </div>
         </div>
         
-        <div style="display:flex; flex-direction:column; gap:10px;">
-            <button class="btn-back" style="border-color:var(--danger); color:var(--danger); margin-top:0;" onclick="logout()">Logout / Switch User</button>
-            <button id="btn-delete-account" class="hidden btn-back" style="border-color:var(--danger); background:var(--danger); color:white; margin-top:0;" onclick="confirmDeleteAccount()">🗑️ Delete Account & Company</button>
-        </div>
+        <button class="btn-back" style="border-color:var(--danger); color:var(--danger);" onclick="logout()">Logout / Switch User</button>
     </div>
 
     <div id="user-master" class="container hidden">
@@ -878,20 +871,6 @@
             <div style="display:flex; gap:10px;">
                 <button class="btn-save" id="btnSubmitLicense" onclick="submitLicenseKey()">Verify & Unlock</button>
                 <button class="btn-back" style="margin:0;" onclick="closeLicenseModal()">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- DELETE ACCOUNT CONFIRM MODAL -->
-    <div id="deleteAccountModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:10030; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:350px; padding:25px; border-radius:16px; border:1px solid var(--danger); text-align:center;">
-            <div style="font-size: 40px; margin-bottom: 10px;">⚠️</div>
-            <h3 style="margin-top:0; color:var(--danger);">Delete Account</h3>
-            <p style="color:#94a3b8; font-size:13px; margin-bottom:15px;">Warning: This will permanently delete your company, all delivery men, customers, and transactions. This action <b>CANNOT</b> be undone.</p>
-            <input type="password" id="delAccountPass" placeholder="Enter Password to Confirm" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid var(--danger); border-radius:8px; background:rgba(0,0,0,0.3); color:white;">
-            <div style="display:flex; gap:10px;">
-                <button class="btn-save" style="background:var(--danger); flex:1;" id="btnConfirmDeleteAcc" onclick="executeDeleteAccount()">Delete Everything</button>
-                <button class="btn-back" style="margin:0; flex:1;" onclick="document.getElementById('deleteAccountModal').classList.add('hidden')">Cancel</button>
             </div>
         </div>
     </div>
@@ -1886,12 +1865,6 @@
             const pin = document.getElementById('regPincode').value;
             if (pin && !finalAddress.includes(pin)) finalAddress += ` - Pincode: ${pin}`;
 
-            const pass = document.getElementById('regPass').value;
-            const passConfirm = document.getElementById('regPassConfirm').value;
-            if (pass !== passConfirm) {
-                return alert("Passwords do not match!", "error");
-            }
-
             const data = {
                 name: document.getElementById('regName').value, company: document.getElementById('regCompany').value,
                 username: document.getElementById('regUsername').value, city: document.getElementById('regCity').value, 
@@ -1904,11 +1877,8 @@
             
             const res = await fetch(`${API_BASE}/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             const result = await res.json();
-            if(result.success) { 
-                alert(`Account Created Successfully!\n🎁 You have received a 15-Day Free Trial.\n\nYour Unique Login ID is: ${result.login_id}\n\nPlease note this ID to login.`, "success"); 
-                showLogin('Owner'); 
-            }
-            else alert(result.message, "error");
+            if(result.success) { alert(`Account Created Successfully!\n\nYour Unique Login ID is: ${result.login_id}\n\nPlease note this ID to login.`); showLogin('Owner'); }
+            else alert(result.message);
         }
 
         async function handleAuth(isAutoLogin = false) {
@@ -2135,7 +2105,6 @@
                 document.getElementById('row-email').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
                 document.getElementById('row-addr').classList.toggle('hidden', currentUser.type === 'Milk Man');
                 document.getElementById('row-pass').classList.toggle('hidden', currentUser.type === 'Customer');
-                document.getElementById('btn-delete-account').classList.toggle('hidden', currentUser.type !== 'Owner');
                 
                 // Set up License Display Row for Owner
                 let rowLicense = document.getElementById('row-license');
@@ -2659,40 +2628,6 @@
             btn.innerText = editIdx !== "" ? "Update & Print Bill" : "Generate & Print Bill";
         }
         
-        // --- DELETE ACCOUNT LOGIC ---
-        function confirmDeleteAccount() {
-            document.getElementById('delAccountPass').value = '';
-            document.getElementById('deleteAccountModal').classList.remove('hidden');
-        }
-        
-        async function executeDeleteAccount() {
-            const pass = document.getElementById('delAccountPass').value;
-            if(!pass) return alert("Please enter your password to confirm.", "error");
-            
-            if(!confirm("Are you absolutely sure? All your data will be permanently wiped out.")) return;
-            
-            const btn = document.getElementById('btnConfirmDeleteAcc');
-            btn.innerText = "Deleting..."; btn.disabled = true;
-            
-            try {
-                const res = await fetch(`${API_BASE}/delete_account`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ login_id: currentUser.login_id, pass: pass })
-                });
-                const result = await res.json();
-                
-                if(result.success) {
-                    alert("Account and all related data deleted successfully.", "success");
-                    document.getElementById('deleteAccountModal').classList.add('hidden');
-                    setTimeout(() => logout(), 1500);
-                } else {
-                    alert(result.message, "error");
-                }
-            } catch(e) { alert("Network error.", "error"); }
-            btn.innerText = "Delete Everything"; btn.disabled = false;
-        }
-
         function printBillHTML(serialNo, dateStr, custName, mobileNum, address, itemsArr, total) {
             let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
             let ownerAddress = currentUser.address || currentUser.addr || '';
