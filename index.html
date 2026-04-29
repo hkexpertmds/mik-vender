@@ -579,7 +579,6 @@
             <table><thead><tr><th>Item Name</th><th>Rate (₹)</th><th>Actions</th></tr></thead><tbody id="productTableBody"></tbody></table>
         </div>
     </div>
-
     <!-- REQUEST MASTER -->
     <div id="request-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
@@ -4623,6 +4622,31 @@
             triggerPrint(document.getElementById('owner-report-data').innerHTML, document.getElementById('ownerReportMonthYear').value, currentReportCustName);
         }
 
+        function downloadAccountSummary() {
+            let mmName = "All Delivery Men";
+            const filterMM = document.getElementById('accFilterMilkMan');
+            if (filterMM && filterMM.value) {
+                mmName = filterMM.options[filterMM.selectedIndex].text;
+            }
+            let monthVal = document.getElementById('accMonthYear').value;
+
+            let tableHtml = document.getElementById('monthlyReport').innerHTML;
+            tableHtml = `<div style="text-align:center; margin-bottom:10px;"><h3 style="margin-bottom:0;">Account Summary List</h3><p style="margin-top:2px;">Delivery Man: ${mmName}</p></div>` + tableHtml;
+            
+            triggerPrint(tableHtml, monthVal, "Summary");
+        }
+
+        function changeAccMonth(offset) {
+            const input = document.getElementById('accMonthYear');
+            if (!input.value) return;
+            let [year, month] = input.value.split('-').map(Number);
+            let d = new Date(year, month - 1 + offset, 1);
+            let newYear = d.getFullYear();
+            let newMonth = String(d.getMonth() + 1).padStart(2, '0');
+            input.value = `${newYear}-${newMonth}`;
+            renderAccounts();
+        }
+
         function renderAccounts() {
             const div = document.getElementById('monthlyReport');
             const monthInput = document.getElementById('accMonthYear');
@@ -4632,19 +4656,26 @@
                 monthInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
             }
             
+            const filterMM = document.getElementById('accFilterMilkMan') ? document.getElementById('accFilterMilkMan').value : null;
+
             const [selYear, selMonth] = monthInput.value.split('-').map(Number);
             let summary = {};
             
             // Naye aur Purane sabhi customers ko by default 0 balance ke sath load karna
             customers.forEach(c => {
                 if(currentUser.type !== 'Admin' && c.company !== currentUser.company) return;
-                summary[c.name] = { prevBal: 0, currentBill: 0, paid: 0 };
+                if(filterMM && c.milkman_id !== filterMM) return;
+                summary[c.name] = { prevBal: 0, currentBill: 0, paid: 0, seq: c.seq_no || 9999 };
             });
 
             transactions.forEach(t => { 
                 if (t.shift === 'General Bill') return; // Hide General Bills from Accounts
                 if(currentUser.type !== 'Admin' && t.company !== currentUser.company) return;
-                if(!summary[t.cust]) summary[t.cust] = { prevBal: 0, currentBill: 0, paid: 0 };
+                
+                let custObj = customers.find(c => c.name === t.cust);
+                if (filterMM && (!custObj || custObj.milkman_id !== filterMM)) return;
+                
+                if(!summary[t.cust]) summary[t.cust] = { prevBal: 0, currentBill: 0, paid: 0, seq: custObj ? (custObj.seq_no || 9999) : 9999 };
                 
                 let tDate = parseDateToMonthYear(t.date);
                 let amt = parseFloat(t.total) || 0;
@@ -4664,14 +4695,15 @@
             let sumPrevBal = 0, sumCurrentBill = 0, sumPaid = 0, sumFinalDue = 0;
             
             let html = `<div style="max-height: 60vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 10px;">
-                <table style="margin-top: 0; border-collapse: collapse;">
+                <table style="margin-top: 0; border-collapse: collapse; width: 100%;">
                 <thead style="position: sticky; top: 0; background: var(--card); z-index: 10;">
-                    <tr><th>Customer</th><th>Prev Bal</th><th>Current Bill</th><th>Paid</th><th>Total Due</th><th>Action</th></tr>
+                    <tr><th>Customer</th><th>Prev Bal</th><th>Current Bill</th><th>Paid</th><th>Total Due</th><th class="no-print">Action</th></tr>
                 </thead>
                 <tbody id="accTableBody">`;
                 
+            let sortedCustomers = Object.keys(summary).sort((a, b) => summary[a].seq - summary[b].seq);
             let accIndex = 0;
-            for(let c in summary) {
+            for(let c of sortedCustomers) {
                 let s = summary[c];
                 let finalDue = s.prevBal + s.currentBill - s.paid;
                 
@@ -4689,7 +4721,7 @@
                     <td>₹${s.currentBill.toFixed(2)}</td>
                     <td style="color:var(--success)">₹${s.paid.toFixed(2)}</td>
                     <td style="color:${finalColor}"><b>₹${finalDue.toFixed(2)}</b></td>
-                    <td><button class="badge" style="background:#10b981; color:white; padding: 6px 12px;" data-cust="${c.replace(/"/g, '&quot;')}" onclick="openOwnerReport(this.getAttribute('data-cust'))">📄 Generate Bill</button></td>
+                    <td class="no-print"><button class="badge" style="background:#10b981; color:white; padding: 6px 12px;" data-cust="${c.replace(/"/g, '&quot;')}" onclick="openOwnerReport(this.getAttribute('data-cust'))">📄 Bill</button></td>
                 </tr>`;
             }
             
@@ -4704,7 +4736,7 @@
                         <td style="color:var(--danger);">₹${sumCurrentBill.toFixed(2)}</td>
                         <td style="color:var(--success);">₹${sumPaid.toFixed(2)}</td>
                         <td style="color:${sumFinalColor}; font-size:16px;">₹${sumFinalDue.toFixed(2)}</td>
-                        <td></td>
+                        <td class="no-print"></td>
                     </tr>
                 </tfoot>
             </table></div>`;
