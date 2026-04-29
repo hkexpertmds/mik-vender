@@ -641,8 +641,18 @@
     <div id="accounts-user" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">💰 Accounts Summary</h2>
-            <input type="month" id="accMonthYear" onchange="renderAccounts()" style="padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px;">
-            <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="searchTable(this, 'accTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <button class="btn-save" style="background:var(--warning); color:black; padding: 8px 15px; width:auto; margin-left:auto;" onclick="downloadAccountSummary()">🖨️ Download List</button>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:center; flex-wrap: wrap; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; border:1px solid #475569;">
+            <select id="accFilterMilkMan" onchange="renderAccounts()" style="flex:1; min-width: 150px; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
+                <option value="">-- All Delivery Men --</option>
+            </select>
+            <div style="display:flex; align-items:center; gap:5px; flex:1; min-width: 200px;">
+                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeAccMonth(-1)">⬅️ Prev</button>
+                <input type="month" id="accMonthYear" onchange="renderAccounts()" style="flex:1; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
+                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeAccMonth(1)">Next ➡️</button>
+            </div>
+            <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="searchTable(this, 'accTableBody')" style="flex:1; min-width:150px; padding:8px; margin:0; border-radius:8px;">
         </div>
         <div id="monthlyReport"></div>
         <button class="btn-back" onclick="showView('main-menu')">⬅️ Back to Menu</button>
@@ -855,8 +865,8 @@
                 <div style="margin-top: 25px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; font-size: 13px; text-align: center; border: 1px solid #475569;">
                     <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--warning);">Still facing issues? Contact Us:</p>
                     <h4 style="margin: 0 0 8px 0; color: var(--primary);">Expert Computer Services</h4>
-                    <p style="margin: 4px 0;">Rishi Bairagi: <a href="tel:6263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
-                    <p style="margin: 4px 0;">Harish Kumawat: <a href="tel:9425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
+                    <p style="margin: 4px 0;">Rishi Bairagi: <a href="https://wa.me/916263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
+                    <p style="margin: 4px 0;">Harish Kumawat: <a href="https://wa.me/919425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
                     <p style="margin: 4px 0;">Email: <a href="mailto:hkexpertmds@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: bold;">hkexpertmds@gmail.com</a></p>
                 </div>
             </div>
@@ -2052,7 +2062,18 @@
             const id = sessionStorage.getItem('lastView');
             if(id === 'user-master') { populateRouteDropdown(); renderUsers(); }
             if(id === 'ledger-master') { renderCustomers(); renderTrans(); if(currentUser.type === 'Milk Man') renderTransFeed(); }
-            if(id === 'accounts-user') renderAccounts();
+            if(id === 'accounts-user') {
+            let accFilterSel = document.getElementById('accFilterMilkMan');
+            if (accFilterSel) {
+                let oldVal = accFilterSel.value;
+                accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>';
+                users.filter(u => u.type === 'Milk Man').forEach(u => {
+                    accFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
+                });
+                if(oldVal) accFilterSel.value = oldVal;
+            }
+            renderAccounts();
+        }
             if(id === 'customer-self-view') { renderSelfLedger(); renderSelfCustItems(); renderCustomerRequests(); }
             if(id === 'product-master') { renderProducts(); }
             if(id === 'request-master') { renderOwnerRequests(); }
@@ -4665,7 +4686,7 @@
             customers.forEach(c => {
                 if(currentUser.type !== 'Admin' && c.company !== currentUser.company) return;
                 if(filterMM && c.milkman_id !== filterMM) return;
-                summary[c.name] = { prevBal: 0, currentBill: 0, paid: 0, seq: c.seq_no || 9999 };
+                summary[c.name] = { prevBal: 0, currentBill: 0, paid: 0, seq: c.seq_no || c.seq_no_eve || 9999 };
             });
 
             transactions.forEach(t => { 
@@ -4675,7 +4696,7 @@
                 let custObj = customers.find(c => c.name === t.cust);
                 if (filterMM && (!custObj || custObj.milkman_id !== filterMM)) return;
                 
-                if(!summary[t.cust]) summary[t.cust] = { prevBal: 0, currentBill: 0, paid: 0, seq: custObj ? (custObj.seq_no || 9999) : 9999 };
+                if(!summary[t.cust]) summary[t.cust] = { prevBal: 0, currentBill: 0, paid: 0, seq: custObj ? (custObj.seq_no || custObj.seq_no_eve || 9999) : 9999 };
                 
                 let tDate = parseDateToMonthYear(t.date);
                 let amt = parseFloat(t.total) || 0;
@@ -4721,7 +4742,7 @@
                     <td>₹${s.currentBill.toFixed(2)}</td>
                     <td style="color:var(--success)">₹${s.paid.toFixed(2)}</td>
                     <td style="color:${finalColor}"><b>₹${finalDue.toFixed(2)}</b></td>
-                <td class="no-print"><button class="badge" style="background:#10b981; color:white; padding: 6px 12px;" data-cust="${c.replace(/"/g, '&quot;')}" onclick="openOwnerReport(this.getAttribute('data-cust'))">📄 Bill</button></td>
+                    <td class="no-print"><button class="badge" style="background:#10b981; color:white; padding: 6px 12px;" data-cust="${c.replace(/"/g, '&quot;')}" onclick="openOwnerReport(this.getAttribute('data-cust'))">📄 Bill</button></td>
                 </tr>`;
             }
             
@@ -4736,7 +4757,7 @@
                         <td style="color:var(--danger);">₹${sumCurrentBill.toFixed(2)}</td>
                         <td style="color:var(--success);">₹${sumPaid.toFixed(2)}</td>
                         <td style="color:${sumFinalColor}; font-size:16px;">₹${sumFinalDue.toFixed(2)}</td>
-                    <td class="no-print"></td>
+                        <td class="no-print"></td>
                     </tr>
                 </tfoot>
             </table></div>`;
