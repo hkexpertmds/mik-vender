@@ -855,8 +855,8 @@
                 <div style="margin-top: 25px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; font-size: 13px; text-align: center; border: 1px solid #475569;">
                     <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--warning);">Still facing issues? Contact Us:</p>
                     <h4 style="margin: 0 0 8px 0; color: var(--primary);">Expert Computer Services</h4>
-                    <p style="margin: 4px 0;">Rishi Bairagi: <a href="https://wa.me/916263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
-                    <p style="margin: 4px 0;">Harish Kumawat: <a href="https://wa.me/919425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
+                    <p style="margin: 4px 0;">Rishi Bairagi: <a href="tel:6263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
+                    <p style="margin: 4px 0;">Harish Kumawat: <a href="tel:9425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
                     <p style="margin: 4px 0;">Email: <a href="mailto:hkexpertmds@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: bold;">hkexpertmds@gmail.com</a></p>
                 </div>
             </div>
@@ -4721,7 +4721,7 @@
                     <td>₹${s.currentBill.toFixed(2)}</td>
                     <td style="color:var(--success)">₹${s.paid.toFixed(2)}</td>
                     <td style="color:${finalColor}"><b>₹${finalDue.toFixed(2)}</b></td>
-                    <td class="no-print"><button class="badge" style="background:#10b981; color:white; padding: 6px 12px;" data-cust="${c.replace(/"/g, '&quot;')}" onclick="openOwnerReport(this.getAttribute('data-cust'))">📄 Bill</button></td>
+                <td class="no-print"><button class="badge" style="background:#10b981; color:white; padding: 6px 12px;" data-cust="${c.replace(/"/g, '&quot;')}" onclick="openOwnerReport(this.getAttribute('data-cust'))">📄 Bill</button></td>
                 </tr>`;
             }
             
@@ -4736,7 +4736,7 @@
                         <td style="color:var(--danger);">₹${sumCurrentBill.toFixed(2)}</td>
                         <td style="color:var(--success);">₹${sumPaid.toFixed(2)}</td>
                         <td style="color:${sumFinalColor}; font-size:16px;">₹${sumFinalDue.toFixed(2)}</td>
-                        <td class="no-print"></td>
+                    <td class="no-print"></td>
                     </tr>
                 </tfoot>
             </table></div>`;
