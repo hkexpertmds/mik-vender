@@ -4662,10 +4662,26 @@
             }
             let monthVal = document.getElementById('accMonthYear').value;
 
-            let tableHtml = document.getElementById('monthlyReport').innerHTML;
-            tableHtml = `<div style="text-align:center; margin-bottom:10px;"><h3 style="margin-bottom:0;">Account Summary List</h3><p style="margin-top:2px;">Delivery Man: ${mmName}</p></div>` + tableHtml;
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = document.getElementById('monthlyReport').innerHTML;
             
-            triggerPrint(tableHtml, monthVal, "Summary");
+             // Remove 'Action' column and "Bill" buttons
+            let noPrintEls = tempDiv.querySelectorAll('.no-print');
+            noPrintEls.forEach(el => el.remove());
+            
+            // Fix sticky headers/footers so all pages print smoothly
+            let thead = tempDiv.querySelector('thead');
+            if (thead) thead.style.position = 'static';
+            let tfoot = tempDiv.querySelector('tfoot');
+            if (tfoot) { tfoot.style.position = 'static'; tfoot.style.boxShadow = 'none'; }
+            
+            // Extract pure table without max-height scrollable wrapper
+            let tableEl = tempDiv.querySelector('table');
+            let tableHtml = tableEl ? tableEl.outerHTML : tempDiv.innerHTML;
+
+            let printContent = `<div style="text-align:center; margin-bottom:10px;"><h3 style="margin-bottom:0;">Account Summary List</h3><p style="margin-top:2px;">Delivery Man: ${mmName}</p></div>` + tableHtml;
+            
+            triggerPrint(printContent, monthVal, "Summary");
         }
 
         function changeAccMonth(offset) {
