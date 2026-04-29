@@ -2179,7 +2179,18 @@
                     switchLedger('cust'); // Default to customers for Owner/Admin
                 }
             }
-            if(id === 'accounts-user') renderAccounts();
+           if(id === 'accounts-user') {
+                let accFilterSel = document.getElementById('accFilterMilkMan');
+                if (accFilterSel) {
+                    let oldVal = accFilterSel.value;
+                    accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>';
+                    users.filter(u => u.type === 'Milk Man').forEach(u => {
+                        accFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
+                    });
+                    if(oldVal) accFilterSel.value = oldVal;
+                }
+                renderAccounts();
+            }
             if(id === 'customer-self-view') { 
                 renderSelfLedger(); 
                 renderSelfCustItems(); 
