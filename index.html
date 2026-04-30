@@ -1034,6 +1034,9 @@
             }
         }
         function convertToDDMMYYYY(yyyy_mm_dd) {
+             if (yyyy_mm_dd instanceof Date) {
+                return `${String(yyyy_mm_dd.getDate()).padStart(2, '0')}-${String(yyyy_mm_dd.getMonth() + 1).padStart(2, '0')}-${yyyy_mm_dd.getFullYear()}`;
+            }
             if(!yyyy_mm_dd) return "";
             let date_str = yyyy_mm_dd.toString().trim().replace(/\//g, '-');
             let p = date_str.split('-');
@@ -2357,7 +2360,8 @@
                 data.seq_no = customers[idx].seq_no || 1;
             } else {
                 let mmCusts = customers.filter(c => c.milkman_id === data.milkman_id && (c.shift === 'Morning' || c.shift === 'Both'));
-                data.seq_no = mmCusts.length + 1;
+                const maxSeq = mmCusts.length > 0 ? Math.max(...mmCusts.map(c => c.seq_no || 0)) : 0;
+                data.seq_no = maxSeq + 1;
             }
 
             if (!isNaN(parsedSeqEve)) {
@@ -2366,7 +2370,8 @@
                 data.seq_no_eve = customers[idx].seq_no_eve || 1;
             } else {
                 let mmCustsEve = customers.filter(c => c.milkman_id === data.milkman_id && (c.shift === 'Evening' || c.shift === 'Both'));
-                data.seq_no_eve = mmCustsEve.length + 1;
+                const maxSeqEve = mmCustsEve.length > 0 ? Math.max(...mmCustsEve.map(c => c.seq_no_eve || 0)) : 0;
+                data.seq_no_eve = maxSeqEve + 1;
             }
             
             let cId = document.getElementById('cId').value.trim();
