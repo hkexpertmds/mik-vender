@@ -2700,7 +2700,6 @@
             let contactHtml = contactParts.length > 0 ? `<p style="text-align:center; margin:2px 0 10px 0; font-size:12px;">${contactParts.join(' | ')}</p>` : '';
 
             let docTitle = `GB-${serialNo}`;
-            let backendPrintCmd = `fetch('${API_BASE}/print_command', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'General Bill ${serialNo}'})}).catch(e=>{});`;
                 let printHtml = `<html><head><title>${docTitle}</title><style>
                     body { font-family: sans-serif; padding: 20px; color: black; max-width: 800px; margin: auto; }
                     h2, h4 { text-align: center; margin: 5px 0; }
@@ -3326,10 +3325,14 @@
             if(!custObj) return;
             const newShift = document.getElementById('selfDailyShiftSelect').value;
             custObj.shift = newShift;
-            await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
-            alert("Shift updated successfully!", "success");
-            document.getElementById('my-current-shift').innerText = `(${newShift})`;
-            renderTempChangeItems();
+            try {
+                await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+                alert("Shift updated successfully!", "success");
+                document.getElementById('my-current-shift').innerText = `(${newShift})`;
+                renderTempChangeItems();
+            } catch(e) {
+                alert("Network Error: Failed to update shift.", "error");
+            }
         }
         
         async function addSelfCustItem() {
@@ -3349,11 +3352,15 @@
             
             custObj.defItem = JSON.stringify(items);
             const btn = window.event ? window.event.target : null; if(btn) btn.innerText = "...";
-            await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
-            document.getElementById('selfQtyAdd').value = ''; document.getElementById('selfItemAdd').value = ''; document.getElementById('selfRateAdd').value = '';
+            try {
+                await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+                document.getElementById('selfQtyAdd').value = ''; document.getElementById('selfItemAdd').value = ''; document.getElementById('selfRateAdd').value = '';
+                renderSelfCustItems();
+                renderTempChangeItems();
+            } catch(e) {
+                alert("Network Error: Failed to add item.", "error");
+            }
             if(btn) btn.innerText = "Add / Update";
-            renderSelfCustItems();
-            renderTempChangeItems();
         }
         
         async function removeSelfCustItem(idx) {
@@ -3363,9 +3370,13 @@
             let items = getCustItems(custObj);
             items.splice(idx, 1);
             custObj.defItem = JSON.stringify(items);
-            await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
-            renderSelfCustItems();
-            renderTempChangeItems();
+            try {
+                await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+                renderSelfCustItems();
+                renderTempChangeItems();
+            } catch(e) {
+                alert("Network Error: Failed to remove item.", "error");
+            }
         }
 
         // --- SELF VIEW TEMP CHANGE LOGIC ---
@@ -3511,6 +3522,7 @@
                     if (existingItemsTrans) data.id = existingItemsTrans.id;
                     let res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                     let savedData = await res.json();
+                    if(savedData.success === false) throw new Error(savedData.message);
                     if(existingItemsTrans) { let tIdx = transactions.findIndex(t=>t.id===existingItemsTrans.id); transactions[tIdx] = savedData; } else transactions.push(savedData);
                 } else if (existingItemsTrans) {
                     await fetch(`${API_BASE}/transactions/${existingItemsTrans.id}`, { method: 'DELETE' });
@@ -3521,6 +3533,7 @@
                     if (existingPayTrans) pData.id = existingPayTrans.id;
                     let res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pData) });
                     let savedData = await res.json();
+                    if(savedData.success === false) throw new Error(savedData.message);
                     if(existingPayTrans) { let tIdx = transactions.findIndex(t=>t.id===existingPayTrans.id); transactions[tIdx] = savedData; } else transactions.push(savedData);
                 } else if (existingPayTrans) {
                     await fetch(`${API_BASE}/transactions/${existingPayTrans.id}`, { method: 'DELETE' });
@@ -3947,7 +3960,12 @@
             if(promises.length > 0) {
                 let btn = window.event ? window.event.target : null; 
                 if(btn) btn.innerText = "Saving...";
-                await Promise.all(promises);
+                try {
+                    await Promise.all(promises);
+                } catch(e) {
+                    alert("Warning: Some sequences may not have been saved due to network issues.", "warning");
+                    console.error(e);
+                }
                 if(btn) btn.innerText = "Update & Save";
                 renderTransFeed();
                 if(document.getElementById('ledger-master').classList.contains('hidden') === false && currentUser.type !== 'Milk Man') { renderCustomers(); }
@@ -4042,6 +4060,7 @@
 
                     let res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                     let savedData = await res.json();
+                    if(savedData.success === false) throw new Error(savedData.message);
                     if(existingItemsTrans) { let tIdx = transactions.findIndex(t=>t.id===existingItemsTrans.id); transactions[tIdx] = savedData; }
                     else transactions.push(savedData);
                 } else if (existingItemsTrans) {
@@ -4055,6 +4074,7 @@
 
                     let res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(pData) });
                     let savedData = await res.json();
+                    if(savedData.success === false) throw new Error(savedData.message);
                     if(existingPayTrans) { let tIdx = transactions.findIndex(t=>t.id===existingPayTrans.id); transactions[tIdx] = savedData; }
                     else transactions.push(savedData);
                 } else if (existingPayTrans) {
@@ -4138,16 +4158,18 @@
             document.getElementById('editTransIdx').value = i; 
             document.getElementById('transModalTitle').innerText = "✏️ Edit Entry";
             
-            let dObj = new Date(t.date);
-            if (isNaN(dObj) && (t.date.includes('/') || t.date.includes('-'))) {
+            let formattedDate = "";
+            if (t.date && (t.date.includes('/') || t.date.includes('-'))) {
                 let p = t.date.split(/[-/]/);
                 if (p.length === 3) {
-                    if (p[0].length === 4) dObj = new Date(`${p[0]}-${p[1]}-${p[2]}`);
-                    else dObj = new Date(`${p[2]}-${p[1]}-${p[0]}`);
+                    if (p[0].length === 4) formattedDate = `${p[0]}-${p[1].padStart(2,'0')}-${p[2].padStart(2,'0')}`;
+                    else formattedDate = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
                 }
+            } else if (!isNaN(new Date(t.date))) {
+                let d = new Date(t.date);
+                formattedDate = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
             }
-            if(!isNaN(dObj)) document.getElementById('tDateText').value = dObj.toISOString().split('T')[0];
-            else document.getElementById('tDateText').value = '';
+            document.getElementById('tDateText').value = formattedDate;
             
             document.getElementById('tDateText').readOnly = true; document.getElementById('tDateText').style.opacity = "0.7";
             
@@ -4973,8 +4995,6 @@
                 if(currentUser.type === 'Customer' && !currentUser.login_id) currentUser.login_id = currentUser.cid;
                 if(!currentUser.company) currentUser.company = 'Default';
                 
-                users = []; customers = []; transactions = []; products = []; requests = []; routes = [];
-                if (currentUser.type === 'Customer') customers.push(currentUser);
                 let offlineData = localStorage.getItem('dairyOfflineData_' + currentUser.login_id);
                 users = []; customers = []; transactions = []; products = []; requests = []; routes = []; licenses = [];
                 if (offlineData) {
@@ -5040,9 +5060,13 @@
                 requester_company: currentUser.company
             };
 
-            const response = await fetch(`${API_BASE}/reset_password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-            const result = await response.json();
-            alert(result.message);
+            try {
+                const response = await fetch(`${API_BASE}/reset_password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const result = await response.json();
+                alert(result.message, result.success ? 'success' : 'error');
+            } catch(e) {
+                alert("Network Error: Failed to reset password.", "error");
+            }
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
