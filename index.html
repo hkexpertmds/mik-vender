@@ -2997,8 +2997,8 @@
             } else {
                 users.forEach(u => { 
                     if(u.type === 'Milk Man') {
-                        let uComp = u.company || currentUser.company;
-                        if (!isAdmin() && uComp !== currentUser.company) return;
+                        let uComp = u.company || currentUser?.company;
+                        if (!isAdmin() && uComp !== currentUser?.company) return;
                         mmHtml += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; 
                     }
                 });
@@ -3014,8 +3014,8 @@
 
             let html = '';
             customers.sort((a,b) => (a.seq_no||999) - (b.seq_no||999)).forEach((c, i) => {
-                let cComp = c.company || currentUser.company;
-                if(!isAdmin() && cComp !== currentUser.company) return;
+                let cComp = c.company || currentUser?.company;
+                if(!isAdmin() && cComp !== currentUser?.company) return;
                 if(isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
                 if(isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if(selectedCustMM && c.milkman_id !== selectedCustMM) return;
@@ -3235,8 +3235,8 @@
             let selectedOwner = (ownerSel && !ownerSel.classList.contains('hidden')) ? ownerSel.value : null;
 
             customers.sort((a,b) => (a.seq_no||999) - (b.seq_no||999)).forEach((c, i) => {
-                let cComp = c.company || currentUser.company;
-                if(!isAdmin() && cComp !== currentUser.company) return;
+                let cComp = c.company || currentUser?.company;
+                if(!isAdmin() && cComp !== currentUser?.company) return;
                 if(isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
                 if(isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if(selectedMM && c.milkman_id !== selectedMM) return;
@@ -3269,8 +3269,8 @@
             let foundEntries = false;
             transactions.slice().reverse().forEach((t, i) => { 
                 const realIdx = transactions.length - 1 - i;
-                let tComp = t.company || currentUser.company;
-                if (!isAdmin() && tComp !== currentUser.company) return;
+                let tComp = t.company || currentUser?.company;
+                if (!isAdmin() && tComp !== currentUser?.company) return;
                 if (isAdmin() && selectedOwner && (t.company || 'Unknown') !== selectedOwner) return;
                 
                 // Filter by the new date picker
@@ -3749,8 +3749,8 @@
 
             transactions.forEach(t => {
                 if (t.shift === 'General Bill') return; // Hide General Bills
-                let tComp = t.company || currentUser.company;
-                if (!isAdmin() && tComp !== currentUser.company) return;
+                let tComp = t.company || currentUser?.company;
+                if (!isAdmin() && tComp !== currentUser?.company) return;
                 if (isAdmin() && selectedOwner && (t.company || 'Unknown') !== selectedOwner) return;
                 // Robust matching: Ignore exact company strictness locally & trim spaces
                 let tDateStr = convertToDDMMYYYY((t.date || '').trim());
@@ -3770,8 +3770,8 @@
             let pending = [], completed = [];
 
             customers.forEach((c, i) => {
-                let cComp = c.company || currentUser.company;
-                if (!isAdmin() && cComp !== currentUser.company) return;
+                let cComp = c.company || currentUser?.company;
+                if (!isAdmin() && cComp !== currentUser?.company) return;
                 if (isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
                 if (isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if (selectedMM && c.milkman_id !== selectedMM) return;
@@ -3904,8 +3904,8 @@
         let totalCustomersForShift = 0;
 
         customers.forEach(c => {
-            let cComp = c.company || currentUser.company;
-            if (!isAdmin() && cComp !== currentUser.company) return;
+            let cComp = c.company || currentUser?.company;
+            if (!isAdmin() && cComp !== currentUser?.company) return;
             if (isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
             if (isMilkMan() && c.milkman_id !== currentUser.login_id) return;
             if (selectedMM && c.milkman_id !== selectedMM) return;
@@ -4035,8 +4035,8 @@
 
             let getSeq = (c) => currentFeedShift === 'Evening' ? (c.seq_no_eve || 999) : (c.seq_no || 999);
             currentSeqEditList = customers.filter(c => {
-                let cComp = c.company || currentUser.company;
-                if (!isAdmin() && cComp !== currentUser.company) return false;
+                let cComp = c.company || currentUser?.company;
+                if (!isAdmin() && cComp !== currentUser?.company) return false;
                 if (isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return false;
                 if (isMilkMan() && c.milkman_id !== currentUser.login_id) return false;
                 if (selectedMM && c.milkman_id !== selectedMM) return false;
@@ -4920,8 +4920,8 @@
             
             // Naye aur Purane sabhi customers ko by default 0 balance ke sath load karna
             customers.forEach(c => {
-                let cComp = c.company || currentUser.company;
-                if(!isAdmin() && cComp !== currentUser.company) return;
+                let cComp = c.company || currentUser?.company;
+                if(!isAdmin() && cComp !== currentUser?.company) return;
                 if(isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
                 if(filterMM && c.milkman_id !== filterMM) return;
                 summary[c.name] = { prevBal: 0, currentBill: 0, paid: 0, seq: c.seq_no || c.seq_no_eve || 9999 };
@@ -4929,8 +4929,8 @@
 
             transactions.forEach(t => { 
                 if (t.shift === 'General Bill') return; // Hide General Bills from Accounts
-                let tComp = t.company || currentUser.company;
-                if(!isAdmin() && tComp !== currentUser.company) return;
+                let tComp = t.company || currentUser?.company;
+                if(!isAdmin() && tComp !== currentUser?.company) return;
                 if(isAdmin() && selectedOwner && (t.company || 'Unknown') !== selectedOwner) return;
                 
                 let custObj = customers.find(c => c.name === t.cust);
@@ -5012,8 +5012,8 @@
 
                 transactions.forEach(t => {
                     if (t.shift !== 'General Bill') return;
-                    let tComp = t.company || currentUser.company;
-                    if (!isAdmin() && tComp !== currentUser.company) return;
+                    let tComp = t.company || currentUser?.company;
+                    if (!isAdmin() && tComp !== currentUser?.company) return;
                     if (isAdmin() && selectedOwner && (t.company || 'Unknown') !== selectedOwner) return;
 
                     let tDate = parseDateToMonthYear(t.date);
