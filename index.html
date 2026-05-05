@@ -2177,7 +2177,7 @@
                 
                 let rowDelAcc = document.getElementById('row-delete-account');
                 if(rowDelAcc) rowDelAcc.classList.add('hidden'); // Removed from owner profile as per request
-                document.getElementById('row-email').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
+                document.getElementById('row-email').classList.toggle('hidden', currentUser.type !== 'Owner' && !isAdmin());
                 document.getElementById('row-addr').classList.toggle('hidden', currentUser.type === 'Milk Man');
                 document.getElementById('row-pass').classList.toggle('hidden', currentUser.type === 'Customer');
                 
@@ -2271,6 +2271,7 @@
 
         // Check if user is Operator
         function isMilkMan() { return currentUser && currentUser.type === 'Milk Man'; }
+        function isAdmin() { return currentUser && (currentUser.type === 'Admin' || currentUser.type === 'Super Admin'); }
         function genAutoId(prefix) { return prefix + Math.floor(Math.random() * 90000 + 10000); }
 
         // --- STAFF ---
@@ -2994,7 +2995,13 @@
             if (isMilkMan()) {
                 mmHtml = `<option value="${currentUser.login_id}">${currentUser.name} (${currentUser.login_id})</option>`;
             } else {
-                users.forEach(u => { if(u.type === 'Milk Man') mmHtml += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; });
+                users.forEach(u => { 
+                    if(u.type === 'Milk Man') {
+                        let uComp = u.company || currentUser.company;
+                        if (!isAdmin() && uComp !== currentUser.company) return;
+                        mmHtml += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; 
+                    }
+                });
             }
             if(mmSelect) mmSelect.innerHTML = mmHtml;
             if (isMilkMan() && mmSelect) {
@@ -3007,10 +3014,9 @@
 
             let html = '';
             customers.sort((a,b) => (a.seq_no||999) - (b.seq_no||999)).forEach((c, i) => {
-                let cComp = c.company || 'Default';
-                let myComp = currentUser.company || 'Default';
-                if(currentUser.type !== 'Admin' && cComp !== myComp) return;
-                if(currentUser.type === 'Admin' && selectedOwner && cComp !== selectedOwner) return;
+                let cComp = c.company || currentUser.company;
+                if(!isAdmin() && cComp !== currentUser.company) return;
+                if(isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
                 if(isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if(selectedCustMM && c.milkman_id !== selectedCustMM) return;
                 
@@ -3229,10 +3235,9 @@
             let selectedOwner = (ownerSel && !ownerSel.classList.contains('hidden')) ? ownerSel.value : null;
 
             customers.sort((a,b) => (a.seq_no||999) - (b.seq_no||999)).forEach((c, i) => {
-                let cComp = c.company || 'Default';
-                let myComp = currentUser.company || 'Default';
-                if(currentUser.type !== 'Admin' && cComp !== myComp) return;
-                if(currentUser.type === 'Admin' && selectedOwner && cComp !== selectedOwner) return;
+                let cComp = c.company || currentUser.company;
+                if(!isAdmin() && cComp !== currentUser.company) return;
+                if(isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
                 if(isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if(selectedMM && c.milkman_id !== selectedMM) return;
                 html += `<option value="${c.name}" data-idx="${customers.indexOf(c)}">${c.name}</option>`;
@@ -3264,10 +3269,9 @@
             let foundEntries = false;
             transactions.slice().reverse().forEach((t, i) => { 
                 const realIdx = transactions.length - 1 - i;
-                let tComp = t.company || 'Default';
-                let myComp = currentUser.company || 'Default';
-                if (currentUser.type !== 'Admin' && tComp !== myComp) return;
-                if (currentUser.type === 'Admin' && selectedOwner && tComp !== selectedOwner) return;
+                let tComp = t.company || currentUser.company;
+                if (!isAdmin() && tComp !== currentUser.company) return;
+                if (isAdmin() && selectedOwner && (t.company || 'Unknown') !== selectedOwner) return;
                 
                 // Filter by the new date picker
                 if (convertToDDMMYYYY(t.date) !== filterDate) return;
@@ -3745,10 +3749,9 @@
 
             transactions.forEach(t => {
                 if (t.shift === 'General Bill') return; // Hide General Bills
-                let tComp = t.company || 'Default';
-                let myComp = currentUser.company || 'Default';
-                if (currentUser.type !== 'Admin' && tComp !== myComp) return;
-                if (currentUser.type === 'Admin' && selectedOwner && tComp !== selectedOwner) return;
+                let tComp = t.company || currentUser.company;
+                if (!isAdmin() && tComp !== currentUser.company) return;
+                if (isAdmin() && selectedOwner && (t.company || 'Unknown') !== selectedOwner) return;
                 // Robust matching: Ignore exact company strictness locally & trim spaces
                 let tDateStr = convertToDDMMYYYY((t.date || '').trim());
                 let tShift = (t.shift || '').trim().toLowerCase();
@@ -3767,10 +3770,9 @@
             let pending = [], completed = [];
 
             customers.forEach((c, i) => {
-                let cComp = c.company || 'Default';
-                let myComp = currentUser.company || 'Default';
-                if (currentUser.type !== 'Admin' && cComp !== myComp) return;
-                if (currentUser.type === 'Admin' && selectedOwner && cComp !== selectedOwner) return;
+                let cComp = c.company || currentUser.company;
+                if (!isAdmin() && cComp !== currentUser.company) return;
+                if (isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
                 if (isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if (selectedMM && c.milkman_id !== selectedMM) return;
                 let cShift = c.shift || 'Morning'; // Fallback for old data
@@ -3902,10 +3904,9 @@
         let totalCustomersForShift = 0;
 
         customers.forEach(c => {
-            let cComp = c.company || 'Default';
-            let myComp = currentUser.company || 'Default';
-            if (currentUser.type !== 'Admin' && cComp !== myComp) return;
-            if (currentUser.type === 'Admin' && selectedOwner && cComp !== selectedOwner) return;
+            let cComp = c.company || currentUser.company;
+            if (!isAdmin() && cComp !== currentUser.company) return;
+            if (isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
             if (isMilkMan() && c.milkman_id !== currentUser.login_id) return;
             if (selectedMM && c.milkman_id !== selectedMM) return;
             if (c.shift !== currentFeedShift && c.shift !== 'Both') return;
@@ -4034,10 +4035,9 @@
 
             let getSeq = (c) => currentFeedShift === 'Evening' ? (c.seq_no_eve || 999) : (c.seq_no || 999);
             currentSeqEditList = customers.filter(c => {
-                let cComp = c.company || 'Default';
-                let myComp = currentUser.company || 'Default';
-                if (currentUser.type !== 'Admin' && cComp !== myComp) return false;
-                if (currentUser.type === 'Admin' && selectedOwner && cComp !== selectedOwner) return false;
+                let cComp = c.company || currentUser.company;
+                if (!isAdmin() && cComp !== currentUser.company) return false;
+                if (isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return false;
                 if (isMilkMan() && c.milkman_id !== currentUser.login_id) return false;
                 if (selectedMM && c.milkman_id !== selectedMM) return false;
                 if (c.shift !== 'Both' && c.shift !== currentFeedShift) return false;
@@ -4920,20 +4920,18 @@
             
             // Naye aur Purane sabhi customers ko by default 0 balance ke sath load karna
             customers.forEach(c => {
-                let cComp = c.company || 'Default';
-                let myComp = currentUser.company || 'Default';
-                if(currentUser.type !== 'Admin' && cComp !== myComp) return;
-                if(currentUser.type === 'Admin' && selectedOwner && cComp !== selectedOwner) return;
+                let cComp = c.company || currentUser.company;
+                if(!isAdmin() && cComp !== currentUser.company) return;
+                if(isAdmin() && selectedOwner && (c.company || 'Unknown') !== selectedOwner) return;
                 if(filterMM && c.milkman_id !== filterMM) return;
                 summary[c.name] = { prevBal: 0, currentBill: 0, paid: 0, seq: c.seq_no || c.seq_no_eve || 9999 };
             });
 
             transactions.forEach(t => { 
                 if (t.shift === 'General Bill') return; // Hide General Bills from Accounts
-                let tComp = t.company || 'Default';
-                let myComp = currentUser.company || 'Default';
-                if(currentUser.type !== 'Admin' && tComp !== myComp) return;
-                if(currentUser.type === 'Admin' && selectedOwner && tComp !== selectedOwner) return;
+                let tComp = t.company || currentUser.company;
+                if(!isAdmin() && tComp !== currentUser.company) return;
+                if(isAdmin() && selectedOwner && (t.company || 'Unknown') !== selectedOwner) return;
                 
                 let custObj = customers.find(c => c.name === t.cust);
                 if (filterMM && (!custObj || custObj.milkman_id !== filterMM)) return;
@@ -5014,10 +5012,9 @@
 
                 transactions.forEach(t => {
                     if (t.shift !== 'General Bill') return;
-                    let tComp = t.company || 'Default';
-                    let myComp = currentUser.company || 'Default';
-                    if (currentUser.type !== 'Admin' && tComp !== myComp) return;
-                    if (currentUser.type === 'Admin' && selectedOwner && tComp !== selectedOwner) return;
+                    let tComp = t.company || currentUser.company;
+                    if (!isAdmin() && tComp !== currentUser.company) return;
+                    if (isAdmin() && selectedOwner && (t.company || 'Unknown') !== selectedOwner) return;
 
                     let tDate = parseDateToMonthYear(t.date);
                     if (tDate.year === selYear && tDate.month === selMonth) {
