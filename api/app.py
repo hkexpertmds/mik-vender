@@ -320,21 +320,6 @@ def save_data(table_name):
         
     db_table = 'sys_' + (table_name if table_name != 'transactions' else 'trans')
 
-    # --- BACKEND DATA VALIDATIONS ---
-    try:
-        if table_name == 'products' and float(data.get('rate') or 0) < 0:
-            return jsonify({"success": False, "message": "Rate cannot be negative!"})
-        if table_name == 'transactions' and (float(data.get('rate') or 0) < 0 or float(data.get('total') or 0) < 0):
-            return jsonify({"success": False, "message": "Amount/Rate cannot be negative!"})
-    except ValueError:
-        pass
-        
-    if table_name == 'customers':
-        def_item = data.get('defItem', '[]')
-        if not def_item or def_item == '[]' or def_item == 'null':
-            return jsonify({"success": False, "message": "At least one product must be assigned to the customer!"})
-    # --------------------------------
-
     # --- UNIQUE VALIDATION FOR MOBILE & EMAIL ---
     item_id_val = data.get('id')
     mobile = (data.get('mobile') or '').strip() if data.get('mobile') else None
@@ -515,36 +500,31 @@ def delete_account():
     data = request.json
     login_id = data.get('login_id')
     password = data.get('pass')
-    admin_id = data.get('admin_id')
-    company = data.get('company')
     
     if not login_id or not password:
         return jsonify({"success": False, "message": "Please provide Login ID and Password!"})
         
     try:
-        if admin_id:
-            admin_res = supabase.table('sys_users').select('pass, type').eq('login_id', admin_id).execute()
-            if not admin_res.data or admin_res.data[0].get('type') != 'Admin':
-                return jsonify({"success": False, "message": "Unauthorized Admin access!"})
-            if not check_password_hash(admin_res.data[0].get('pass', ''), password):
-                return jsonify({"success": False, "message": "Admin Password Incorrect!"})
-            if company == 'SuperAdmin':
-                return jsonify({"success": False, "message": "SuperAdmin account cannot be deleted!"})
-        else:
-            user_res = supabase.table('sys_users').select('id, pass, type, company').eq('login_id', login_id).execute()
-            if not user_res.data:
-                return jsonify({"success": False, "message": "Account not found!"})
-                
-            user = user_res.data[0]
-            if user.get('type') != 'Owner':
-                return jsonify({"success": False, "message": "Only Owner can delete the company account!"})
-                
-            if not check_password_hash(user.get('pass', ''), password):
-                return jsonify({"success": False, "message": "Incorrect Password! Account deletion failed."})
-                
-            company = user.get('company')
-            if company == 'SuperAdmin':
-                return jsonify({"success": False, "message": "SuperAdmin account cannot be deleted!"})
+        user_res = supabase.table('sys_users').select('id, pass, type, company').eq('login_id', login_id).execute()
+        if not user_res.data:
+            return jsonify({"success": False, "message": "Account not found!"})
+            
+        user = user_res.data[0]
+        if user.get('type') != 'Owner':
+            return jsonify({"success": False, "message": "Only Owner can delete the company account!"})
+            
+        pass_db = user.get('pass', '')
+        is_valid = False
+        if pass_db:
+            try: is_valid = check_password_hash(pass_db, password)
+            except Exception: pass
+            
+        if not is_valid:
+            return jsonify({"success": False, "message": "Incorrect Password! Account deletion failed."})
+            
+        company = user.get('company')
+        if company == 'SuperAdmin':
+            return jsonify({"success": False, "message": "SuperAdmin account cannot be deleted!"})
             
         # Delete associated data for this company
         supabase.table('sys_trans').delete().eq('company', company).execute()
