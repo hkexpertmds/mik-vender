@@ -471,6 +471,9 @@
 
             <!-- UNIFIED FEED CONTROLS PANEL -->
             <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #475569; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                <div style="display:flex; gap:10px; align-items:center; flex: 1 1 100%;">
+                    <input type="text" id="searchFeed" placeholder="🔍 Search Customer in Feed..." onkeyup="renderTransFeed()" style="flex:1; padding:8px; border-radius:8px; margin:0; background:var(--input); color:white; border:1px solid #475569;">
+                </div>
                 <div style="display:flex; gap:10px; align-items:center; flex: 1 1 200px;">
                     <select id="filterMilkMan" onchange="populateTransCustSelect(); renderTransFeed(); renderTrans();" class="hidden" style="flex:1; padding: 8px; background:var(--primary); color:white; border:none; border-radius: 6px; font-weight:bold; margin:0;"></select>
                     <button class="badge" style="background:var(--warning); color:black; padding:8px 12px; font-size:13px; font-weight:bold; border-radius:6px; white-space:nowrap; margin-left:auto;" onclick="openSeqModal()">🔢 Edit Seq</button>
@@ -3645,6 +3648,9 @@
             let filterSel = document.getElementById('filterMilkMan');
             let selectedMM = (filterSel && !filterSel.classList.contains('hidden')) ? filterSel.value : null;
 
+            let searchFeedInput = document.getElementById('searchFeed');
+            let searchQuery = searchFeedInput ? searchFeedInput.value.toLowerCase().trim() : '';
+
             let doneToday = new Map();
             let targetShift = currentFeedShift.toLowerCase();
 
@@ -3672,6 +3678,7 @@
                 if (selectedMM && c.milkman_id !== selectedMM) return;
                 let cShift = c.shift || 'Morning'; // Fallback for old data
                 if (cShift !== currentFeedShift && cShift !== 'Both') return; // Filter By Shift
+                if (searchQuery && !(c.name && c.name.toLowerCase().includes(searchQuery))) return; // SEARCH FILTER
                 
                 let entry = doneToday.get((c.name || '').trim().toLowerCase());
                 
@@ -3738,12 +3745,24 @@
                     let btnTxt = entry ? "Update 📅" : "Save 📅";
                     let bgBtn = entry ? "var(--warning)" : "var(--primary)";
                     let colBtn = entry ? "black" : "white";
-                    actionButton = `<button class="btn-save" style="width:auto; padding:6px 12px; font-size:12px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
+                    actionButton = `<div style="display:flex; gap:5px;"><button class="btn-save" style="width:auto; padding:6px 12px; font-size:12px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
+                    if (entry) {
+                        actionButton += `<button class="btn-save" style="width:auto; padding:6px 10px; font-size:12px; background:var(--danger); color:white; margin:0;" onclick="deleteFeedEntry('${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Delete Entry">❌</button>`;
+                    } else {
+                        actionButton += `<button class="btn-save" style="width:auto; padding:6px 10px; font-size:12px; background:var(--danger); color:white; margin:0;" onclick="skipFeedEntry(${i}, '${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Skip Delivery">❌</button>`;
+                    }
+                    actionButton += `</div>`;
                 } else { // Today or past date
                     let btnTxt = entry ? "Update ✔" : "Done ✔";
                     let bgBtn = entry ? "var(--warning)" : "var(--primary)";
                     let colBtn = entry ? "black" : "white";
-                    actionButton = `<button class="btn-save" style="width:auto; padding:6px 12px; font-size:13px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
+                    actionButton = `<div style="display:flex; gap:5px;"><button class="btn-save" style="width:auto; padding:6px 12px; font-size:13px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
+                    if (entry) {
+                        actionButton += `<button class="btn-save" style="width:auto; padding:6px 10px; font-size:13px; background:var(--danger); color:white; margin:0;" onclick="deleteFeedEntry('${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Delete Entry">❌</button>`;
+                    } else {
+                        actionButton += `<button class="btn-save" style="width:auto; padding:6px 10px; font-size:13px; background:var(--danger); color:white; margin:0;" onclick="skipFeedEntry(${i}, '${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Skip Delivery">❌</button>`;
+                    }
+                    actionButton += `</div>`;
                 }
 
                 let payInputHtml = `
@@ -4083,6 +4102,61 @@
                 }
             } catch(e) { alert("Network error!"); console.error(e); }
             renderTransFeed(); renderTrans();
+        }
+
+        async function skipFeedEntry(idx, custName, btn) {
+            if(!confirm(`Are you sure you want to cancel/skip delivery for ${custName} today?`)) return;
+            btn.innerText = "⏳"; btn.disabled = true;
+            
+            let qtyInputs = document.querySelectorAll(`input[id^="feed-qty-${idx}-"]`);
+            if (qtyInputs.length > 0) {
+                qtyInputs.forEach(el => el.value = 0);
+            } else {
+                let dummyInput = document.createElement('input');
+                dummyInput.type = 'hidden';
+                dummyInput.id = `feed-qty-${idx}-dummy`;
+                dummyInput.dataset.item = 'Skipped';
+                dummyInput.dataset.rate = '0';
+                dummyInput.value = '0';
+                document.getElementById(`feed-items-container-${idx}`).appendChild(dummyInput);
+            }
+            
+            let extraSelects = document.querySelectorAll(`select[id^="feed-extra-item-${idx}-"]`);
+            extraSelects.forEach(sel => sel.parentElement.remove());
+
+            let payEl = document.getElementById(`feed-pay-${idx}`);
+            if(payEl) payEl.value = '';
+
+            await saveFeedEntry(idx, btn);
+        }
+
+        async function deleteFeedEntry(custName, btn) {
+            if(!confirm(`Are you sure you want to cancel/delete the delivery entry for ${custName} on ${currentFeedDateStr}?`)) return;
+            btn.innerText = "⏳"; btn.disabled = true;
+            try {
+                let targetShift = currentFeedShift.toLowerCase();
+                let cNameLower = custName.trim().toLowerCase();
+                
+                let transToDelete = transactions.filter(t => {
+                    let tDateStr = convertToDDMMYYYY((t.date || '').trim());
+                    let tShift = (t.shift || '').trim().toLowerCase();
+                    let tCust = (t.cust || '').trim().toLowerCase();
+                    return tDateStr === currentFeedDateStr && tCust === cNameLower && (tShift === targetShift || tShift === '') && t.shift !== 'General Bill';
+                });
+
+                for(let i=0; i<transToDelete.length; i++) {
+                    await fetch(`${API_BASE}/transactions/${transToDelete[i].id}`, { method: 'DELETE' });
+                    transactions = transactions.filter(t => t.id !== transToDelete[i].id);
+                }
+                
+                alert("Entry cancelled successfully.", "success");
+                renderTransFeed();
+                renderTrans();
+            } catch(e) {
+                alert("Network error, could not delete entry.", "error");
+                console.error(e);
+                btn.innerText = "❌"; btn.disabled = false;
+            }
         }
 
         // Standard helpers (Edit/Delete/Reset)
