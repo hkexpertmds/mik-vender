@@ -432,7 +432,7 @@
                 <input type="text" id="cUsername" placeholder="Create Login Username (Optional)">
                 <input type="text" id="cName" placeholder="Name" required>
                 <input type="text" id="cRoute" placeholder="Route / Area" tabindex="-1" required readonly style="opacity:0.6; cursor:not-allowed; background:rgba(0,0,0,0.3);">
-                <select id="cShift" required onchange="handleCustShiftChange()"><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option><option value="Both">🌅+🌃 Both</option></select>
+                <select id="cShift" required><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option><option value="Both">🌅+🌃 Both</option></select>
                 <div style="position: relative; grid-column: 1 / -1;">
                     <input type="password" id="cPass" placeholder="Set Customer Password" style="margin: 0; padding-right: 35px;">
                     <span onclick="togglePasswordVisibility('cPass', 'cPassEyeIcon')" id="cPassEyeIcon" title="Show/Hide Password" style="position: absolute; right: 12px; top: 10px; cursor: pointer; user-select: none; font-size: 16px;">👁️</span>
@@ -444,10 +444,6 @@
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
                         <select id="cItemAdd" style="flex: 1; min-width: 120px; margin:0;" onchange="autoFillProductRate()">
                             <option value="">-- Select Product --</option>
-                        </select>
-                        <select id="cItemShiftAdd" style="display: none; flex: 1; min-width: 100px; margin:0;">
-                            <option value="Morning">🌅 Morning</option>
-                            <option value="Evening">🌃 Evening</option>
                         </select>
                         <input type="number" id="cQtyAdd" placeholder="Def Qty" style="width: 80px; margin:0;">
                         <input type="number" id="cRateAdd" placeholder="Rate (₹)" style="width: 80px; margin:0;">
@@ -492,10 +488,6 @@
             </div>
 
             <div id="trans-tab-feed">
-             <!-- SEARCH FEED BAR -->
-            <div style="margin-bottom: 10px; display:flex;">
-                <input type="text" id="searchFeed" placeholder="🔍 Search Customer in Feed..." onkeyup="searchFeedCards(this)" style="flex:1; padding:8px; border-radius:8px; margin:0; border: 1px solid #475569; background: var(--input); color: white;">
-            </div>
             <!-- FINAL DAILY REPORT (OUTSIDE SCROLL) -->
             <div id="daily-feed-report" style="margin-bottom: 15px;"></div>
 
@@ -704,10 +696,6 @@
                 <ul id="selfItemList" style="font-size:13px; color:var(--text); padding-left:20px; margin-bottom:10px; max-height: 150px; overflow-y: auto; padding-right: 5px;"></ul>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:flex-end;">
                     <select id="selfItemAdd" style="flex:1; min-width:120px; padding:8px; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;" onchange="autoFillSelfProductRate()"></select>
-                    <select id="selfItemShiftAdd" style="display:none; flex:1; min-width:100px; padding:8px; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;">
-                        <option value="Morning">🌅 Morning</option>
-                        <option value="Evening">🌃 Evening</option>
-                    </select>
                     <input type="number" id="selfQtyAdd" placeholder="Qty" style="width:70px; padding:8px; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;">
                     <input type="number" id="selfRateAdd" placeholder="Rate" style="width:70px; padding:8px; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;" readonly>
                     <button class="btn-save" style="width:auto; padding:8px 15px;" onclick="addSelfCustItem()">Add / Update</button>
@@ -1029,19 +1017,7 @@
         function formatDate(d) {
             return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth()+1).padStart(2, '0')}-${d.getFullYear()}`;
         }
-
-        function handleCustShiftChange() {
-            let shift = document.getElementById('cShift').value;
-            document.getElementById('cSeq').style.display = (shift === 'Morning' || shift === 'Both') ? 'block' : 'none';
-            document.getElementById('cSeqEve').style.display = (shift === 'Evening' || shift === 'Both') ? 'block' : 'none';
-            let cItemShiftAdd = document.getElementById('cItemShiftAdd');
-            if(cItemShiftAdd) cItemShiftAdd.style.display = (shift === 'Both') ? 'block' : 'none';
-        }
-
-        function handleSelfShiftChange(shift) {
-            let el = document.getElementById('selfItemShiftAdd');
-            if (el) el.style.display = (shift === 'Both') ? 'block' : 'none';
-        }
+        
         // --- GLOBAL SEARCH FUNCTION ---
         function searchTable(inputElem, tbodyId) {
             let filter = inputElem.value.toLowerCase();
@@ -1362,7 +1338,6 @@
             } catch (e) {
                 console.log("Using local verification fallback...");
             }
-            handleSelfShiftChange(custObj.shift || 'Morning');
 
             const masterKey = "A1B2-C3D4-E5F6-G7H8";
             let duration = 0;
@@ -3284,10 +3259,6 @@
             const item = document.getElementById('cItemAdd').value;
             const qtyInput = document.getElementById('cQtyAdd').value;
             const rate = document.getElementById('cRateAdd').value;
-
-            let shiftVal = document.getElementById('cShift').value;
-            let itemShift = shiftVal === 'Both' ? document.getElementById('cItemShiftAdd').value : shiftVal;
-
             if(!rate) { alert("Please enter a Rate!"); return; }
             if(!item) { alert("Please select an item!"); return; }
             
@@ -3298,8 +3269,8 @@
             }
             const qty = qtyNum.toFixed(1);
 
-            currentCustDefaults = currentCustDefaults.filter(i => !(i.item === item && (i.shift === itemShift || !i.shift)));
-            currentCustDefaults.push({ item, qty, rate, shift: itemShift });
+            currentCustDefaults = currentCustDefaults.filter(i => i.item !== item);
+            currentCustDefaults.push({ item, qty, rate });
             renderCustItems();
             document.getElementById('cQtyAdd').value = '';
             document.getElementById('cRateAdd').value = '';
@@ -3310,7 +3281,7 @@
             const ul = document.getElementById('cItemList');
             let html = '';
             currentCustDefaults.forEach((d, i) => {
-                html += `<li>${d.item} ${d.shift ? `<span style="color:var(--warning); font-size:11px;">[${d.shift}]</span>` : ''} (Qty: ${d.qty || '-'}) - ₹${parseFloat(d.rate).toFixed(2)} 
+                html += `<li>${d.item} (Qty: ${d.qty || '-'}) - ₹${parseFloat(d.rate).toFixed(2)} 
                 <button type="button" class="badge" style="background:var(--danger); padding: 2px 5px; margin-left: 10px;" onclick="removeCustItem(${i})">X</button></li>`;
             });
             if(ul) ul.innerHTML = html;
@@ -3338,7 +3309,7 @@
             let html = '';
             if(items.length === 0) html = '<li>No default items set.</li>';
             items.forEach((d, i) => {
-                html += `<li style="margin-bottom:5px;"><b>${d.item}</b> ${d.shift ? `<span style="color:var(--warning); font-size:11px;">[${d.shift}]</span>` : ''} : ${d.qty || '-'} Unit (₹${parseFloat(d.rate).toFixed(2)}/u) 
+                html += `<li style="margin-bottom:5px;"><b>${d.item}</b> : ${d.qty || '-'} Unit (₹${parseFloat(d.rate).toFixed(2)}/u) 
                 <button type="button" class="badge" style="background:var(--danger); padding: 2px 5px; margin-left: 10px;" onclick="removeSelfCustItem(${i})">Remove</button></li>`;
             });
             if(ul) ul.innerHTML = html;
@@ -3354,7 +3325,6 @@
             if(!custObj) return;
             const newShift = document.getElementById('selfDailyShiftSelect').value;
             custObj.shift = newShift;
-            handleSelfShiftChange(newShift);
             try {
                 await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
                 alert("Shift updated successfully!", "success");
@@ -3371,18 +3341,14 @@
             const item = document.getElementById('selfItemAdd').value;
             const qtyInput = document.getElementById('selfQtyAdd').value;
             const rate = document.getElementById('selfRateAdd').value;
-
-            let shiftVal = document.getElementById('selfDailyShiftSelect').value;
-            let itemShift = shiftVal === 'Both' ? document.getElementById('selfItemShiftAdd').value : shiftVal;
-            
             if(!item) return alert("Please select an item!");
             let qtyNum = parseFloat(qtyInput);
             if(isNaN(qtyNum) || qtyNum <= 0) return alert("Enter valid quantity!");
             const qty = qtyNum.toFixed(1);
             
             let items = getCustItems(custObj);
-            items = items.filter(i => !(i.item === item && (i.shift === itemShift || !i.shift)));
-            items.push({ item, qty, rate, shift: itemShift });
+            items = items.filter(i => i.item !== item);
+            items.push({ item, qty, rate });
             
             custObj.defItem = JSON.stringify(items);
             const btn = window.event ? window.event.target : null; if(btn) btn.innerText = "...";
@@ -3474,7 +3440,7 @@
             });
             let savedPayAmt = existingPayTrans ? Math.abs(parseFloat(existingPayTrans.rate)) : '';
 
-            let defItems = getCustItems(custObj).filter(d => !d.shift || d.shift === shift);
+            let defItems = getCustItems(custObj);
             let itemsHtml = defItems.map((d, itemIdx) => {
                 let preFillQty = savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : (existingTrans ? '' : d.qty);
                 return `
@@ -3738,7 +3704,7 @@
                     }
                 }
                 
-                let itemsToShow = getCustItems(c).filter(d => !d.shift || d.shift === currentFeedShift);
+                let itemsToShow = getCustItems(c);
                 if (entry && entry.itemsTrans) {
                     Object.keys(savedItemsMap).forEach(savedItem => {
                         if (!itemsToShow.find(d => d.item === savedItem)) {
@@ -3780,13 +3746,6 @@
                     actionButton = `<button class="btn-save" style="width:auto; padding:6px 12px; font-size:13px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
                 }
 
-                let delBtnHtml = '';
-                if (entry && (entry.itemsTrans || entry.payTrans)) {
-                    let tId = entry.itemsTrans ? entry.itemsTrans.id : 'null';
-                    let pId = entry.payTrans ? entry.payTrans.id : 'null';
-                    delBtnHtml = `<button class="btn-save" style="width:auto; padding:6px 12px; font-size:12px; background:var(--danger); color:white; margin:0 0 0 5px;" onclick="deleteFeedEntry(this, ${tId}, ${pId})" title="Delete/Cancel Entry">🗑️</button>`;
-                }
-                
                 let payInputHtml = `
                 <div style="background:rgba(16, 185, 129, 0.05); padding:4px 8px; border-radius:6px; display:flex; align-items:center; gap:6px; border:1px solid rgba(16, 185, 129, 0.3); flex-shrink:0;">
                     <span style="font-size:11px; color:var(--success); font-weight:bold;">Pay ₹</span>
@@ -3796,19 +3755,15 @@
                 let cardBorder = entry ? '1px solid var(--success)' : '1px solid #475569';
                 let titleColor = isCompleted ? 'var(--success)' : 'var(--text)'; // Only green if completed
                 let amountBadge = entry && savedTotalAmt > 0 ? `<span style="font-size:11px; background:rgba(16, 185, 129, 0.15); color:var(--success); padding:2px 6px; border-radius:4px; margin-left:5px;">₹${savedTotalAmt.toFixed(2)}</span>` : '';
-                let cNameLower = (c.name || '').toLowerCase();
+
                 return `
-                <div class="feed-card" data-name="${cNameLower}" style="background:var(--card); border:${cardBorder}; padding: 10px 12px; border-radius:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.2); display:flex; flex-direction:column; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
+                <div style="background:var(--card); border:${cardBorder}; padding: 10px 12px; border-radius:10px; margin-bottom:12px; box-shadow:0 2px 4px rgba(0,0,0,0.2); display:flex; flex-direction:column; animation: fadeInUp 0.5s backwards; animation-delay: ${(feedIndex++) * 0.04}s;">
                     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span style="font-size:12px; color:#94a3b8; font-weight:bold;">#${getSeq(c) !== 999 ? getSeq(c) : '-'}</span>
                             <strong style="font-size:15px; color:${titleColor};">${c.name}${amountBadge}</strong>
                         </div>
-                       <div style="display:flex; align-items:center;">
-                            ${actionButton}
-                            ${delBtnHtml}
-                        </div>
+                        ${actionButton}
                     </div>
                     <div style="display:flex; flex-wrap:nowrap; gap:8px; margin-top:10px; width:100%; overflow-x:auto; padding-bottom:5px;" id="feed-items-container-${i}">
                         ${extraBtn}
@@ -3838,7 +3793,7 @@
             totalCustomersForShift++;
             
             let cTarget = 0;
-            let defItems = getCustItems(c).filter(d => !d.shift || d.shift === currentFeedShift);
+            let defItems = getCustItems(c);
             defItems.forEach(di => {
                 if(!targetItems[di.item]) targetItems[di.item] = 0;
                 targetItems[di.item] += parseFloat(di.qty || 0);
@@ -3908,29 +3863,6 @@
         } else {
             bottomSummaryHtml += `<p style="font-size:13px; color:#94a3b8; margin:0;">No active items assigned for this shift.</p>`;
         }
-
-         function searchFeedCards(input) {
-            let filter = input.value.toLowerCase();
-            let cards = document.querySelectorAll('#daily-feed-view .feed-card');
-            cards.forEach(card => {
-                let nameStr = card.getAttribute('data-name') || '';
-                card.style.display = nameStr.includes(filter) ? '' : 'none';
-            });
-        }
-
-        async function deleteFeedEntry(btn, tId, pId) {
-            if(!confirm("Are you sure you want to cancel and delete this delivery entry?")) return;
-            btn.innerText = "..."; btn.disabled = true;
-            try {
-                if (tId !== null) { await fetch(`${API_BASE}/transactions/${tId}`, { method: 'DELETE' }); transactions = transactions.filter(t => t.id !== tId); }
-                if (pId !== null) { await fetch(`${API_BASE}/transactions/${pId}`, { method: 'DELETE' }); transactions = transactions.filter(t => t.id !== pId); }
-                renderTransFeed(); renderTrans();
-            } catch(e) {
-                alert("Network error, please try again.");
-                btn.innerText = "🗑️"; btn.disabled = false;
-            }
-        }
-
 
         if (skippedCustomers.length > 0) {
             bottomSummaryHtml += `<div style="margin-top:12px; background:rgba(244, 63, 94, 0.1); padding:10px; border-radius:8px; border:1px solid rgba(244, 63, 94, 0.3);">
@@ -4210,7 +4142,6 @@
             document.getElementById('cSeqContainer').style.display = 'flex';
             document.getElementById('cRoute').value = c.route || '';
             document.getElementById('cShift').value = c.shift || 'Morning';
-            handleCustShiftChange();
             document.getElementById('cMobile').value = c.mobile || '';
             document.getElementById('cPass').value = '';
             let cp = document.getElementById('cPass'); (cp.closest('.form-group-auto') || cp.parentElement).classList.add('hidden');
@@ -4343,12 +4274,10 @@
             if(type==='cust') { 
                 document.getElementById('editCustIdx').value = ""; document.getElementById('btnCustSave').innerText = "Save Customer"; 
                 ['cName','cAddr','cRoute','cSeq','cSeqEve','cMilkMan','cQtyAdd','cRateAdd','cMobile', 'cPass'].forEach(id=>document.getElementById(id).value=""); // Clear cPass field
-                document.getElementById('cSeqContainer').style.display = 'flex';
+                document.getElementById('cSeqContainer').style.display = 'none';
                 document.getElementById('cId').value = ""; // Clear so backend generates it
             document.getElementById('cUsername').value = "";
                 let cp = document.getElementById('cPass'); (cp.closest('.form-group-auto') || cp.parentElement).classList.remove('hidden');
-                document.getElementById('cShift').value = 'Morning';
-                handleCustShiftChange();
                 currentCustDefaults = []; renderCustItems();
                 if(isMilkMan()) {
                     document.getElementById('cMilkMan').value = currentUser.login_id;
@@ -4887,52 +4816,6 @@
                 </tfoot>
             </table></div>`;
 
-             if (!filterMM) {
-                let gbHtml = '';
-                let gbTotal = 0;
-                let gbRows = '';
-
-                transactions.forEach(t => {
-                    if (t.shift !== 'General Bill') return;
-                    if (currentUser.type !== 'Admin' && t.company !== currentUser.company) return;
-
-                    let tDate = parseDateToMonthYear(t.date);
-                    if (tDate.year === selYear && tDate.month === selMonth) {
-                        gbTotal += parseFloat(t.total) || 0;
-                        gbRows += `<tr>
-                            <td>${t.date}</td>
-                            <td>${t.cust}</td>
-                            <td>${formatItemDisplay(t.item)}</td>
-                            <td style="color:var(--success); font-weight:bold; text-align:right;">₹${(parseFloat(t.total) || 0).toFixed(2)}</td>
-                        </tr>`;
-                    }
-                });
-
-                if (gbRows !== '') {
-                    gbHtml = `
-                    <div style="margin-top: 20px;">
-                        <h3 style="color:var(--primary); margin-bottom:10px;">🧾 General Bill Sales (${monthInput.value})</h3>
-                        <div style="max-height: 40vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 10px;">
-                            <table style="margin-top: 0; border-collapse: collapse; width: 100%;">
-                                <thead style="position: sticky; top: 0; background: var(--card); z-index: 10;">
-                                    <tr><th>Date</th><th>Customer</th><th>Items</th><th style="text-align:right;">Amount</th></tr>
-                                </thead>
-                                <tbody>${gbRows}</tbody>
-                                <tfoot style="position: sticky; bottom: 0; background: var(--card); font-weight: bold; border-top: 2px solid var(--primary); box-shadow: 0 -2px 10px rgba(0,0,0,0.5); z-index: 10;">
-                                    <tr>
-                                        <td colspan="3" style="color:var(--primary); text-align:right;">TOTAL GB SALE</td>
-                                        <td style="color:var(--success); text-align:right; font-size:16px;">₹${gbTotal.toFixed(2)}</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>`;
-                } else {
-                    gbHtml = `<div style="margin-top: 20px;"><h3 style="color:var(--primary); margin-bottom:10px;">🧾 General Bill Sales (${monthInput.value})</h3><p style="color:#94a3b8; font-size:13px;">No General Bills found for this month.</p></div>`;
-                }
-                html += gbHtml;
-            }
-
             div.innerHTML = html;
         }
 
@@ -5189,4 +5072,3 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 </body>
 </html>
-    
