@@ -473,9 +473,6 @@
 
             <!-- UNIFIED FEED CONTROLS PANEL -->
             <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #475569; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                <div style="display:flex; gap:10px; align-items:center; flex: 1 1 100%;">
-                    <input type="text" id="searchFeed" placeholder="🔍 Search Customer in Feed..." onkeyup="renderTransFeed()" style="flex:1; padding:8px; border-radius:8px; margin:0; background:var(--input); color:white; border:1px solid #475569;">
-                </div>
                 <div style="display:flex; gap:10px; align-items:center; flex: 1 1 200px;">
                     <select id="filterMilkMan" onchange="populateTransCustSelect(); renderTransFeed(); renderTrans();" class="hidden" style="flex:1; padding: 8px; background:var(--primary); color:white; border:none; border-radius: 6px; font-weight:bold; margin:0;"></select>
                     <button class="badge" style="background:var(--warning); color:black; padding:8px 12px; font-size:13px; font-weight:bold; border-radius:6px; white-space:nowrap; margin-left:auto;" onclick="openSeqModal()">🔢 Edit Seq</button>
@@ -494,6 +491,11 @@
             <div id="trans-tab-feed">
             <!-- FINAL DAILY REPORT (OUTSIDE SCROLL) -->
             <div id="daily-feed-report" style="margin-bottom: 15px;"></div>
+
+                <!-- FEED SEARCH (MOVED NEAR PENDING) -->
+                <div style="display:flex; gap:10px; align-items:center; margin-bottom: 15px;">
+                    <input type="text" id="searchFeed" placeholder="🔍 Search Customer in Pending / Done..." onkeyup="renderTransFeed()" style="flex:1; padding:10px; border-radius:8px; margin:0; background:rgba(0,0,0,0.2); color:white; border:1px solid rgba(251, 191, 36, 0.4);">
+                </div>
 
             <!-- NEW DAILY FEED VIEW -->
             <div id="daily-feed-view" style="margin-bottom: 20px; max-height: 45vh; overflow-y: auto; padding-right: 10px;"></div>
@@ -3911,6 +3913,8 @@
                     extraBtn = `<div style="padding:4px; display:flex; align-items:center; flex-shrink:0;"><button type="button" class="badge" style="background:var(--primary); font-size:14px; padding:2px 8px; border-radius:50%;" onclick="addExtraFeedItem(${i}, this)" title="Add Extra Item">+</button></div>`;
                 }
                 
+                let skipBtnStyle = "width:auto; padding:6px 10px; font-size:12px; background:rgba(244, 63, 94, 0.2); border:1px solid var(--danger); color:white; margin:0; border-radius:8px; box-shadow:none;";
+
                 let actionButton = '';
                 if (isOld) {
                     actionButton = `<span style="font-size:11px; color:var(--warning); padding:4px 8px; border:1px dashed var(--warning); border-radius:6px;">⚠️ Locked</span>`;
@@ -3920,9 +3924,9 @@
                     let colBtn = entry ? "black" : "white";
                     actionButton = `<div style="display:flex; gap:5px;"><button class="btn-save" style="width:auto; padding:6px 12px; font-size:12px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
                     if (entry) {
-                        actionButton += `<button class="btn-save" style="width:auto; padding:6px 10px; font-size:12px; background:var(--danger); color:white; margin:0;" onclick="deleteFeedEntry('${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Delete Entry">❌</button>`;
+                        actionButton += `<button class="btn-save" style="${skipBtnStyle}" onclick="deleteFeedEntry('${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Delete Entry">❌</button>`;
                     } else {
-                        actionButton += `<button class="btn-save" style="width:auto; padding:6px 10px; font-size:12px; background:var(--danger); color:white; margin:0;" onclick="skipFeedEntry(${i}, '${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Skip Delivery">❌</button>`;
+                        actionButton += `<button class="btn-save" style="${skipBtnStyle}" onclick="skipFeedEntry(${i}, '${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Skip Delivery">❌</button>`;
                     }
                     actionButton += `</div>`;
                 } else { // Today or past date
@@ -3931,9 +3935,9 @@
                     let colBtn = entry ? "black" : "white";
                     actionButton = `<div style="display:flex; gap:5px;"><button class="btn-save" style="width:auto; padding:6px 12px; font-size:13px; background:${bgBtn}; color:${colBtn}; margin:0;" onclick="saveFeedEntry(${i}, this)">${btnTxt}</button>`;
                     if (entry) {
-                        actionButton += `<button class="btn-save" style="width:auto; padding:6px 10px; font-size:13px; background:var(--danger); color:white; margin:0;" onclick="deleteFeedEntry('${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Delete Entry">❌</button>`;
+                        actionButton += `<button class="btn-save" style="${skipBtnStyle}" onclick="deleteFeedEntry('${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Delete Entry">❌</button>`;
                     } else {
-                        actionButton += `<button class="btn-save" style="width:auto; padding:6px 10px; font-size:13px; background:var(--danger); color:white; margin:0;" onclick="skipFeedEntry(${i}, '${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Skip Delivery">❌</button>`;
+                        actionButton += `<button class="btn-save" style="${skipBtnStyle}" onclick="skipFeedEntry(${i}, '${c.name.replace(/'/g, "\\'")}', this)" title="Cancel/Skip Delivery">❌</button>`;
                     }
                     actionButton += `</div>`;
                 }
