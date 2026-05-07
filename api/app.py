@@ -132,12 +132,20 @@ def login():
     id_field = 'cid' if role == 'Customer' else 'login_id'
 
     try:
-        if role == 'Customer':
-            or_cond = f'{id_field}.ilike."{login_id}",username.ilike."{login_id}",mobile.eq."{login_id}"'
-        else:
-            or_cond = f'{id_field}.ilike."{login_id}",username.ilike."{login_id}",mobile.eq."{login_id}",email.ilike."{login_id}"'
-        user_res = supabase.table(table).select('*').or_(or_cond).execute()
-        user = user_res.data[0] if user_res.data else None
+        res = supabase.table(table).select('*').ilike(id_field, login_id).execute()
+        user = res.data[0] if res.data else None
+        
+        if not user:
+            res = supabase.table(table).select('*').ilike('username', login_id).execute()
+            user = res.data[0] if res.data else None
+            
+        if not user:
+            res = supabase.table(table).select('*').eq('mobile', login_id).execute()
+            user = res.data[0] if res.data else None
+            
+        if not user and role != 'Customer':
+            res = supabase.table(table).select('*').ilike('email', login_id).execute()
+            user = res.data[0] if res.data else None
     except Exception as e:
         print("Login DB Error:", e)
         user = None
@@ -159,6 +167,8 @@ def login():
         if role == 'Owner' and db_role not in ['Owner', 'Admin']:
             return jsonify({"success": False, "message": f"Account exists, but you are not registered as an {role}. Please select the correct portal!"})
         if role == 'Milk Man' and db_role != 'Milk Man':
+            return jsonify({"success": False, "message": f"Account exists, but you are not registered as a {role}. Please select the correct portal!"})
+        if role == 'Manager' and db_role != 'Manager':
             return jsonify({"success": False, "message": f"Account exists, but you are not registered as a {role}. Please select the correct portal!"})
 
     company = user.get('company', '')
@@ -196,7 +206,7 @@ def sync_data():
     name = req_data.get('name')
     
     # For Owner/Admin, fetch their true company from DB to decide data scope and check license
-    if role in ['Owner', 'Admin']:
+    if role in ['Owner', 'Admin', 'Manager']:
         user_details_res = supabase.table('sys_users').select('company, license_expiry').eq('login_id', login_id).execute()
         if not user_details_res.data:
             return jsonify({"success": False, "message": "Could not verify user."}), 403
@@ -204,8 +214,13 @@ def sync_data():
         user_details = user_details_res.data[0]
         company = user_details.get('company')  # Use authoritative company from DB
 
-        if role == 'Owner' and company != 'SuperAdmin':
-            expiry_str = user_details.get('license_expiry')
+        if role in ['Owner', 'Manager'] and company != 'SuperAdmin':
+            if role == 'Manager':
+                owner_res = supabase.table('sys_users').select('license_expiry').eq('type', 'Owner').eq('company', company).execute()
+                expiry_str = owner_res.data[0].get('license_expiry') if owner_res.data else None
+            else:
+                expiry_str = user_details.get('license_expiry')
+
             if not expiry_str:
                 return jsonify({"success": False, "message": "Your license is not active. Please contact support."}), 403
 
@@ -229,7 +244,7 @@ def sync_data():
             print("Sync Error:", e)
             return []
 
-    if role in ['Owner', 'Admin']:
+    if role in ['Owner', 'Admin', 'Manager']:
         with ThreadPoolExecutor(max_workers=7) as executor:
             if role == 'Admin' or company == 'SuperAdmin':
                 f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols).execute().data)
@@ -255,6 +270,24 @@ def sync_data():
         requests = safe_get(f_r)
         routes = safe_get(f_ro)
         licenses = safe_get(f_l)
+        
+        if role == 'Manager':
+            import json
+            filtered_t = []
+            for t in transactions:
+                if t.get('shift') == 'General Bill':
+                    created_by = t.get('cust')
+                    qty_str = t.get('qty', '')
+                    if qty_str and qty_str.startswith('{'):
+                        try:
+                            qty_data = json.loads(qty_str)
+                            created_by = qty_data.get('created_by', created_by)
+                        except Exception:
+                            pass
+                    if created_by == login_id:
+                        filtered_t.append(t)
+            transactions = filtered_t
+            customers, requests, routes, licenses = [], [], [], []
 
         if role == 'Admin' or company == 'SuperAdmin':
             user_map = {user['login_id']: user for user in users}
@@ -302,7 +335,7 @@ def sync_data():
             f_p = executor.submit(lambda: supabase.table('sys_products').select('*').eq('company', company).execute().data)
             f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('cust_id', login_id).eq('company', company).order('id', desc=True).limit(15).execute().data)
             f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
-            f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols + ', qr_code, company_logo').in_('type', ['Owner', 'Milk Man']).eq('company', company).execute().data)
+            f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols + ', qr_code, company_logo').in_('type', ['Owner', 'Milk Man', 'Manager']).eq('company', company).execute().data)
         
         owner_users = safe_get(f_u)
         owner_qr = owner_users[0].get('qr_code', '') if owner_users else ''
@@ -329,48 +362,37 @@ def save_data(table_name):
         username = (data.get('username') or '').strip()
         user_type = data.get('type')
         
-        # 🚀 SPEED FIX: Combine 4 queries into 1 query
-        or_conditions = []
-        if username: or_conditions.append(f'username.ilike."{username}"')
-        if user_type and mobile: or_conditions.append(f'mobile.eq."{mobile}"')
-        if user_type and email: or_conditions.append(f'email.eq."{email}"')
-
-        if or_conditions:
-            q = supabase.table('sys_users').select('id, username, mobile, email, type').or_(",".join(or_conditions))
-            if item_id_val: q = q.neq('id', item_id_val)
-            duplicates = q.execute().data
-            for d in duplicates:
-                if username and (d.get('username') or '').lower() == username.lower():
-                    return jsonify({"success": False, "message": f"Username '{username}' is already taken!"})
-                if user_type and d.get('type') == user_type:
-                    if mobile and d.get('mobile') == mobile: return jsonify({"success": False, "message": f"Mobile already registered as {user_type}!"})
-                    if email and d.get('email') == email: return jsonify({"success": False, "message": f"Email already registered as {user_type}!"})
-        
         if username:
+            q = supabase.table('sys_users').select('id').ilike('username', username)
+            if item_id_val: q = q.neq('id', item_id_val)
+            if q.execute().data: return jsonify({"success": False, "message": f"Username '{username}' is already taken!"})
             if supabase.table('sys_customers').select('id').ilike('username', username).execute().data:
                 return jsonify({"success": False, "message": f"Username '{username}' is already taken!"})
             
+        if user_type and mobile:
+            q = supabase.table('sys_users').select('id').eq('type', user_type).eq('mobile', mobile)
+            if item_id_val: q = q.neq('id', item_id_val)
+            if q.execute().data: return jsonify({"success": False, "message": f"Mobile already registered as {user_type}!"})
+
+        if user_type and email:
+            q = supabase.table('sys_users').select('id').eq('type', user_type).ilike('email', email)
+            if item_id_val: q = q.neq('id', item_id_val)
+            if q.execute().data: return jsonify({"success": False, "message": f"Email already registered as {user_type}!"})
+
     elif table_name == 'customers':
         username = (data.get('username') or '').strip()
         
-        # 🚀 SPEED FIX: Combine queries
-        or_conditions = []
-        if username: or_conditions.append(f'username.ilike."{username}"')
-        if mobile: or_conditions.append(f'mobile.eq."{mobile}"')
-        
-        if or_conditions:
-            q = supabase.table('sys_customers').select('id, username, mobile').or_(",".join(or_conditions))
-            if item_id_val: q = q.neq('id', item_id_val)
-            duplicates = q.execute().data
-            for d in duplicates:
-                if username and (d.get('username') or '').lower() == username.lower():
-                    return jsonify({"success": False, "message": f"Username '{username}' is already taken!"})
-                if mobile and d.get('mobile') == mobile:
-                    return jsonify({"success": False, "message": "This mobile number is already registered as a Customer!"})
-        
         if username:
+            q = supabase.table('sys_customers').select('id').ilike('username', username)
+            if item_id_val: q = q.neq('id', item_id_val)
+            if q.execute().data: return jsonify({"success": False, "message": f"Username '{username}' is already taken!"})
             if supabase.table('sys_users').select('id').ilike('username', username).execute().data:
                 return jsonify({"success": False, "message": f"Username '{username}' is already taken!"})
+
+        if mobile:
+            q = supabase.table('sys_customers').select('id').eq('mobile', mobile)
+            if item_id_val: q = q.neq('id', item_id_val)
+            if q.execute().data: return jsonify({"success": False, "message": "This mobile number is already registered as a Customer!"})
     # ------------------------------------------
     
     # UPDATE EXISTING RECORD
@@ -485,7 +507,7 @@ def reset_password():
     
     requester_role = requester_res.data[0]['type']
 
-    if requester_role == 'Admin' or (requester_role == 'Owner' and target_type in ['Milk Man', 'Customer']):
+    if requester_role == 'Admin' or (requester_role == 'Owner' and target_type in ['Milk Man', 'Customer', 'Manager']):
         hashed_pass = generate_password_hash(data['new_password'])
         table_to_update = 'sys_customers' if target_type == 'Customer' else 'sys_users'
         id_field = 'cid' if target_type == 'Customer' else 'login_id'
