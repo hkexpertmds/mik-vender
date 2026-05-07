@@ -2041,7 +2041,8 @@
                 if (isAutoLogin) logout();
                 }
             } catch (err) {
-            alert("Connection Failed!\n\nReason: " + err.message + "\n\nSteps to Fix:\n1. Open CMD, type 'python app.py' and ensure it shows 'Backend Chal Raha Hai...'\n2. Do NOT double-click the HTML file. Open your browser and go to http://127.0.0.1:5000 directly.");
+             alert("Connection Failed! Please check your internet connection and try again.\n\nReason: " + err.message);
+                console.error(err);
                 console.error(err);
             if (isAutoLogin) showView('landing-page');
             } finally {
