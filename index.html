@@ -205,6 +205,7 @@
         <p style="color: #94a3b8; margin-bottom: 30px;">Select your Role to continue</p>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
             <div class="role-card" onclick="showLogin('Owner')"><h3>👑</h3><h4>Owner</h4></div>
+            <div class="role-card" onclick="showLogin('Manager')"><h3>💼</h3><h4>Manager</h4></div>
             <div class="role-card" onclick="showLogin('Milk Man')"><h3>🛵</h3><h4>Delivery Man</h4></div>
             <div class="role-card" onclick="showLogin('Customer')"><h3>🥛</h3><h4>Customer</h4></div>
         </div>
@@ -314,6 +315,7 @@
             <button id="btn-req" class="btn-save box-btn" style="background:#ea580c" onclick="showView('request-master')"><span style="font-size:28px; margin-bottom:8px;">📝</span>Customer Requests</button>
             <button id="btn-acc" class="btn-save box-btn" style="background:#1e40af" onclick="showView('accounts-user')"><span style="font-size:28px; margin-bottom:8px;">💰</span>Accounts Summary</button>
             <button id="btn-owner-master" class="btn-save box-btn" style="background:#6d28d9" onclick="showView('owner-master')"><span style="font-size:28px; margin-bottom:8px;">👑</span>Manage Owners</button>
+            <button id="btn-manager-master" class="btn-save box-btn hidden" style="background:#059669" onclick="showView('manager-master')"><span style="font-size:28px; margin-bottom:8px;">💼</span>Manage Managers</button>
             <button id="btn-license-master" class="btn-save box-btn hidden" style="background:#b91c1c" onclick="showView('license-master')"><span style="font-size:28px; margin-bottom:8px;">🔑</span>Manage Licenses</button>
             <button id="btn-manual-bill" class="btn-save box-btn hidden" style="background:#0284c7" onclick="showView('general-bill-view')"><span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill</button>
             
@@ -546,6 +548,10 @@
             <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; flex-wrap:wrap;">
                 <label style="font-size:14px; font-weight:bold; color:var(--primary);">📅 Filter by Date:</label>
                 <input type="date" id="gbFilterDate" onchange="renderGeneralBills()" style="width:auto; padding:8px; margin:0;">
+                <select id="gbFilterManager" onchange="renderGeneralBills()" class="hidden" style="width:auto; padding:8px; margin:0; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;">
+                    <option value="ALL">-- All Bills --</option>
+                    <option value="SELF">My Bills (Owner)</option>
+                </select>
                 <input type="text" id="searchGb" placeholder="🔍 Search Bill..." onkeyup="searchTable(this, 'gbTableBody')" style="flex:1; min-width:120px; max-width:200px; padding:8px; margin:0; border-radius:8px;">
                 <button class="btn-save" style="width:auto; padding:8px 15px; background:var(--warning); color:black;" onclick="document.getElementById('gbFilterDate').value=''; document.getElementById('searchGb').value=''; renderGeneralBills();">Clear Filter</button>
             </div>
@@ -614,6 +620,28 @@
         <p style="color: #94a3b8; margin-bottom: 20px;">Manage registered dairy owners and reset their passwords.</p>
         <table><thead><tr><th>Name</th><th>Company</th><th>Login ID</th><th>Email</th><th>Actions</th></tr></thead><tbody id="ownerTableBody"></tbody></table>
         <button class="btn-back" onclick="showView('main-menu')">Back</button>
+    </div>
+
+    <!-- MANAGER MASTER -->
+    <div id="manager-master" class="container hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h2 style="margin:0;">💼 Manager Master</h2>
+            <input type="text" id="searchManager" placeholder="🔍 Search Manager..." onkeyup="searchTable(this, 'managerTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <button class="btn-save" id="btnShowNewManager" style="width:auto; padding:10px 15px;" onclick="openNewManagerForm()">➕ New Manager</button>
+        </div>
+        <div class="grid-form hidden" id="manager-form-section">
+            <input type="hidden" id="editManagerIdx">
+            <input type="text" id="mId" placeholder="Manager ID (Auto 6-Digit)" readonly style="opacity:0.7">
+            <input type="text" id="mUsername" placeholder="Create Login Username">
+            <input type="text" id="mName" placeholder="Manager Name" required>
+            <input type="text" id="mMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+            <input type="text" id="mPass" placeholder="Set Password">
+            <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
+                <button id="btnManagerSave" class="btn-save" style="flex:1;" onclick="saveManager()">Save Manager</button>
+                <button class="btn-back" style="flex:1; margin:0;" onclick="closeManagerForm()">Cancel</button>
+            </div>
+        </div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>Name</th><th>Manager ID</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="managerTableBody"></tbody></table></div>
     </div>
 
     <!-- LICENSE MASTER -->
@@ -1451,6 +1479,7 @@
                 'btn-req': '<span style="font-size:28px; margin-bottom:8px;">📝</span>Customer Requests',
                 'btn-acc': '<span style="font-size:28px; margin-bottom:8px;">💰</span>Accounts Summary',
                 'btn-owner-master': '<span style="font-size:28px; margin-bottom:8px;">👑</span>Manage Owners',
+                'btn-manager-master': '<span style="font-size:28px; margin-bottom:8px;">💼</span>Manage Managers',
                 'btn-license-master': '<span style="font-size:28px; margin-bottom:8px;">🔑</span>Manage Licenses',
                 'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill',
                 'btn-self': '<span style="font-size:24px; margin:0;">📈</span>View Detailed My Report',
@@ -1476,6 +1505,7 @@
                 'btn-req': '<span style="font-size:28px; margin-bottom:8px;">📝</span>कस्टमर रिक्वेस्ट',
                 'btn-acc': '<span style="font-size:28px; margin-bottom:8px;">💰</span>हिसाब और रिपोर्ट',
                 'btn-owner-master': '<span style="font-size:28px; margin-bottom:8px;">👑</span>ओनर मैनेज करें',
+                'btn-manager-master': '<span style="font-size:28px; margin-bottom:8px;">💼</span>मैनेजर (Managers)',
                 'btn-license-master': '<span style="font-size:28px; margin-bottom:8px;">🔑</span>लाइसेंस (Licenses)',
                 'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>जनरल बिल',
                 'btn-self': '<span style="font-size:24px; margin:0;">📈</span>मेरी रिपोर्ट देखें',
@@ -1516,6 +1546,7 @@
             setHtml('btn-req', dict['btn-req']);
             setHtml('btn-acc', dict['btn-acc']);
             setHtml('btn-owner-master', dict['btn-owner-master']);
+            setHtml('btn-manager-master', dict['btn-manager-master']);
             setHtml('btn-license-master', dict['btn-license-master']);
             setHtml('btn-manual-bill', dict['btn-manual-bill']);
             setHtml('btn-self', dict['btn-self']);
@@ -1640,7 +1671,7 @@
             currentProfilePicBase64 = currentUser.profile_pic || '';
             document.getElementById('mmProfilePic').src = currentProfilePicBase64 || 'https://via.placeholder.com/100';
             
-            if (currentUser.type === 'Owner') {
+            if (currentUser.type === 'Owner' || currentUser.type === 'Manager') {
                 currentQrCodeBase64 = currentUser.qr_code || '';
                 currentCompanyLogoBase64 = currentUser.company_logo || '';
                 document.getElementById('mmQrPic').src = currentQrCodeBase64 || 'https://via.placeholder.com/150';
@@ -1661,7 +1692,7 @@
             let data = { ...currentUser };
             data.profile_pic = currentProfilePicBase64;
             
-            if (currentUser.type === 'Owner') {
+            if (currentUser.type === 'Owner' || currentUser.type === 'Manager') {
                 data.qr_code = currentQrCodeBase64;
                 data.company_logo = currentCompanyLogoBase64;
             }
@@ -2102,18 +2133,25 @@
             
             const isCust = currentUser.type === 'Customer';
             const isMilkMan = currentUser.type === 'Milk Man';
+            const isManager = currentUser.type === 'Manager';
             
-            document.getElementById('btn-um').classList.toggle('hidden', isCust || isMilkMan);
-            document.getElementById('btn-lm').classList.toggle('hidden', isCust);
-            document.getElementById('btn-acc').classList.toggle('hidden', isCust || isMilkMan);
+            document.getElementById('btn-um').classList.toggle('hidden', isCust || isMilkMan || isManager);
+            document.getElementById('btn-lm').classList.toggle('hidden', isCust || isManager);
+            document.getElementById('btn-acc').classList.toggle('hidden', isCust || isMilkMan || isManager);
             document.getElementById('btn-self').classList.toggle('hidden', !isCust);
-            document.getElementById('btn-prod').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
-            document.getElementById('btn-req').classList.toggle('hidden', isCust);
+            
+            document.getElementById('btn-prod').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin' && currentUser.type !== 'Manager');
+            
+            document.getElementById('btn-req').classList.toggle('hidden', isCust || isManager);
             document.getElementById('btn-route').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
             document.getElementById('btn-owner-master').classList.toggle('hidden', currentUser.type !== 'Admin'); // Only Admin can see this
             if(document.getElementById('btn-license-master')) document.getElementById('btn-license-master').classList.toggle('hidden', currentUser.type !== 'Admin');
-            if(document.getElementById('btn-manual-bill')) document.getElementById('btn-manual-bill').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
+            
+            if(document.getElementById('btn-manual-bill')) document.getElementById('btn-manual-bill').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin' && currentUser.type !== 'Manager');
             document.getElementById('btn-dropdown-req').classList.toggle('hidden', !isMilkMan);
+            
+            let btnMgr = document.getElementById('btn-manager-master');
+            if(btnMgr) btnMgr.classList.toggle('hidden', currentUser.type !== 'Owner');
             
             applyTranslations();
             applyLicenseRestrictions();
@@ -2236,6 +2274,7 @@
             if(id === 'request-master') { renderOwnerRequests(); }
             if(id === 'route-master') { resetForm('route'); renderRoutes(); } // This was missing from the previous diff, adding it back.
             if(id === 'owner-master') { renderOwners(); }
+            if(id === 'manager-master') { resetForm('manager'); closeManagerForm(); renderManagers(); }
             if(id === 'license-master') { document.getElementById('license-form-section').classList.add('hidden'); renderLicenses(); }
             
             if(id === 'general-bill-view') {
@@ -2246,6 +2285,21 @@
                 itemSelect.innerHTML = '<option value="">-- Select Product --</option>';
                 products.forEach(p => { itemSelect.innerHTML += `<option value="${p.item_name}" data-rate="${p.rate}">${p.item_name} (${p.unit || '-'})</option>`; });
                 
+                let gbFilterMgr = document.getElementById('gbFilterManager');
+                if (gbFilterMgr) {
+                    if (currentUser.type === 'Owner') {
+                        gbFilterMgr.classList.remove('hidden');
+                        let oldVal = gbFilterMgr.value;
+                        gbFilterMgr.innerHTML = '<option value="ALL">-- All Bills --</option><option value="SELF">My Bills (Owner)</option>';
+                        users.filter(u => u.type === 'Manager' && u.company === currentUser.company).forEach(m => {
+                            gbFilterMgr.innerHTML += `<option value="${m.login_id}">${m.name}'s Bills</option>`;
+                        });
+                        gbFilterMgr.value = oldVal || 'ALL';
+                    } else {
+                        gbFilterMgr.classList.add('hidden');
+                    }
+                }
+
                 renderGeneralBills();
             }
         }
@@ -2265,6 +2319,74 @@
             document.getElementById('user-form-section').classList.add('hidden');
             document.getElementById('btnShowNewUser').classList.remove('hidden');
         }
+        
+        // --- MANAGER STAFF ---
+        function openNewManagerForm() {
+            resetForm('manager');
+            document.getElementById('manager-form-section').classList.remove('hidden');
+            document.getElementById('btnShowNewManager').classList.add('hidden');
+            
+            let baseId = String(currentUser.login_id);
+            let ownerManagers = users.filter(u => u.type === 'Manager' && u.company === currentUser.company);
+            let maxSuffix = 0;
+            ownerManagers.forEach(m => {
+                let idStr = String(m.login_id);
+                if(idStr.startsWith(baseId) && idStr.length > baseId.length) {
+                    let suffix = parseInt(idStr.substring(baseId.length));
+                    if(!isNaN(suffix) && suffix > maxSuffix) maxSuffix = suffix;
+                }
+            });
+            document.getElementById('mId').value = baseId + (maxSuffix + 1);
+        }
+        function closeManagerForm() {
+            document.getElementById('manager-form-section').classList.add('hidden');
+            document.getElementById('btnShowNewManager').classList.remove('hidden');
+        }
+        
+        async function saveManager() {
+            if(currentUser.type !== 'Owner') return;
+            if (!validateForm('manager-master')) return;
+            document.getElementById('btnManagerSave').innerText = "Saving...";
+            const idx = document.getElementById('editManagerIdx').value;
+            
+            let data = {
+                name: document.getElementById('mName').value,
+                username: document.getElementById('mUsername').value.trim(),
+                pass: document.getElementById('mPass').value,
+                type: 'Manager',
+                company: currentUser.company,
+                mobile: document.getElementById('mMobile').value,
+                login_id: document.getElementById('mId').value
+            };
+            
+            if(!data.name || !data.mobile) return alert("Name and Mobile are required!");
+            if(idx === "" && !data.pass) return alert("Password is required for new Manager!");
+            if(idx !== "") data.id = users[idx].id;
+            
+            const res = await fetch(`${API_BASE}/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            const savedData = await res.json();
+            if (savedData.success === false) { alert(savedData.message); document.getElementById('btnManagerSave').innerText = idx === "" ? "Save Manager" : "Update Manager"; return; }
+            
+            if(idx === "") users.push(savedData); else users[idx] = savedData;
+            resetForm('manager'); renderManagers();
+            closeManagerForm();
+        }
+        
+        function renderManagers() {
+            const tbody = document.getElementById('managerTableBody');
+            let html = '';
+            users.forEach((u, i) => {
+                if(u.type !== 'Manager') return;
+                html += `<tr style="animation-delay:${i * 0.04}s"><td>${u.name}</td><td>${u.login_id}</td><td>${u.mobile||'-'}</td>
+                <td style="display:flex; gap:4px; flex-wrap:nowrap;">
+                    <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Manager')">Pass</button>
+                    <button class="badge" style="background:var(--warning); color:black" onclick="editManager(${i})">Edit</button>
+                    <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'user')">Del</button>
+                </td></tr>`;
+            });
+            if(tbody) tbody.innerHTML = html;
+        }
+
         function openNewProductForm() {
             resetForm('product');
             document.getElementById('product-form-section').classList.remove('hidden');
@@ -2550,6 +2672,7 @@
             const tbody = document.getElementById('gbTableBody');
             const filterDateVal = document.getElementById('gbFilterDate').value;
             let filterDateStr = filterDateVal ? convertToDDMMYYYY(filterDateVal) : null;
+            let filterMgr = document.getElementById('gbFilterManager') ? document.getElementById('gbFilterManager').value : 'ALL';
             
             let html = '';
             let totalAmt = 0;
@@ -2566,6 +2689,21 @@
             gbDisplayList.reverse().forEach(({ t, realIdx, serialNo }) => {
                 if (filterDateStr && t.date !== filterDateStr) return;
                 
+                let createdBy = t.cust;
+                try {
+                    if(t.qty && t.qty.startsWith('{')) {
+                        let info = JSON.parse(t.qty);
+                        createdBy = info.created_by || createdBy;
+                    }
+                } catch(e) {}
+                
+                if (currentUser.type === 'Manager' && createdBy !== currentUser.login_id) return;
+                
+                if (currentUser.type === 'Owner') {
+                    if (filterMgr === 'SELF' && createdBy !== currentUser.login_id) return;
+                    if (filterMgr !== 'ALL' && filterMgr !== 'SELF' && createdBy !== filterMgr) return;
+                }
+
                 totalAmt += parseFloat(t.total || 0);
                 
                 let displayItem = formatItemDisplay(t.item);
@@ -2604,13 +2742,14 @@
             }
             
             let mobileNum = ''; let address = '';
+            let creatorDetails = null;
             if (t.qty && t.qty.startsWith('{')) {
-                try { let info = JSON.parse(t.qty); mobileNum = info.mobile || ''; address = info.address || ''; } catch(e){}
+                try { let info = JSON.parse(t.qty); mobileNum = info.mobile || ''; address = info.address || ''; creatorDetails = info; } catch(e){}
             } else {
                 mobileNum = (t.qty !== '-' && t.qty) ? t.qty : '';
             }
 
-            printBillHTML(serialNo, t.date, t.cust, mobileNum, address, itemsArr, parseFloat(t.total));
+            printBillHTML(serialNo, t.date, t.cust, mobileNum, address, itemsArr, parseFloat(t.total), creatorDetails);
         }
 
         function editGb(idx) {
@@ -2666,8 +2805,33 @@
             if(currentGbItems.length === 0) return alert("Please add at least one item to the bill.");
             
             let grandTotal = currentGbItems.reduce((sum, i) => sum + i.total, 0);
+            
+            let creatorInfo = { 
+                mobile: mobileNum, 
+                address: address, 
+                created_by: currentUser.login_id,
+                creator_name: currentUser.name,
+                creator_mobile: currentUser.mobile,
+                creator_address: currentUser.address || currentUser.addr,
+                creator_company: currentUser.company,
+                creator_logo: currentUser.company_logo
+            };
+            
+            if (editIdx !== "") {
+                try {
+                    let existingQty = JSON.parse(transactions[editIdx].qty);
+                    if (existingQty.created_by) {
+                        creatorInfo.created_by = existingQty.created_by;
+                        creatorInfo.creator_name = existingQty.creator_name;
+                        creatorInfo.creator_mobile = existingQty.creator_mobile;
+                        creatorInfo.creator_address = existingQty.creator_address;
+                        creatorInfo.creator_company = existingQty.creator_company;
+                        creatorInfo.creator_logo = existingQty.creator_logo;
+                    }
+                } catch(e) {}
+            }
 
-            let qtyField = JSON.stringify({ mobile: mobileNum, address: address });
+            let qtyField = JSON.stringify(creatorInfo);
             let data = { date: dateStr, cust: custName, item: JSON.stringify(currentGbItems), qty: qtyField, rate: grandTotal, total: grandTotal, company: currentUser.company, shift: shift };
             if(editIdx !== "") data.id = transactions[editIdx].id;
 
@@ -2683,7 +2847,7 @@
                 let serialNo = 0;
                 transactions.forEach(t => { if(t.shift === 'General Bill') serialNo++; });
 
-                printBillHTML(serialNo, dateStr, custName, mobileNum, address, currentGbItems, grandTotal);
+                printBillHTML(serialNo, dateStr, custName, mobileNum, address, currentGbItems, grandTotal, creatorInfo);
                 clearGbForm();
                 
                 switchGbTab('old'); // Switch to old bills tab automatically
@@ -2691,11 +2855,11 @@
             btn.innerText = editIdx !== "" ? "Update & Print Bill" : "Generate & Print Bill";
         }
         
-        function printBillHTML(serialNo, dateStr, custName, mobileNum, address, itemsArr, total) {
-            let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
-            let ownerAddress = currentUser.address || currentUser.addr || '';
-            let ownerMobile = currentUser.mobile || '';
-            let ownerLogo = currentUser.company_logo || '';
+        function printBillHTML(serialNo, dateStr, custName, mobileNum, address, itemsArr, total, creatorDetails = null) {
+            let companyName = (creatorDetails && creatorDetails.creator_company) ? creatorDetails.creator_company : (currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger');
+            let ownerAddress = (creatorDetails && creatorDetails.creator_address !== undefined) ? creatorDetails.creator_address : (currentUser.address || currentUser.addr || '');
+            let ownerMobile = (creatorDetails && creatorDetails.creator_mobile !== undefined) ? creatorDetails.creator_mobile : (currentUser.mobile || '');
+            let ownerLogo = (creatorDetails && creatorDetails.creator_logo !== undefined) ? creatorDetails.creator_logo : (currentUser.company_logo || '');
             
             let contactParts = [];
             if (ownerAddress) contactParts.push(ownerAddress);
@@ -4370,6 +4534,11 @@
                 document.getElementById('uId').value = ""; 
             document.getElementById('uUsername').value = "";
             }
+            if(type==='manager') { 
+                document.getElementById('editManagerIdx').value = ""; document.getElementById('btnManagerSave').innerText = "Save Manager"; 
+                ['mName','mPass','mMobile','mUsername'].forEach(id=>document.getElementById(id).value=""); 
+                document.getElementById('mId').value = ""; 
+            }
             if(type==='product') { 
                 document.getElementById('editProdIdx').value = ""; document.getElementById('btnProdSave').innerText = "Save Product"; 
                 ['pName','pRate'].forEach(id=>document.getElementById(id).value=""); document.getElementById('pUnit').value = 'Ltr';
@@ -4695,8 +4864,8 @@
             let ownerMobile = currentUser.mobile || '';
             let companyLogo = currentUser.company_logo || '';
             
-            if (!companyLogo && currentUser.type === 'Customer') {
-                let owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
+            if (!companyLogo && (currentUser.type === 'Customer' || currentUser.type === 'Milk Man')) {
+                let owner = users.find(u => (u.type === 'Owner' || u.type === 'Manager') && u.company === currentUser.company);
                 if (owner && owner.company_logo) companyLogo = owner.company_logo;
                 else if (currentUser.owner_logo) companyLogo = currentUser.owner_logo;
             }
