@@ -484,11 +484,10 @@
                     <button class="btn-tab active-tab" style="flex: 1; padding: 8px; margin:0;" id="btnShiftM" onclick="setFeedShift('Morning')">🌅 Morning</button>
                     <button class="btn-tab" style="flex: 1; padding: 8px; margin:0;" id="btnShiftE" onclick="setFeedShift('Evening')">🌃 Evening</button>
                 </div>
-                <div style="display:flex; gap:5px; align-items:center; flex: 1 1 220px; overflow-x:auto;">
-                    <button class="btn-tab" style="flex: 1; padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateYest" onclick="setFeedDate(-1)">Yest</button>
-                    <button class="btn-tab active-tab" style="flex: 1; padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateToday" onclick="setFeedDate(0)">Today</button>
-                    <button class="btn-tab" style="flex: 1; padding: 6px 8px; font-size: 11px; margin:0;" id="btnDateTom" onclick="setFeedDate(1)">Tom</button>
-                    <input type="date" id="feedCustomDate" onchange="setFeedDateCustom(this.value)" style="flex: 2; min-width: 100px; padding: 6px; font-size: 11px; margin:0;">
+            <div style="display:flex; gap:8px; align-items:center; flex: 1 1 250px;">
+                <button class="badge" style="background:var(--primary); font-size:13px; flex:1; height:38px; display:flex; align-items:center; justify-content:center; margin:0;" onclick="changeFeedDateBy(-1)">⬅️ Prev</button>
+                <input type="date" id="feedCustomDate" onchange="setFeedDateCustom(this.value)" style="flex:1.5; padding:0 8px; font-size:13px; margin:0; text-align:center; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; height:38px; box-sizing:border-box;">
+                <button class="badge" style="background:var(--primary); font-size:13px; flex:1; height:38px; display:flex; align-items:center; justify-content:center; margin:0;" onclick="changeFeedDateBy(1)">Next ➡️</button>
                 </div>
             </div>
 
@@ -2122,6 +2121,12 @@
         }
 
         function setupUI() {
+            let feedDateInput = document.getElementById('feedCustomDate');
+            if (feedDateInput && !feedDateInput.value) {
+                let d = new Date();
+                feedDateInput.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            }
+
             let headPicUrl = currentUser.profile_pic || 'https://via.placeholder.com/30';
             let headPic = `<img src="${headPicUrl}" title="Profile Menu" style="cursor:pointer; width:30px;height:30px;border-radius:50%;vertical-align:middle;margin-right:10px;border:2px solid var(--primary); object-fit:cover;">`;
             
@@ -3778,17 +3783,21 @@
             renderTransFeed();
                 renderTrans(); // Fix for "Completed" tab not refreshing when Morning/Evening toggled
         }
-        function setFeedDate(offset) {
-            let d = new Date(); d.setDate(d.getDate() + offset);
-            currentFeedDateStr = formatDate(d);
-            currentFeedOffset = offset;
+        function changeFeedDateBy(days) {
+            let dateInput = document.getElementById('feedCustomDate');
+            let val = dateInput.value;
+            let d;
+            if (val) {
+                let parts = val.split('-');
+                d = new Date(parts[0], parts[1]-1, parts[2]);
+            } else {
+                d = new Date(); 
+            }
+            d.setDate(d.getDate() + days);
             
-            document.getElementById('btnDateToday').classList.toggle('active-tab', offset === 0);
-            document.getElementById('btnDateYest').classList.toggle('active-tab', offset === -1);
-            document.getElementById('btnDateTom').classList.toggle('active-tab', offset === 1);
-            document.getElementById('feedCustomDate').value = "";
-            renderTransFeed();
-            renderTrans();
+            let isoStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            dateInput.value = isoStr;
+            setFeedDateCustom(isoStr);
         }
         function setFeedDateCustom(val) {
             if(!val) return;
@@ -3800,7 +3809,6 @@
             d.setHours(0,0,0,0);
             currentFeedOffset = Math.round((d - today) / (1000 * 60 * 60 * 24));
             
-            ['btnDateToday', 'btnDateYest', 'btnDateTom'].forEach(id => document.getElementById(id).classList.remove('active-tab'));
             renderTransFeed();
             renderTrans();
         }
