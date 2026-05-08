@@ -159,6 +159,9 @@
         </div>
         <div id="header-company-name" style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; text-align: center;"></div>
         <div style="display: flex; align-items: center; gap: 15px; padding-right: 40px; z-index: 10;">
+            <select id="global-admin-company-filter" onchange="applyAdminCompanyFilter()" class="hidden" style="background:var(--input); color:white; border:1px solid #475569; border-radius:6px; padding:4px 8px; font-size:12px; max-width:150px; outline:none; cursor:pointer;">
+                <option value="ALL">All Owners</option>
+            </select>
             <span id="header-role" style="background:var(--warning); color:black; padding:4px 10px; border-radius:10px; font-size:12px; font-weight:bold;"></span>
         </div>
     </div>
@@ -371,10 +374,6 @@
                 <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Media & QR Codes</span><br><b style="font-size:15px; color:var(--text);">Manage Pictures</b></div>
                 <span style="color:var(--primary); font-size:18px;">🖼️</span>
             </div>
-            <div class="profile-list-item" id="row-delete-account" onclick="openDeleteAccountModal()">
-                <div style="flex:1;"><span style="font-size:12px; color:var(--danger); text-transform:uppercase; letter-spacing:0.5px;">Danger Zone</span><br><b style="font-size:15px; color:var(--danger);">Delete Account & Company</b></div>
-                <span style="color:var(--danger); font-size:18px;">🗑️</span>
-            </div>
         </div>
         
         <button class="btn-back" style="border-color:var(--danger); color:var(--danger);" onclick="logout()">Logout / Switch User</button>
@@ -425,7 +424,7 @@
             <div id="cust-form-section" class="hidden">
                 <div class="grid-form">
                 <input type="hidden" id="editCustIdx">
-                <select id="cMilkMan" onchange="autoFillCustRoute()" required><option value="">-- Assign Delivery Man --</option></select>
+                <select id="cMilkMan" onchange="autoFillCustRoute(); autoFillCustSeq()" required><option value="">-- Assign Delivery Man --</option></select>
                 <div id="cSeqContainer" style="display: flex; grid-column: 1 / -1; gap: 10px; width: 100%;">
                     <input type="number" id="cSeq" placeholder="Morning Seq No" style="flex: 1;">
                     <input type="number" id="cSeqEve" placeholder="Evening Seq No" style="flex: 1;">
@@ -434,7 +433,7 @@
                 <input type="text" id="cUsername" placeholder="Create Login Username (Optional)">
                 <input type="text" id="cName" placeholder="Name" required>
                 <input type="text" id="cRoute" placeholder="Route / Area" tabindex="-1" required readonly style="opacity:0.6; cursor:not-allowed; background:rgba(0,0,0,0.3);">
-                <select id="cShift" required><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option><option value="Both">🌅+🌃 Both</option></select>
+                <select id="cShift" required onchange="toggleCustItemShift()"><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option><option value="Both">🌅+🌃 Both</option></select>
                 <div style="position: relative; grid-column: 1 / -1;">
                     <input type="password" id="cPass" placeholder="Set Customer Password" style="margin: 0; padding-right: 35px;">
                     <span onclick="togglePasswordVisibility('cPass', 'cPassEyeIcon')" id="cPassEyeIcon" title="Show/Hide Password" style="position: absolute; right: 12px; top: 10px; cursor: pointer; user-select: none; font-size: 16px;">👁️</span>
@@ -446,6 +445,11 @@
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
                         <select id="cItemAdd" style="flex: 1; min-width: 120px; margin:0;" onchange="autoFillProductRate()">
                             <option value="">-- Select Product --</option>
+                        </select>
+                        <select id="cItemShift" class="hidden" style="width: 100px; margin:0; padding: 12px 8px;">
+                            <option value="All">Both Shifts</option>
+                            <option value="Morning">Morning</option>
+                            <option value="Evening">Evening</option>
                         </select>
                         <input type="number" id="cQtyAdd" placeholder="Def Qty" style="width: 80px; margin:0;">
                         <input type="number" id="cRateAdd" placeholder="Rate (₹)" style="width: 80px; margin:0;">
@@ -728,6 +732,11 @@
                 <ul id="selfItemList" style="font-size:13px; color:var(--text); padding-left:20px; margin-bottom:10px; max-height: 150px; overflow-y: auto; padding-right: 5px;"></ul>
                 <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; align-items:flex-end;">
                     <select id="selfItemAdd" style="flex:1; min-width:120px; padding:8px; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;" onchange="autoFillSelfProductRate()"></select>
+                    <select id="selfItemShift" class="hidden" style="width:90px; padding:8px; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;">
+                        <option value="All">Both</option>
+                        <option value="Morning">Morn</option>
+                        <option value="Evening">Eve</option>
+                    </select>
                     <input type="number" id="selfQtyAdd" placeholder="Qty" style="width:70px; padding:8px; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;">
                     <input type="number" id="selfRateAdd" placeholder="Rate" style="width:70px; padding:8px; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;" readonly>
                     <button class="btn-save" style="width:auto; padding:8px 15px;" onclick="addSelfCustItem()">Add / Update</button>
@@ -918,22 +927,6 @@
         </div>
     </div>
 
-    <!-- DELETE ACCOUNT MODAL -->
-    <div id="deleteAccountModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10025; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid var(--danger); text-align:center;">
-            <h3 style="margin-top:0; margin-bottom: 10px; color:var(--danger); font-size: 22px;">⚠️ Delete Account</h3>
-            <p style="color:#94a3b8; font-size:13px; margin-top:0; margin-bottom:20px;">This will permanently delete your account, delivery men, customers, and all entries. <b>This cannot be undone!</b></p>
-            <div style="position:relative; margin-bottom: 20px; text-align: left;">
-                <label style="font-size:12px; color:var(--danger); font-weight:bold; margin-bottom: 5px; display:block;">Enter Password to Confirm:</label>
-                <input type="password" id="delAccountPass" placeholder="Your Password" style="width:100%; margin:0;" required>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-save" id="btnConfirmDeleteAccount" style="background:var(--danger);" onclick="executeAccountDeletion()">Delete Everything</button>
-                <button class="btn-back" style="margin:0;" onclick="closeDeleteAccountModal()">Cancel</button>
-            </div>
-        </div>
-    </div>
-
     <!-- EDIT PROFILE FIELD MODAL -->
     <div id="editFieldModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px;">
         <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid #475569;">
@@ -1100,6 +1093,12 @@
         let currentFeedDateStr = formatDate(new Date());
         let currentFeedShift = 'Morning';
         let currentFeedOffset = 0;
+        let currentAdminCompanyFilter = 'ALL';
+
+        function applyAdminCompanyFilter() {
+            currentAdminCompanyFilter = document.getElementById('global-admin-company-filter').value;
+            refreshCurrentView();
+        }
 
         const stateCityMap = {
             "AN": ["Nicobar", "North and Middle Andaman", "South Andaman"],
@@ -2080,6 +2079,7 @@
                     licenses = result.data.licenses || [];
                     
                     populateProductDropdowns();
+                    populateAdminCompanyFilter();
                     refreshCurrentView();
                     
                     applyLicenseRestrictions(); // Apply restrictions after data sync
@@ -2107,6 +2107,7 @@
                 let oldVal = accFilterSel.value;
                 accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>';
                 users.filter(u => u.type === 'Milk Man').forEach(u => {
+                        if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
                     accFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
                 });
                 if(oldVal) accFilterSel.value = oldVal;
@@ -2120,6 +2121,25 @@
             if(id === 'owner-master') { renderOwners(); }
             if(id === 'license-master') { renderLicenses(); }
             if(id === 'profile-view') { showView('profile-view'); }
+        }
+
+        function populateAdminCompanyFilter() {
+            const adminFilter = document.getElementById('global-admin-company-filter');
+            if (adminFilter && currentUser && currentUser.type === 'Admin') {
+                let oldVal = currentAdminCompanyFilter || 'ALL';
+                let html = '<option value="ALL">All Owners</option>';
+                let uniqueCompanies = [...new Set(users.filter(u => u.type === 'Owner').map(o => o.company))];
+                uniqueCompanies.forEach(comp => {
+                    html += `<option value="${comp}">${comp}</option>`;
+                });
+                adminFilter.innerHTML = html;
+                
+                if (!Array.from(adminFilter.options).some(opt => opt.value === oldVal)) {
+                    oldVal = 'ALL';
+                    currentAdminCompanyFilter = 'ALL';
+                }
+                adminFilter.value = oldVal;
+            }
         }
 
         function setupUI() {
@@ -2139,6 +2159,11 @@
             let headerCompany = document.getElementById('header-company-name');
             if(headerCompany) headerCompany.innerText = currentUser.company || 'DAIRY LEDGER';
             
+            const isAdmin = currentUser.type === 'Admin';
+            const adminFilter = document.getElementById('global-admin-company-filter');
+            if (adminFilter) { adminFilter.classList.toggle('hidden', !isAdmin); }
+            populateAdminCompanyFilter();
+
             const isCust = currentUser.type === 'Customer';
             const isMilkMan = currentUser.type === 'Milk Man';
             const isManager = currentUser.type === 'Manager';
@@ -2196,8 +2221,6 @@
                 document.getElementById('lbl-email').innerText = currentUser.email || '-';
                 document.getElementById('lbl-addr').innerText = currentUser.address || currentUser.addr || '-';
                 
-                let rowDelAcc = document.getElementById('row-delete-account');
-                if(rowDelAcc) rowDelAcc.classList.toggle('hidden', currentUser.type !== 'Owner');
                 document.getElementById('row-email').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
                 document.getElementById('row-addr').classList.toggle('hidden', currentUser.type === 'Milk Man');
                 document.getElementById('row-pass').classList.toggle('hidden', currentUser.type === 'Customer');
@@ -2237,6 +2260,7 @@
                     let oldVal = accFilterSel.value;
                     accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>';
                     users.filter(u => u.type === 'Milk Man').forEach(u => {
+                        if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
                         accFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
                     });
                     if(oldVal) accFilterSel.value = oldVal;
@@ -2385,6 +2409,7 @@
             let html = '';
             users.forEach((u, i) => {
                 if(u.type !== 'Manager') return;
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
                 html += `<tr style="animation-delay:${i * 0.04}s"><td>${u.name}</td><td>${u.login_id}</td><td>${u.mobile||'-'}</td>
                 <td style="display:flex; gap:4px; flex-wrap:nowrap;">
                     <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Manager')">Pass</button>
@@ -2448,6 +2473,7 @@
 
         function openNewCustForm() {
             resetForm('cust');
+            autoFillCustSeq();
             document.getElementById('cust-form-section').classList.remove('hidden');
             document.getElementById('btnShowNewCust').classList.add('hidden');
         }
@@ -2487,8 +2513,26 @@
             
             let parsedSeq = parseInt(document.getElementById('cSeq').value);
             let parsedSeqEve = parseInt(document.getElementById('cSeqEve').value);
+            
+            let promises = [];
+            
             if (!isNaN(parsedSeq)) {
                 data.seq_no = parsedSeq;
+                if (data.shift === 'Morning' || data.shift === 'Both') {
+                    let excludeId = idx !== "" ? customers[idx].id : null;
+                    let customersInRoute = customers.filter(c => c.milkman_id === data.milkman_id && (c.shift === 'Morning' || c.shift === 'Both') && c.id !== excludeId);
+                    customersInRoute.sort((a,b) => (a.seq_no||999) - (b.seq_no||999));
+                    
+                    let currentSeq = parsedSeq;
+                    for(let i=0; i<customersInRoute.length; i++) {
+                        let c = customersInRoute[i];
+                        if (c.seq_no === currentSeq) {
+                            c.seq_no = currentSeq + 1;
+                            currentSeq++;
+                            promises.push(fetch(`${API_BASE}/customers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c) }));
+                        }
+                    }
+                }
             } else if(idx !== "") {
                 data.seq_no = customers[idx].seq_no || 1;
             } else {
@@ -2499,6 +2543,21 @@
 
             if (!isNaN(parsedSeqEve)) {
                 data.seq_no_eve = parsedSeqEve;
+                if (data.shift === 'Evening' || data.shift === 'Both') {
+                    let excludeId = idx !== "" ? customers[idx].id : null;
+                    let customersInRoute = customers.filter(c => c.milkman_id === data.milkman_id && (c.shift === 'Evening' || c.shift === 'Both') && c.id !== excludeId);
+                    customersInRoute.sort((a,b) => (a.seq_no_eve||999) - (b.seq_no_eve||999));
+                    
+                    let currentSeq = parsedSeqEve;
+                    for(let i=0; i<customersInRoute.length; i++) {
+                        let c = customersInRoute[i];
+                        if (c.seq_no_eve === currentSeq) {
+                            c.seq_no_eve = currentSeq + 1;
+                            currentSeq++;
+                            promises.push(fetch(`${API_BASE}/customers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c) }));
+                        }
+                    }
+                }
             } else if(idx !== "") {
                 data.seq_no_eve = customers[idx].seq_no_eve || 1;
             } else {
@@ -2507,6 +2566,11 @@
                 data.seq_no_eve = maxSeqEve + 1;
             }
             
+            if (promises.length > 0) {
+                document.getElementById('btnCustSave').innerText = "Updating Sequences...";
+                await Promise.allSettled(promises);
+            }
+
             let cId = document.getElementById('cId').value.trim();
             if(cId && idx !== "") data.cid = cId;
             if(idx !== "") data.id = customers[idx].id;
@@ -2695,6 +2759,7 @@
             });
             
             gbDisplayList.reverse().forEach(({ t, realIdx, serialNo }) => {
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && t.company !== currentAdminCompanyFilter) return;
                 if (filterDateStr && t.date !== filterDateStr) return;
                 
                 let createdBy = t.cust;
@@ -3070,6 +3135,7 @@
             let html = '<option value="">-- Select Route --</option>'; 
             
             routes.forEach(r => {
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && r.company !== currentAdminCompanyFilter) return;
                 let rName = r.route_name; if(!rName || rName === 'undefined') rName = 'Unnamed Route';
                 let assignedUser = users.find(u => {
                     if(u.type !== 'Milk Man' || u.login_id === skipUserId) return false;
@@ -3092,6 +3158,7 @@
             let html = '';
             users.forEach((u, i) => { 
                 if(u.type !== 'Milk Man') return;
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
                 
                 let displayRoute = u.route;
                 if(!displayRoute || displayRoute === 'undefined') displayRoute = 'Unnamed Route';
@@ -3130,6 +3197,7 @@
 
             let html = '';
             customers.sort((a,b) => (a.seq_no||999) - (b.seq_no||999)).forEach((c, i) => {
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return;
                 if(isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if(selectedCustMM && c.milkman_id !== selectedCustMM) return;
                 
@@ -3166,6 +3234,7 @@
             const tbody = document.getElementById('productTableBody'); 
             let html = '';
             products.forEach((p, i) => { 
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && p.company !== currentAdminCompanyFilter) return;
                 html += `<tr style="animation-delay:${i * 0.04}s"><td>${p.item_name} <span style="font-size:11px; color:#94a3b8;">(${p.unit || '-'})</span></td><td>₹${parseFloat(p.rate).toFixed(2)}</td><td style="white-space:nowrap;">
                     <button class="badge" style="background:var(--warning); color:black" onclick="editProduct(${i})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'product')">Del</button>
@@ -3178,6 +3247,7 @@
             const tbody = document.getElementById('routeTableBody'); 
             let html = '';
             routes.forEach((r, i) => { 
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && r.company !== currentAdminCompanyFilter) return;
                 let rName = r.route_name;
                 if (!rName || rName === 'undefined') rName = 'Unnamed Route';
                 
@@ -3218,6 +3288,7 @@
             const tbody = document.getElementById('requestTableBody'); 
             let html = '';
             requests.slice().reverse().forEach((r, i) => {
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && r.company !== currentAdminCompanyFilter) return;
                 const realIdx = requests.length - 1 - i;
             let r_milkman_id = r.milkman_id;
             if (!r_milkman_id) {
@@ -3259,6 +3330,7 @@
             let html = '';
             users.forEach((u, i) => {
                 if(u.type !== 'Owner') return;
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
                 html += `<tr style="animation-delay:${i * 0.04}s">
                     <td>${u.name}</td>
                     <td>${u.company || '-'}</td>
@@ -3266,6 +3338,7 @@
                     <td>${u.email || '-'}</td>
                     <td style="white-space:nowrap;">
                         <button class="badge" style="background:var(--danger)" onclick="resetPassword('${u.login_id}', 'Owner')">Reset Pass</button>
+                        <button class="badge" style="background:var(--danger)" onclick="deleteOwnerByAdmin(${i})">Del</button>
                     </td>
                 </tr>`;
             });
@@ -3343,6 +3416,7 @@
             let selectedMM = (filterSel && !filterSel.classList.contains('hidden')) ? filterSel.value : null;
 
             customers.sort((a,b) => (a.seq_no||999) - (b.seq_no||999)).forEach((c, i) => {
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return;
                 if(isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if(selectedMM && c.milkman_id !== selectedMM) return;
                 html += `<option value="${c.name}" data-idx="${customers.indexOf(c)}">${c.name}</option>`;
@@ -3370,6 +3444,7 @@
 
             let foundEntries = false;
             transactions.slice().reverse().forEach((t, i) => { 
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && t.company !== currentAdminCompanyFilter) return;
                 const realIdx = transactions.length - 1 - i;
                 
                 // Filter by the new date picker
@@ -3430,10 +3505,80 @@
             return items;
         }
 
+        function toggleCustItemShift() {
+            let shiftVal = document.getElementById('cShift').value;
+            let cItemShift = document.getElementById('cItemShift');
+            if (cItemShift) {
+                if (shiftVal === 'Both') {
+                    cItemShift.classList.remove('hidden');
+                } else {
+                    cItemShift.classList.add('hidden');
+                    cItemShift.value = 'All';
+                }
+            }
+            
+            let cSeq = document.getElementById('cSeq');
+            let cSeqEve = document.getElementById('cSeqEve');
+            if (cSeq && cSeqEve) {
+                let wrapM = cSeq.closest('.form-group-auto') || cSeq;
+                let wrapE = cSeqEve.closest('.form-group-auto') || cSeqEve;
+                
+                if (shiftVal === 'Morning') {
+                    wrapM.style.display = '';
+                    wrapE.style.display = 'none';
+                    cSeqEve.value = '';
+                } else if (shiftVal === 'Evening') {
+                    wrapM.style.display = 'none';
+                    wrapE.style.display = '';
+                    cSeq.value = '';
+                } else {
+                    wrapM.style.display = '';
+                    wrapE.style.display = '';
+                }
+            }
+            autoFillCustSeq();
+        }
+
+        function autoFillCustSeq() {
+            let mmId = document.getElementById('cMilkMan').value;
+            let shiftVal = document.getElementById('cShift').value;
+            let idx = document.getElementById('editCustIdx').value;
+            
+            if (idx === "") {
+                if (mmId) {
+                    if (shiftVal === 'Morning' || shiftVal === 'Both') {
+                        let mmCusts = customers.filter(c => c.milkman_id === mmId && (c.shift === 'Morning' || c.shift === 'Both'));
+                        let maxSeq = mmCusts.length > 0 ? Math.max(...mmCusts.map(c => c.seq_no || 0)) : 0;
+                        document.getElementById('cSeq').value = maxSeq + 1;
+                    } else {
+                        document.getElementById('cSeq').value = '';
+                    }
+                    
+                    if (shiftVal === 'Evening' || shiftVal === 'Both') {
+                        let mmCustsEve = customers.filter(c => c.milkman_id === mmId && (c.shift === 'Evening' || c.shift === 'Both'));
+                        let maxSeqEve = mmCustsEve.length > 0 ? Math.max(...mmCustsEve.map(c => c.seq_no_eve || 0)) : 0;
+                        document.getElementById('cSeqEve').value = maxSeqEve + 1;
+                    } else {
+                        document.getElementById('cSeqEve').value = '';
+                    }
+                } else {
+                    document.getElementById('cSeq').value = '';
+                    document.getElementById('cSeqEve').value = '';
+                }
+            }
+        }
+
         function addCustItem() {
             const item = document.getElementById('cItemAdd').value;
             const qtyInput = document.getElementById('cQtyAdd').value;
             const rate = document.getElementById('cRateAdd').value;
+            
+            let shift = 'All';
+            const shiftEl = document.getElementById('cItemShift');
+            if (shiftEl && !shiftEl.classList.contains('hidden')) {
+                shift = shiftEl.value;
+            }
+            
             if(!rate) { alert("Please enter a Rate!"); return; }
             if(!item) { alert("Please select an item!"); return; }
             
@@ -3444,8 +3589,8 @@
             }
             const qty = qtyNum.toFixed(1);
 
-            currentCustDefaults = currentCustDefaults.filter(i => i.item !== item);
-            currentCustDefaults.push({ item, qty, rate });
+            currentCustDefaults = currentCustDefaults.filter(i => !(i.item === item && (i.shift || 'All') === shift));
+            currentCustDefaults.push({ item, qty, rate, shift });
             renderCustItems();
             document.getElementById('cQtyAdd').value = '';
             document.getElementById('cRateAdd').value = '';
@@ -3456,7 +3601,8 @@
             const ul = document.getElementById('cItemList');
             let html = '';
             currentCustDefaults.forEach((d, i) => {
-                html += `<li>${d.item} (Qty: ${d.qty || '-'}) - ₹${parseFloat(d.rate).toFixed(2)} 
+                let shiftBadge = (d.shift && d.shift !== 'All') ? `<span style="font-size:10px; background:var(--primary); color:white; padding:2px 4px; border-radius:4px; margin-left:5px;">${d.shift}</span>` : '';
+                html += `<li><b>${d.item}</b>${shiftBadge} (Qty: ${d.qty || '-'}) - ₹${parseFloat(d.rate).toFixed(2)} 
                 <button type="button" class="badge" style="background:var(--danger); padding: 2px 5px; margin-left: 10px;" onclick="removeCustItem(${i})">X</button></li>`;
             });
             if(ul) ul.innerHTML = html;
@@ -3480,11 +3626,17 @@
             let custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
             if(!custObj) return;
             
+            let shiftSel = document.getElementById('selfItemShift');
+            if (shiftSel) {
+                shiftSel.classList.toggle('hidden', custObj.shift !== 'Both');
+            }
+            
             let items = getCustItems(custObj);
             let html = '';
             if(items.length === 0) html = '<li>No default items set.</li>';
             items.forEach((d, i) => {
-                html += `<li style="margin-bottom:5px;"><b>${d.item}</b> : ${d.qty || '-'} Unit (₹${parseFloat(d.rate).toFixed(2)}/u) 
+                let shiftBadge = (d.shift && d.shift !== 'All') ? `<span style="font-size:10px; background:var(--primary); color:white; padding:2px 4px; border-radius:4px; margin-left:5px;">${d.shift}</span>` : '';
+                html += `<li style="margin-bottom:5px;"><b>${d.item}</b>${shiftBadge} : ${d.qty || '-'} Unit (₹${parseFloat(d.rate).toFixed(2)}/u) 
                 <button type="button" class="badge" style="background:var(--danger); padding: 2px 5px; margin-left: 10px;" onclick="removeSelfCustItem(${i})">Remove</button></li>`;
             });
             if(ul) ul.innerHTML = html;
@@ -3504,6 +3656,7 @@
                 await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
                 alert("Shift updated successfully!", "success");
                 document.getElementById('my-current-shift').innerText = `(${newShift})`;
+                renderSelfCustItems();
                 renderTempChangeItems();
             } catch(e) {
                 alert("Network Error: Failed to update shift.", "error");
@@ -3516,14 +3669,21 @@
             const item = document.getElementById('selfItemAdd').value;
             const qtyInput = document.getElementById('selfQtyAdd').value;
             const rate = document.getElementById('selfRateAdd').value;
+            
+            let shift = 'All';
+            const shiftEl = document.getElementById('selfItemShift');
+            if (shiftEl && !shiftEl.classList.contains('hidden')) {
+                shift = shiftEl.value;
+            }
+            
             if(!item) return alert("Please select an item!");
             let qtyNum = parseFloat(qtyInput);
             if(isNaN(qtyNum) || qtyNum <= 0) return alert("Enter valid quantity!");
             const qty = qtyNum.toFixed(1);
             
             let items = getCustItems(custObj);
-            items = items.filter(i => i.item !== item);
-            items.push({ item, qty, rate });
+            items = items.filter(i => !(i.item === item && (i.shift || 'All') === shift));
+            items.push({ item, qty, rate, shift });
             
             custObj.defItem = JSON.stringify(items);
             const btn = window.event ? window.event.target : null; if(btn) btn.innerText = "...";
@@ -3615,7 +3775,7 @@
             });
             let savedPayAmt = existingPayTrans ? Math.abs(parseFloat(existingPayTrans.rate)) : '';
 
-            let defItems = getCustItems(custObj);
+            let defItems = getCustItems(custObj).filter(d => !d.shift || d.shift === 'All' || d.shift === shift);
             let itemsHtml = defItems.map((d, itemIdx) => {
                 let preFillQty = savedItemsMap[d.item] !== undefined ? savedItemsMap[d.item] : (existingTrans ? '' : d.qty);
                 return `
@@ -3830,6 +3990,7 @@
             let targetShift = currentFeedShift.toLowerCase();
 
             transactions.forEach(t => {
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && t.company !== currentAdminCompanyFilter) return;
                 if (t.shift === 'General Bill') return; // Hide General Bills
                 // Robust matching: Ignore exact company strictness locally & trim spaces
                 let tDateStr = convertToDDMMYYYY((t.date || '').trim());
@@ -3849,6 +4010,7 @@
             let pending = [], completed = [];
 
             customers.forEach((c, i) => {
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return;
                 if (isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if (selectedMM && c.milkman_id !== selectedMM) return;
                 let cShift = c.shift || 'Morning'; // Fallback for old data
@@ -3886,7 +4048,7 @@
                     }
                 }
                 
-                let itemsToShow = getCustItems(c);
+                let itemsToShow = getCustItems(c).filter(d => !d.shift || d.shift === 'All' || d.shift === currentFeedShift);
                 if (entry && entry.itemsTrans) {
                     Object.keys(savedItemsMap).forEach(savedItem => {
                         if (!itemsToShow.find(d => d.item === savedItem)) {
@@ -3983,6 +4145,7 @@
         let totalCustomersForShift = 0;
 
         customers.forEach(c => {
+            if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return;
             if (isMilkMan() && c.milkman_id !== currentUser.login_id) return;
             if (selectedMM && c.milkman_id !== selectedMM) return;
             if (c.shift !== currentFeedShift && c.shift !== 'Both') return;
@@ -4086,6 +4249,7 @@
 
             let getSeq = (c) => currentFeedShift === 'Evening' ? (c.seq_no_eve || 999) : (c.seq_no || 999);
             currentSeqEditList = customers.filter(c => {
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return false;
                 if (isMilkMan() && c.milkman_id !== currentUser.login_id) return false;
                 if (selectedMM && c.milkman_id !== selectedMM) return false;
                 if (c.shift !== 'Both' && c.shift !== currentFeedShift) return false;
@@ -4393,6 +4557,7 @@
             document.getElementById('cSeqContainer').style.display = 'flex';
             document.getElementById('cRoute').value = c.route || '';
             document.getElementById('cShift').value = c.shift || 'Morning';
+            toggleCustItemShift();
             document.getElementById('cMobile').value = c.mobile || '';
             document.getElementById('cPass').value = '';
             let cp = document.getElementById('cPass'); (cp.closest('.form-group-auto') || cp.parentElement).classList.add('hidden');
@@ -4525,7 +4690,9 @@
             if(type==='cust') { 
                 document.getElementById('editCustIdx').value = ""; document.getElementById('btnCustSave').innerText = "Save Customer"; 
                 ['cName','cAddr','cRoute','cSeq','cSeqEve','cMilkMan','cQtyAdd','cRateAdd','cMobile', 'cPass'].forEach(id=>document.getElementById(id).value=""); // Clear cPass field
-                document.getElementById('cSeqContainer').style.display = 'none';
+                document.getElementById('cShift').value = 'Morning';
+                toggleCustItemShift();
+                document.getElementById('cSeqContainer').style.display = 'flex';
                 document.getElementById('cId').value = ""; // Clear so backend generates it
             document.getElementById('cUsername').value = "";
                 let cp = document.getElementById('cPass'); (cp.closest('.form-group-auto') || cp.parentElement).classList.remove('hidden');
@@ -4562,18 +4729,12 @@
             }
         }
 
-        function openDeleteAccountModal() {
-            document.getElementById('delAccountPass').value = '';
-            document.getElementById('deleteAccountModal').classList.remove('hidden');
-        }
+        async function deleteOwnerByAdmin(idx) {
+            let ownerToDelete = users[idx];
+            if (!ownerToDelete || ownerToDelete.type !== 'Owner') return;
 
-        function closeDeleteAccountModal() {
-            document.getElementById('deleteAccountModal').classList.add('hidden');
-        }
-
-        async function executeAccountDeletion() {
-            let enteredPass = document.getElementById('delAccountPass').value;
-            if (!enteredPass) return alert("Please enter your password!", "error");
+            let enteredPass = prompt(`⚠️ Enter your Admin password to CONFIRM deletion of Owner: ${ownerToDelete.name} (${ownerToDelete.company}):`);
+            if (!enteredPass) return;
 
             let auth = JSON.parse(localStorage.getItem('sessionAuth'));
             let validPass = auth ? auth.pass : (currentUser ? currentUser.pass : null);
@@ -4582,32 +4743,36 @@
                 return alert("❌ Incorrect Password! Account deletion aborted.", "error");
             }
 
-            if (!confirm("FINAL WARNING: Are you absolutely sure you want to permanently delete your entire company and all data?")) return;
-
-            const btn = document.getElementById('btnConfirmDeleteAccount');
-            btn.innerText = "Deleting..."; btn.disabled = true;
+            if (!confirm(`FINAL WARNING: This will permanently delete Owner ${ownerToDelete.name} and ALL their company data (${ownerToDelete.company}). This cannot be undone!`)) return;
 
             try {
                 let promises = [];
+                let companyToDelete = ownerToDelete.company;
                 
-                if (users) users.filter(u => u.company === currentUser.company).forEach(u => promises.push(fetch(`${API_BASE}/users/${u.id}`, {method: 'DELETE'})));
-                if (customers) customers.filter(c => c.company === currentUser.company).forEach(c => promises.push(fetch(`${API_BASE}/customers/${c.id}`, {method: 'DELETE'})));
-                if (transactions) transactions.filter(t => t.company === currentUser.company).forEach(t => promises.push(fetch(`${API_BASE}/transactions/${t.id}`, {method: 'DELETE'})));
-                if (products) products.filter(p => p.company === currentUser.company).forEach(p => promises.push(fetch(`${API_BASE}/products/${p.id}`, {method: 'DELETE'})));
-                if (routes) routes.filter(r => r.company === currentUser.company).forEach(r => promises.push(fetch(`${API_BASE}/routes/${r.id}`, {method: 'DELETE'})));
-                if (requests) requests.filter(r => r.company === currentUser.company).forEach(r => promises.push(fetch(`${API_BASE}/requests/${r.id}`, {method: 'DELETE'})));
+                if (users) users.filter(u => u.company === companyToDelete).forEach(u => promises.push(fetch(`${API_BASE}/users/${u.id}`, {method: 'DELETE'})));
+                if (customers) customers.filter(c => c.company === companyToDelete).forEach(c => promises.push(fetch(`${API_BASE}/customers/${c.id}`, {method: 'DELETE'})));
+                if (transactions) transactions.filter(t => t.company === companyToDelete).forEach(t => promises.push(fetch(`${API_BASE}/transactions/${t.id}`, {method: 'DELETE'})));
+                if (products) products.filter(p => p.company === companyToDelete).forEach(p => promises.push(fetch(`${API_BASE}/products/${p.id}`, {method: 'DELETE'})));
+                if (routes) routes.filter(r => r.company === companyToDelete).forEach(r => promises.push(fetch(`${API_BASE}/routes/${r.id}`, {method: 'DELETE'})));
+                if (requests) requests.filter(r => r.company === companyToDelete).forEach(r => promises.push(fetch(`${API_BASE}/requests/${r.id}`, {method: 'DELETE'})));
 
-                promises.push(fetch(`${API_BASE}/delete_account`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ login_id: currentUser.login_id, company: currentUser.company, pass: enteredPass }) }));
+                promises.push(fetch(`${API_BASE}/users/${ownerToDelete.id}`, {method: 'DELETE'}));
+                promises.push(fetch(`${API_BASE}/delete_account`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ login_id: ownerToDelete.login_id, company: companyToDelete, pass: ownerToDelete.pass, admin_override: true }) }));
 
                 await Promise.allSettled(promises);
                 
-                alert("✅ Account and all related data deleted successfully.", "success");
-                closeDeleteAccountModal();
-                logout();
+                users = users.filter(u => u.company !== companyToDelete && u.id !== ownerToDelete.id);
+                customers = customers.filter(c => c.company !== companyToDelete);
+                transactions = transactions.filter(t => t.company !== companyToDelete);
+                products = products.filter(p => p.company !== companyToDelete);
+                routes = routes.filter(r => r.company !== companyToDelete);
+                requests = requests.filter(r => r.company !== companyToDelete);
+                
+                alert(`✅ Owner ${ownerToDelete.name} and their data deleted successfully.`, "success");
+                renderOwners();
             } catch (e) {
                 console.error(e);
                 alert("⚠️ Some data may not have been deleted due to network error.", "error");
-                btn.innerText = "Delete Everything"; btn.disabled = false;
             }
         }
 
@@ -4994,6 +5159,7 @@
             
             // Naye aur Purane sabhi customers ko by default 0 balance ke sath load karna
             customers.forEach(c => {
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return;
                 if(currentUser.type !== 'Admin' && c.company !== currentUser.company) return;
                 if(filterMM && c.milkman_id !== filterMM) return;
                 summary[c.name] = { prevBal: 0, currentBill: 0, paid: 0, seq: c.seq_no || c.seq_no_eve || 9999 };
@@ -5001,6 +5167,7 @@
 
             transactions.forEach(t => { 
                 if (t.shift === 'General Bill') return; // Hide General Bills from Accounts
+                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && t.company !== currentAdminCompanyFilter) return;
                 if(currentUser.type !== 'Admin' && t.company !== currentUser.company) return;
                 
                 let custObj = customers.find(c => c.name === t.cust);
