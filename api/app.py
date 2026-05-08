@@ -522,9 +522,10 @@ def delete_account():
     data = request.json
     login_id = data.get('login_id')
     password = data.get('pass')
+    admin_override = data.get('admin_override', False)
     
-    if not login_id or not password:
-        return jsonify({"success": False, "message": "Please provide Login ID and Password!"})
+    if not login_id:
+        return jsonify({"success": False, "message": "Please provide Login ID!"})
         
     try:
         user_res = supabase.table('sys_users').select('id, pass, type, company').eq('login_id', login_id).execute()
@@ -535,14 +536,17 @@ def delete_account():
         if user.get('type') != 'Owner':
             return jsonify({"success": False, "message": "Only Owner can delete the company account!"})
             
-        pass_db = user.get('pass', '')
-        is_valid = False
-        if pass_db:
-            try: is_valid = check_password_hash(pass_db, password)
-            except Exception: pass
-            
-        if not is_valid:
-            return jsonify({"success": False, "message": "Incorrect Password! Account deletion failed."})
+        if not admin_override:
+            if not password:
+                return jsonify({"success": False, "message": "Please provide Password!"})
+            pass_db = user.get('pass', '')
+            is_valid = False
+            if pass_db:
+                try: is_valid = check_password_hash(pass_db, password)
+                except Exception: pass
+                
+            if not is_valid:
+                return jsonify({"success": False, "message": "Incorrect Password! Account deletion failed."})
             
         company = user.get('company')
         if company == 'SuperAdmin':
