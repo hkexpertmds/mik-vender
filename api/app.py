@@ -110,7 +110,8 @@ def register():
         "email": data.get('email', ''),
         "address": data.get('address', ''),
         "mobile": data.get('mobile', ''),
-        "license_expiry": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=15)).isoformat()
+        "license_expiry": (datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=15)).isoformat(),
+        "ref_code": data.get('ref_code', '')
     }
     
     supabase.table('sys_users').insert(insert_data).execute()
@@ -174,10 +175,23 @@ def login():
     company = user.get('company', '')
 
     # 🚀 SPEED FIX: Faltu heavy Base64 images aur passwords ko background list se hata diya
-    u_cols = 'id, name, login_id, type, company, email, address, route, mobile, qr_code, license_expiry'
+    u_cols = 'id, name, login_id, type, company, email, address, route, mobile, qr_code, license_expiry, ref_code'
     c_cols = 'id, name, addr, cid, defItem, defQty, defRate, company, milkman_id, route, shift, mobile, seq_no, seq_no_eve'
 
     user_to_return = user.copy()
+
+    # --- PYTHON FIX: INJECT OWNER'S LICENSE EXPIRY FOR ALL STAFF/CUSTOMERS ---
+    if role != 'Admin' and company != 'SuperAdmin':
+        if role != 'Owner':
+            owner_res = supabase.table('sys_users').select('license_expiry').eq('type', 'Owner').ilike('company', company).execute()
+            if owner_res and owner_res.data:
+                user_to_return['license_expiry'] = owner_res.data[0].get('license_expiry')
+            else:
+                fallback = supabase.table('sys_users').select('license_expiry').eq('type', 'Owner').execute()
+                if fallback and fallback.data:
+                    user_to_return['license_expiry'] = fallback.data[0].get('license_expiry')
+    # --------------------------------------------------------------------------
+
     if role == 'Customer':
         user_to_return['type'] = 'Customer'
         user_to_return['login_id'] = user_to_return.get('cid')
@@ -205,39 +219,51 @@ def sync_data():
     company = req_data.get('company')
     name = req_data.get('name')
     
-    # For Owner/Admin, fetch their true company from DB to decide data scope and check license
-    if role in ['Owner', 'Admin', 'Manager']:
-        user_details_res = supabase.table('sys_users').select('company, license_expiry').eq('login_id', login_id).execute()
+    # --- PYTHON LEVEL SECURITY ENFORCEMENT ---
+    # 1. Authoritative Company Fetch (prevents frontend spoofing)
+    if role in ['Owner', 'Admin', 'Manager', 'Milk Man']:
+        user_details_res = supabase.table('sys_users').select('company').eq('login_id', login_id).execute()
         if not user_details_res.data:
             return jsonify({"success": False, "message": "Could not verify user."}), 403
+        company = user_details_res.data[0].get('company')
+    elif role == 'Customer':
+        cust_details_res = supabase.table('sys_customers').select('company').eq('cid', login_id).execute()
+        if not cust_details_res.data:
+            return jsonify({"success": False, "message": "Could not verify customer."}), 403
+        company = cust_details_res.data[0].get('company')
 
-        user_details = user_details_res.data[0]
-        company = user_details.get('company')  # Use authoritative company from DB
+    # 2. Global License Enforcement for ALL Roles
+    if role != 'Admin' and company != 'SuperAdmin':
+        expiry_str = None
+        if role == 'Owner':
+            owner_res = supabase.table('sys_users').select('license_expiry').eq('login_id', login_id).execute()
+            if owner_res and owner_res.data:
+                expiry_str = owner_res.data[0].get('license_expiry')
+        else:
+            owner_res = supabase.table('sys_users').select('license_expiry').eq('type', 'Owner').ilike('company', company).execute()
+            if owner_res and owner_res.data:
+                expiry_str = owner_res.data[0].get('license_expiry')
 
-        if role in ['Owner', 'Manager'] and company != 'SuperAdmin':
-            if role == 'Manager':
-                owner_res = supabase.table('sys_users').select('license_expiry').eq('type', 'Owner').eq('company', company).execute()
-                expiry_str = owner_res.data[0].get('license_expiry') if owner_res.data else None
-            else:
-                expiry_str = user_details.get('license_expiry')
-
-            if not expiry_str:
-                return jsonify({"success": False, "message": "Your license is not active. Please contact support."}), 403
-
+        if expiry_str:
             try:
                 expiry_date = datetime.datetime.fromisoformat(expiry_str)
                 if expiry_date.tzinfo is None:
                     expiry_date = expiry_date.replace(tzinfo=datetime.timezone.utc)
                 
-                # Allow 7 days grace period so frontend can show Limited Access correctly
                 grace_period_end = expiry_date + datetime.timedelta(days=7)
                 if datetime.datetime.now(datetime.timezone.utc) > grace_period_end:
-                    return jsonify({"success": False, "message": "Your license has expired for over 7 days. Access completely blocked."}), 403
+                    # WIPE OUT ALL DATA IF EXPIRED (Returns empty lists to frontend to clear cache)
+                    return jsonify({
+                        "success": True, 
+                        "message": "License expired. Data wiped from device.",
+                        "data": {"users": [], "customers": [], "transactions": [], "products": [], "requests": [], "routes": [], "licenses": []}
+                    })
             except (ValueError, TypeError):
-                return jsonify({"success": False, "message": "Invalid license format. Please contact support."}), 403
+                pass
+    # ------------------------------------------
 
     # 🚀 SPEED FIX: Removed heavy 'qr_code' from background fetching to reduce megabytes of payload
-    u_cols = 'id, name, login_id, type, company, email, address, route, mobile, license_expiry'
+    u_cols = 'id, name, login_id, type, company, email, address, route, mobile, license_expiry, ref_code'
     c_cols = 'id, name, addr, cid, defItem, defQty, defRate, company, milkman_id, route, shift, mobile, seq_no, seq_no_eve'
 
     def safe_get(f):
