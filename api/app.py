@@ -228,8 +228,11 @@ def sync_data():
                 expiry_date = datetime.datetime.fromisoformat(expiry_str)
                 if expiry_date.tzinfo is None:
                     expiry_date = expiry_date.replace(tzinfo=datetime.timezone.utc)
-                if datetime.datetime.now(datetime.timezone.utc) > expiry_date:
-                    return jsonify({"success": False, "message": "Your license has expired. Please renew to continue access."}), 403
+                
+                # Allow 7 days grace period so frontend can show Limited Access correctly
+                grace_period_end = expiry_date + datetime.timedelta(days=7)
+                if datetime.datetime.now(datetime.timezone.utc) > grace_period_end:
+                    return jsonify({"success": False, "message": "Your license has expired for over 7 days. Access completely blocked."}), 403
             except (ValueError, TypeError):
                 return jsonify({"success": False, "message": "Invalid license format. Please contact support."}), 403
 
