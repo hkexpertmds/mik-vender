@@ -317,6 +317,7 @@
                 <input type="password" id="regPass" placeholder="Create Password" style="margin: 0; padding-right: 35px;" required>
                 <span onclick="togglePasswordVisibility('regPass', 'regEyeIcon')" id="regEyeIcon" title="Show/Hide Password" style="position: absolute; right: 12px; top: 10px; cursor: pointer; user-select: none; font-size: 16px;">👁️</span>
             </div>
+            <input type="text" id="regRefCode" placeholder="Reference Code (Optional, 4 Digits)" maxlength="4" style="text-transform:uppercase; letter-spacing:2px; font-weight:bold; text-align:center; margin-top:10px;">
             <button class="btn-save" style="margin-top: 10px;" onclick="registerOwner()">Sign Up</button>
             <button class="btn-back" onclick="showView('login-page')">Back</button>
         </div>
@@ -333,6 +334,7 @@
             <button id="btn-req" class="btn-save box-btn" style="background:#ea580c" onclick="showView('request-master')"><span style="font-size:28px; margin-bottom:8px;">📝</span>Customer Requests</button>
             <button id="btn-acc" class="btn-save box-btn" style="background:#1e40af" onclick="showView('accounts-user')"><span style="font-size:28px; margin-bottom:8px;">💰</span>Accounts Summary</button>
             <button id="btn-owner-master" class="btn-save box-btn" style="background:#6d28d9" onclick="showView('owner-master')"><span style="font-size:28px; margin-bottom:8px;">👑</span>Manage Owners</button>
+            <button id="btn-referral-master" class="btn-save box-btn hidden" style="background:#0ea5e9" onclick="showView('referral-master')"><span style="font-size:28px; margin-bottom:8px;">🤝</span>Manage Referrals</button>
             <button id="btn-manager-master" class="btn-save box-btn hidden" style="background:#059669" onclick="showView('manager-master')"><span style="font-size:28px; margin-bottom:8px;">💼</span>Manage Managers</button>
             <button id="btn-license-master" class="btn-save box-btn hidden" style="background:#b91c1c" onclick="showView('license-master')"><span style="font-size:28px; margin-bottom:8px;">🔑</span>Manage Licenses</button>
             <button id="btn-manual-bill" class="btn-save box-btn hidden" style="background:#0284c7" onclick="showView('general-bill-view')"><span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill</button>
@@ -767,7 +769,51 @@
         </div>
         <button class="btn-back" onclick="showView('main-menu')">Back</button>
     </div>
+     <!-- REFERRAL MASTER -->
+    <div id="referral-master" class="container hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+            <h2 style="margin:0;">🤝 Referral Partners</h2>
+            <input type="text" id="searchReferral" placeholder="🔍 Search..." onkeyup="renderReferrals()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <button class="btn-save" style="width:auto; padding:10px 15px;" onclick="openReferralForm()">➕ New Partner</button>
+        </div>
+        <div id="referral-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; backdrop-filter: blur(5px); overflow-y:auto;">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 id="referralFormTitle" style="margin:0; color:var(--primary);">➕ New Partner</h3>
+                    <button type="button" onclick="closeReferralForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+                </div>
+                <div class="grid-form" style="margin-bottom:0;">
+                    <input type="hidden" id="editReferralIdx">
+                    <input type="text" id="refName" placeholder="Partner Name" required>
+                    <input type="text" id="refMobile" placeholder="Mobile Number" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+                    <input type="text" id="refCode" placeholder="Auto-generated Code" readonly style="opacity:0.7">
+                    <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
+                        <button id="btnReferralSave" class="btn-save" style="flex:1;" onclick="saveReferral()">Save</button>
+                        <button class="btn-back" style="flex:1; margin:0;" onclick="closeReferralForm()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="overflow-x:auto;">
+            <table><thead><tr><th>Sr.</th><th>Name</th><th>Mobile</th><th>Ref Code</th><th>Referrals</th><th>Actions</th></tr></thead><tbody id="referralTableBody"></tbody></table>
+        </div>
+        <button class="btn-back" onclick="showView('main-menu')">Back</button>
+    </div>
 
+    <!-- REFERRAL DETAILS MODAL -->
+    <div id="referralDetailsModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10006; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); display:flex; flex-direction:column;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <h3 id="refDetailsTitle" style="margin:0; color:var(--primary);">📊 Referrals Details</h3>
+                <button onclick="document.getElementById('referralDetailsModal').classList.add('hidden')" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+            </div>
+            <div id="refDetailsList" style="overflow-y:auto; flex:1;"></div>
+            <div style="display:flex; justify-content:flex-end; margin-top: 15px;">
+                <button class="btn-back" style="width:auto; margin:0;" onclick="document.getElementById('referralDetailsModal').classList.add('hidden')">Close</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- MANAGER MASTER -->
     <div id="manager-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
@@ -1081,17 +1127,34 @@
     <!-- FULLY BLOCKED LICENSE MODAL -->
     <div id="licenseBlockedModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(15, 23, 42, 0.98); z-index:999999; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(10px);">
         <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid var(--danger); text-align:center; box-shadow: 0 10px 30px rgba(244, 63, 94, 0.2);">
-            <h3 style="margin-top:0; margin-bottom: 10px; color:var(--danger); font-size: 24px;">⛔ Access Blocked</h3>
-            <p style="color:#e2e8f0; font-size:14px; margin-top:0; margin-bottom:20px;">Your 7-day limited access period has ended. Please enter a valid license key to continue using the application.</p>
-            <input type="text" id="blockedLicenseKey" placeholder="Enter License Key (e.g. VIP-A1B2-C3D4)" style="width:100%; text-align:center; font-family:monospace; font-size:16px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-bottom:20px; border:1px solid var(--danger); box-sizing:border-box;">
-            <button class="btn-save" id="btnSubmitBlockedLicense" style="background:var(--danger); margin-bottom:20px;" onclick="submitBlockedLicenseKey()">Verify & Unlock</button>
-            
-            <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; font-size: 13px; text-align: center; border: 1px solid #475569;">
-                <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--warning);">Contact Support to Buy Key:</p>
-                <h4 style="margin: 0 0 8px 0; color: var(--primary);">Expert Computer Services</h4>
-                <p style="margin: 4px 0;">Rishi Bairagi: <a href="https://wa.me/916263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
-                <p style="margin: 4px 0;">Harish Kumawat: <a href="https://wa.me/919425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
-                <p style="margin: 4px 0;">Email: <a href="mailto:hkexpertmds@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: bold;">hkexpertmds@gmail.com</a></p>
+           <!-- VIEW FOR OWNER / ADMIN -->
+            <div id="ownerBlockedView">
+                <h3 style="margin-top:0; margin-bottom: 10px; color:var(--danger); font-size: 24px;">⛔ Access Blocked</h3>
+                <p style="color:#e2e8f0; font-size:14px; margin-top:0; margin-bottom:20px;">Your 7-day limited access period has ended. Please enter a valid license key to continue using the application.</p>
+                <input type="text" id="blockedLicenseKey" placeholder="Enter License Key (e.g. VIP-A1B2-C3D4)" style="width:100%; text-align:center; font-family:monospace; font-size:16px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-bottom:20px; border:1px solid var(--danger); box-sizing:border-box;">
+                <button class="btn-save" id="btnSubmitBlockedLicense" style="background:var(--danger); margin-bottom:20px;" onclick="submitBlockedLicenseKey()">Verify & Unlock</button>
+                
+                <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; font-size: 13px; text-align: center; border: 1px solid #475569;">
+                    <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--warning);">Contact Support to Buy Key:</p>
+                    <h4 style="margin: 0 0 8px 0; color: var(--primary);">Expert Computer Services</h4>
+                    <p style="margin: 4px 0;">Rishi Bairagi: <a href="https://wa.me/916263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
+                    <p style="margin: 4px 0;">Harish Kumawat: <a href="https://wa.me/919425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
+                    <p style="margin: 4px 0;">Email: <a href="mailto:hkexpertmds@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: bold;">hkexpertmds@gmail.com</a></p>
+                </div>
+            </div>
+
+            <!-- VIEW FOR STAFF & CUSTOMERS -->
+            <div id="staffBlockedView" class="hidden">
+                <div style="font-size: 50px; margin-bottom: 10px; animation: modalPop 0.5s ease;">🚧</div>
+                <h3 style="margin-top:0; margin-bottom: 10px; color:var(--warning); font-size: 22px;">Service Suspended</h3>
+                <p style="color:#e2e8f0; font-size:14px; margin-top:0; margin-bottom:15px; line-height:1.5;">
+                    The enterprise license for <b style="color:white;"><span id="blockedCompanyName">this dairy</span></b> has expired. 
+                </p>
+                <div style="background:rgba(251, 191, 36, 0.1); border:1px solid rgba(251, 191, 36, 0.3); padding:15px; border-radius:10px; margin-bottom:20px;">
+                    <p style="margin:0; font-size:13px; color:var(--text);">
+                        Please contact your <b>Dairy Owner / Manager</b> to renew their subscription and restore your access.
+                    </p>
+                </div>
             </div>
             
             <button class="btn-back" style="margin-top:20px; border-color:#475569; color:#94a3b8;" onclick="logout()">Logout</button>
@@ -1554,19 +1617,8 @@
             if (!currentUser) return false;
             if (currentUser.type === 'Admin') return true; // Admins skip this check
             
-            let expiry = null;
-            if (currentUser.type === 'Owner') {
-                expiry = currentUser.license_expiry;
-            } else {
-                // Check Owner's expiry for Sub-users (Delivery/Customer)
-                let owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
-                if (owner) {
-                    expiry = owner.license_expiry;
-                } else {
-                    // If owner is not found in memory, assume valid to prevent false lockouts for sub-users
-                    return true;
-                }
-            }
+            // Since backend explicitly sets license_expiry on login for all roles
+            let expiry = currentUser.license_expiry;
             
             if (!expiry) return false;
             return new Date(expiry) >= new Date(new Date().setHours(0,0,0,0));
@@ -1592,17 +1644,8 @@
             if (!currentUser) return;
             if (currentUser.type === 'Admin') return; // Admins skip this check
 
-            let expiry = null;
-            if (currentUser.type === 'Owner') {
-                expiry = currentUser.license_expiry;
-            } else {
-                let owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
-                if (owner) {
-                    expiry = owner.license_expiry;
-                } else {
-                    return; // Assume valid if owner not found in memory
-                }
-            }
+            // Since backend explicitly sets license_expiry on login for all roles
+            let expiry = currentUser.license_expiry;
 
             let expiryDate = expiry ? new Date(expiry) : new Date(0);
             expiryDate.setHours(0,0,0,0);
@@ -1617,7 +1660,24 @@
             if (diffDays > 7) {
                 // Fully Blocked (After 7 Days)
                 if (banner) banner.classList.add('hidden');
-                if (blockedModal) blockedModal.classList.remove('hidden');
+                 if (blockedModal) {
+                    blockedModal.classList.remove('hidden');
+                    let isOwnerOrAdmin = (currentUser.type === 'Owner' || currentUser.type === 'Admin');
+                    let ownerView = document.getElementById('ownerBlockedView');
+                    let staffView = document.getElementById('staffBlockedView');
+                    
+                    if (ownerView && staffView) {
+                        ownerView.classList.toggle('hidden', !isOwnerOrAdmin);
+                        staffView.classList.toggle('hidden', isOwnerOrAdmin);
+                        let cNameSpan = document.getElementById('blockedCompanyName');
+                        if (cNameSpan && currentUser) cNameSpan.innerText = currentUser.company || 'your dairy provider';
+                    }
+                }
+                 
+                // Explicitly hide UI to completely block access for all roles
+                document.getElementById('app-header').classList.add('hidden');
+                document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+
                 btnsToHide.forEach(id => { let el = document.getElementById(id); if (el) el.style.display = 'none'; });
             } else if (diffDays > 0 && diffDays <= 7) {
                 // Grace Period (0 to 7 Days Limited Access)
@@ -1639,7 +1699,12 @@
                 if (blockedModal) blockedModal.classList.add('hidden');
                 if (banner) banner.classList.add('hidden');
                 document.body.style.paddingTop = '80px';
-                
+                 
+                // Restore UI dynamically
+                document.getElementById('app-header').classList.remove('hidden');
+                if (currentView && document.getElementById(currentView)) {
+                    document.getElementById(currentView).classList.remove('hidden');
+                }
                 // Restore buttons
                 btnsToHide.forEach(id => { let el = document.getElementById(id); if (el) el.style.display = ''; });
             }
@@ -1807,6 +1872,7 @@
                 'btn-req': '<span style="font-size:28px; margin-bottom:8px;">📝</span>Customer Requests',
                 'btn-acc': '<span style="font-size:28px; margin-bottom:8px;">💰</span>Accounts Summary',
                 'btn-owner-master': '<span style="font-size:28px; margin-bottom:8px;">👑</span>Manage Owners',
+                'btn-referral-master': '<span style="font-size:28px; margin-bottom:8px;">🤝</span>Manage Referrals',
                 'btn-manager-master': '<span style="font-size:28px; margin-bottom:8px;">💼</span>Manage Managers',
                 'btn-license-master': '<span style="font-size:28px; margin-bottom:8px;">🔑</span>Manage Licenses',
                 'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill',
@@ -1833,6 +1899,7 @@
                 'btn-req': '<span style="font-size:28px; margin-bottom:8px;">📝</span>कस्टमर रिक्वेस्ट',
                 'btn-acc': '<span style="font-size:28px; margin-bottom:8px;">💰</span>हिसाब और रिपोर्ट',
                 'btn-owner-master': '<span style="font-size:28px; margin-bottom:8px;">👑</span>ओनर मैनेज करें',
+                'btn-referral-master': '<span style="font-size:28px; margin-bottom:8px;">🤝</span>रेफरल पार्टनर',
                 'btn-manager-master': '<span style="font-size:28px; margin-bottom:8px;">💼</span>मैनेजर (Managers)',
                 'btn-license-master': '<span style="font-size:28px; margin-bottom:8px;">🔑</span>लाइसेंस (Licenses)',
                 'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>जनरल बिल',
@@ -1874,6 +1941,7 @@
             setHtml('btn-req', dict['btn-req']);
             setHtml('btn-acc', dict['btn-acc']);
             setHtml('btn-owner-master', dict['btn-owner-master']);
+            setHtml('btn-referral-master', dict['btn-referral-master']);
             setHtml('btn-manager-master', dict['btn-manager-master']);
             setHtml('btn-license-master', dict['btn-license-master']);
             setHtml('btn-manual-bill', dict['btn-manual-bill']);
@@ -2119,8 +2187,10 @@
                 let originalTitle = document.title;
                 document.title = fileName;
                 frame.contentDocument.title = fileName;
-                frame.contentWindow.print(); 
-                setTimeout(() => { document.title = originalTitle; }, 2000);
+                setTimeout(() => {
+                    frame.contentWindow.print(); 
+                    setTimeout(() => { document.title = originalTitle; }, 2000);
+                }, 250);
             }
         }
 
@@ -2195,7 +2265,7 @@
                 if (el.closest('.hidden') || el.offsetParent === null) continue; 
                 if (!el.value || el.value.trim() === '') {
                     el.style.border = '2px solid var(--danger)';
-                    setTimeout(() => el.style.border = '1px solid transparent', 3000);
+                    setTimeout(() => el.style.border = '', 3000);
                     el.reportValidity();
                     return false;
                 }
@@ -2208,7 +2278,7 @@
                 if (val && (!/^\d{10}$/.test(val))) {
                     alert("Mobile Number must be exactly 10 digits!", "error");
                     el.style.border = '2px solid var(--danger)';
-                    setTimeout(() => el.style.border = '1px solid transparent', 3000);
+                    setTimeout(() => el.style.border = '', 3000);
                     el.focus();
                     return false;
                 }
@@ -2284,15 +2354,20 @@
                 pass: document.getElementById('regPass').value, email: document.getElementById('regEmail').value, 
                 address: finalAddress,
                 mobile: document.getElementById('regMobile').value,
-                license_expiry: expiryDate.toISOString()
+                license_expiry: expiryDate.toISOString(),
+                ref_code: document.getElementById('regRefCode').value.trim()
             };
             if(!data.name || !data.username || !data.city || data.city.length !== 2 || !data.pass || !data.company || !data.mobile) return alert("Please fill all required fields and select a State / District!");
             if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             
-            const res = await fetch(`${API_BASE}/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            const result = await res.json();
-            if(result.success) { alert(`Account Created Successfully!\n\n🎁 15-Days Free Trial Activated!\n\nYour Unique Login ID is: ${result.login_id}\n\nPlease note this ID to login.`); showLogin('Owner'); }
-            else alert(result.message);
+            try {
+                const res = await fetch(`${API_BASE}/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                const result = await res.json();
+                if(result.success) { alert(`Account Created Successfully!\n\n🎁 15-Days Free Trial Activated!\n\nYour Unique Login ID is: ${result.login_id}\n\nPlease note this ID to login.`); showLogin('Owner'); }
+                else alert(result.message);
+            } catch (error) {
+                alert("Network Error: Could not register account. Please try again.", "error");
+            }
         }
 
         async function handleAuth(isAutoLogin = false) {
@@ -2466,6 +2541,7 @@
             if(id === 'request-master') { renderOwnerRequests(); }
             if(id === 'route-master') { renderRoutes(); }
             if(id === 'owner-master') { renderOwners(); }
+            if(id === 'referral-master') { renderReferrals(); }
             if(id === 'license-master') { renderLicenses(); }
             if(id === 'profile-view') { showView('profile-view'); }
         }
@@ -2537,6 +2613,7 @@
             document.getElementById('btn-req').classList.toggle('hidden', isCust || isManager);
             document.getElementById('btn-route').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
             document.getElementById('btn-owner-master').classList.toggle('hidden', currentUser.type !== 'Admin'); // Only Admin can see this
+            if(document.getElementById('btn-referral-master')) document.getElementById('btn-referral-master').classList.toggle('hidden', currentUser.type !== 'Admin');
             if(document.getElementById('btn-license-master')) document.getElementById('btn-license-master').classList.toggle('hidden', currentUser.type !== 'Admin');
             
             if(document.getElementById('btn-manual-bill')) document.getElementById('btn-manual-bill').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin' && currentUser.type !== 'Manager');
@@ -2665,6 +2742,7 @@
             if(id === 'request-master') { renderOwnerRequests(); }
             if(id === 'route-master') { resetForm('route'); renderRoutes(); } // This was missing from the previous diff, adding it back.
             if(id === 'owner-master') { renderOwners(); }
+            if(id === 'referral-master') { renderReferrals(); }
             if(id === 'manager-master') { resetForm('manager'); closeManagerForm(); renderManagers(); }
             if(id === 'license-master') { document.getElementById('license-form-section').classList.add('hidden'); renderLicenses(); }
             
@@ -2834,18 +2912,23 @@
             if(uId && idx !== "") data.login_id = uId;
             if(idx !== "") data.id = users[idx].id;
             
-            const res = await fetch(`${API_BASE}/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            const savedData = await res.json();
-            
-            if (savedData.success === false) {
-                alert(savedData.message);
-                document.getElementById('btnUserSave').innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man";
-                return;
-            }
+            try {
+                const res = await fetch(`${API_BASE}/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                const savedData = await res.json();
+                
+                if (savedData.success === false) {
+                    alert(savedData.message);
+                    document.getElementById('btnUserSave').innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man";
+                    return;
+                }
 
-            if(idx === "") users.push(savedData); else users[idx] = savedData;
-            resetForm('user'); populateRouteDropdown(); renderUsers();
-            closeUserForm();
+                if(idx === "") users.push(savedData); else users[idx] = savedData;
+                resetForm('user'); populateRouteDropdown(); renderUsers();
+                closeUserForm();
+            } catch (error) {
+                alert("Network Error: Could not save Delivery Man. Please try again.", "error");
+                document.getElementById('btnUserSave').innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man";
+            }
         }
 
         function openNewCustForm() {
@@ -2960,18 +3043,23 @@
             if(cId && idx !== "") data.cid = cId;
             if(idx !== "") data.id = customers[idx].id;
 
-            const res = await fetch(`${API_BASE}/customers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-            const savedData = await res.json();
+            try {
+                const res = await fetch(`${API_BASE}/customers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                const savedData = await res.json();
 
-            if (savedData.success === false) {
-                alert(savedData.message);
+                if (savedData.success === false) {
+                    alert(savedData.message);
+                    document.getElementById('btnCustSave').innerText = idx === "" ? "Save Customer" : "Update Customer";
+                    return;
+                }
+
+                if(idx === "") customers.push(savedData); else customers[idx] = savedData;
+                resetForm('cust'); renderCustomers();
+                closeCustForm();
+            } catch (error) {
+                alert("Network Error: Could not save customer. Please try again.");
                 document.getElementById('btnCustSave').innerText = idx === "" ? "Save Customer" : "Update Customer";
-                return;
             }
-
-            if(idx === "") customers.push(savedData); else customers[idx] = savedData;
-            resetForm('cust'); renderCustomers();
-            closeCustForm();
         }
 
         // --- TRANSACTION ---
@@ -3415,6 +3503,7 @@
                 const finalData = { ...data, ...savedData };
                 if(idx === "") products.push(finalData); else products[idx] = finalData;
             } catch(e) {
+                if (!data.id) data.id = 'temp_' + Math.floor(Math.random() * 100000);
                 if(idx === "") products.push(data); else products[idx] = data;
             }
             resetForm('product'); renderProducts(); populateProductDropdowns();
@@ -3439,6 +3528,7 @@
                 const savedData = await res.json();
                 if(idx === "") routes.push(savedData); else routes[idx] = savedData;
             } catch(e) {
+                if (!data.id) data.id = 'temp_' + Math.floor(Math.random() * 100000);
                 if(idx === "") routes.push(data); else routes[idx] = data;
             }
             resetForm('route'); renderRoutes();
@@ -3458,10 +3548,15 @@
                 cust_id: currentUser.login_id, cust_name: currentUser.name, req_date: date, req_qty: qty,
                 company: currentUser.company, milkman_id: custObj ? custObj.milkman_id : ''
             };
-            const res = await fetch(`${API_BASE}/requests`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
-            requests.push(await res.json());
-            document.getElementById('reqDate').value = ""; document.getElementById('reqQty').value = ""; if(btn) btn.innerText = "Send Request";
-            renderCustomerRequests(); alert("Request sent successfully!");
+            try {
+                const res = await fetch(`${API_BASE}/requests`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+                requests.push(await res.json());
+                document.getElementById('reqDate').value = ""; document.getElementById('reqQty').value = ""; if(btn) btn.innerText = "Send Request";
+                renderCustomerRequests(); alert("Request sent successfully!", "success");
+            } catch (error) {
+                if(btn) btn.innerText = "Send Request";
+                alert("Network Error: Could not send request. Please try again.", "error");
+            }
         }
 
         function togglePaymentFields() {
@@ -3859,6 +3954,77 @@
             });
             if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No owners found.</td></tr>';
             updatePaginationUI('Owner', totalItems, startIndex, endIndex, currentOwnerPage, totalPages);
+        }
+
+        // --- REFERRALS (SUPER ADMIN) ---
+        function openReferralForm() {
+            document.getElementById('editReferralIdx').value = "";
+            document.getElementById('refName').value = "";
+            document.getElementById('refMobile').value = "";
+            document.getElementById('refCode').value = Math.floor(1000 + Math.random() * 9000).toString();
+            document.getElementById('referralFormTitle').innerText = "➕ New Partner";
+            document.getElementById('btnReferralSave').innerText = "Save";
+            document.getElementById('referral-form-section').classList.remove('hidden');
+        }
+
+        function closeReferralForm() {
+            document.getElementById('referral-form-section').classList.add('hidden');
+        }
+
+        async function saveReferral() {
+            const name = document.getElementById('refName').value.trim();
+            const mobile = document.getElementById('refMobile').value.trim();
+            const code = document.getElementById('refCode').value.trim();
+            const idx = document.getElementById('editReferralIdx').value;
+
+            if(!name || mobile.length !== 10) return alert("Name and 10-digit Mobile are required!");
+
+            const btn = document.getElementById('btnReferralSave');
+            btn.innerText = "Saving...";
+
+            let data = { name: name, mobile: mobile, ref_code: code, type: 'Referral', company: 'SuperAdmin' };
+            if(idx !== "") data.id = users[idx].id;
+
+            try {
+                const res = await fetch(`${API_BASE}/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                const savedData = await res.json();
+                if(savedData.success === false) { alert(savedData.message); btn.innerText = idx !== "" ? "Update" : "Save"; return; }
+                if(idx === "") users.push(savedData); else users[idx] = savedData;
+                closeReferralForm(); renderReferrals();
+                alert(idx !== "" ? "Partner Updated!" : "Partner Added!", "success");
+            } catch(e) { alert("Network error."); }
+            btn.innerText = idx !== "" ? "Update" : "Save";
+        }
+
+        function editReferral(idx) {
+            const u = users[idx];
+            document.getElementById('editReferralIdx').value = idx; document.getElementById('refName').value = u.name;
+            document.getElementById('refMobile').value = u.mobile; document.getElementById('refCode').value = u.ref_code || Math.floor(1000 + Math.random() * 9000).toString();
+            document.getElementById('referralFormTitle').innerText = "✏️ Edit Partner"; document.getElementById('btnReferralSave').innerText = "Update";
+            document.getElementById('referral-form-section').classList.remove('hidden');
+        }
+
+        function renderReferrals() {
+            const tbody = document.getElementById('referralTableBody');
+            if(!tbody) return;
+            let search = document.getElementById('searchReferral').value.toLowerCase().trim();
+            let html = ''; let srNo = 1;
+            users.forEach((u, i) => {
+                if (u.type !== 'Referral') return;
+                let referredOwners = users.filter(o => o.type === 'Owner' && o.ref_code === u.ref_code);
+                if(search && !(u.name.toLowerCase().includes(search) || u.mobile.includes(search) || (u.ref_code && u.ref_code.includes(search)))) return;
+                html += `<tr><td><b>${srNo++}</b></td><td>${u.name}</td><td>${u.mobile}</td><td><b style="color:var(--primary); font-size:16px;">${u.ref_code || '-'}</b></td>
+                    <td><button class="badge" style="background:var(--success); padding:4px 10px; font-size:14px;" onclick="showReferralDetails('${u.ref_code}', '${u.name.replace(/'/g, "\\'")}')">${referredOwners.length} Registered</button></td>
+                    <td style="white-space:nowrap;"><button class="badge" style="background:var(--warning); color:black" onclick="editReferral(${i})">Edit</button><button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'user'); setTimeout(renderReferrals, 500);">Del</button></td></tr>`;
+            });
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No referral partners found.</td></tr>';
+        }
+
+        function showReferralDetails(code, partnerName) {
+            document.getElementById('refDetailsTitle').innerText = `📊 Details: ${partnerName}`;
+            let list = users.filter(o => o.type === 'Owner' && o.ref_code === code);
+            let html = list.length === 0 ? '<p style="text-align:center; color:#94a3b8;">No registrations yet.</p>' : '<table style="width:100%;"><thead><tr><th>Company</th><th>Owner</th><th>Mobile</th></tr></thead><tbody>' + list.map(o => `<tr><td>${o.company||'-'}</td><td>${o.name}</td><td>${o.mobile||'-'}</td></tr>`).join('') + '</tbody></table>';
+            document.getElementById('refDetailsList').innerHTML = html; document.getElementById('referralDetailsModal').classList.remove('hidden');
         }
 
         function renderLicenses() {
@@ -5277,8 +5443,10 @@
             
             let nextView = 'ledger-master';
             if (sessionStorage.getItem('lastView') === 'general-bill-view') nextView = 'general-bill-view';
-            if(type === 'user') nextView = 'user-master';
-            else if(type === 'route') nextView = 'route-master';
+            if(type === 'user') {
+                if (sessionStorage.getItem('lastView') === 'referral-master') nextView = 'referral-master';
+                else nextView = 'user-master';
+            } else if(type === 'route') nextView = 'route-master';
             else if(type === 'product') nextView = 'product-master';
             else if(type === 'request') nextView = 'request-master';
             else if(type === 'license') nextView = 'license-master';
