@@ -400,8 +400,8 @@
             <input type="text" id="searchUser" placeholder="🔍 Search..." onkeyup="currentUserPage=1; renderUsers()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
             <button class="btn-save" id="btnShowNewUser" style="width:auto; padding:10px 15px;" onclick="openNewUserForm()">➕ New Delivery Man</button>
         </div>
-        <div id="user-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
-            <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+        <div id="user-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; backdrop-filter: blur(5px); overflow-y:auto;">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 id="userFormTitle" style="margin:0; color:var(--primary);">➕ New Delivery Man</h3>
                     <button type="button" onclick="closeUserForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -454,8 +454,8 @@
                 <button class="btn-save" id="btnShowNewCust" style="width:auto; padding:8px 15px; margin:0; white-space:nowrap;" onclick="openNewCustForm()">➕ New</button>
             </div>
 
-            <div id="cust-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
-                <div class="modal-box" style="background:var(--card); width:100%; max-width:650px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+            <div id="cust-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; backdrop-filter: blur(5px); overflow-y:auto;">
+                <div class="modal-box" style="background:var(--card); width:100%; max-width:650px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                         <h3 id="custFormTitle" style="margin:0; color:var(--primary);">➕ New Customer</h3>
                         <button type="button" onclick="closeCustForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -505,10 +505,10 @@
             <div style="overflow-x: auto; margin-top: 20px;">
                 <table style="min-width: 600px;"><thead><tr><th>Sr.</th><th>Name</th><th>Route & Shift</th><th>Delivery Man</th><th>Mobile & ID</th><th>Actions</th></tr></thead><tbody id="customerTableBody"></tbody></table>
                 
-                <div id="custPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
-                    <div style="font-size:13px; color:#94a3b8;" id="custPageInfo">Showing 0 customers</div>
+                <div id="CustPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                    <div style="font-size:13px; color:#94a3b8;" id="CustPageInfo">Showing 0 customers</div>
                     <div style="display:flex; gap:5px; align-items:center;">
-                        <select id="custPerPage" onchange="currentCustPage=1; custItemsPerPage=parseInt(this.value); renderCustomers()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                        <select id="CustPerPage" onchange="currentCustPage=1; custItemsPerPage=parseInt(this.value); renderCustomers()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
                             <option value="25">25 per page</option>
                             <option value="50">50 per page</option>
                             <option value="100">100 per page</option>
@@ -649,8 +649,8 @@
             <input type="text" id="searchProduct" placeholder="🔍 Search Product..." onkeyup="currentProductPage=1; renderProducts()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
             <button class="btn-save" id="btnShowNewProduct" style="width:auto; padding:10px 15px;" onclick="openNewProductForm()">➕ New Product</button>
         </div>
-        <div id="product-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
-            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+        <div id="product-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; backdrop-filter: blur(5px); overflow-y:auto;">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 id="productFormTitle" style="margin:0; color:var(--primary);">➕ New Product</h3>
                     <button type="button" onclick="closeProductForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -714,8 +714,8 @@
             <input type="text" id="searchRoute" placeholder="🔍 Search Route..." onkeyup="currentRoutePage=1; renderRoutes()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
             <button class="btn-save" id="btnShowNewRoute" style="width:auto; padding:10px 15px;" onclick="openNewRouteForm()">➕ New Route</button>
         </div>
-        <div id="route-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
-            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+        <div id="route-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; backdrop-filter: blur(5px); overflow-y:auto;">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 id="routeFormTitle" style="margin:0; color:var(--primary);">➕ New Route</h3>
                     <button type="button" onclick="closeRouteForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -775,8 +775,8 @@
             <input type="text" id="searchManager" placeholder="🔍 Search Manager..." onkeyup="currentManagerPage=1; renderManagers()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
             <button class="btn-save" id="btnShowNewManager" style="width:auto; padding:10px 15px;" onclick="openNewManagerForm()">➕ New Manager</button>
         </div>
-        <div id="manager-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
-            <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+        <div id="manager-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; backdrop-filter: blur(5px); overflow-y:auto;">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 id="managerFormTitle" style="margin:0; color:var(--primary);">➕ New Manager</h3>
                     <button type="button" onclick="closeManagerForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -818,8 +818,8 @@
             <button class="btn-save" style="width:auto; padding:10px 15px;" onclick="openLicenseForm()">➕ New Key</button>
         </div>
         <p style="color: #94a3b8; margin-bottom: 20px;">Generate and manage license keys for Owners.</p>
-        <div id="license-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
-            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+        <div id="license-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; backdrop-filter: blur(5px); overflow-y:auto;">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0; color:var(--primary);">➕ Generate Key</h3>
                     <button type="button" onclick="document.getElementById('license-form-section').classList.add('hidden')" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -999,8 +999,8 @@
     </div>
 
     <!-- SEQUENCE EDITOR MODAL -->
-    <div id="seqModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; max-height:80vh; display:flex; flex-direction:column; border:1px solid #475569;">
+    <div id="seqModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; overflow-y:auto;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; max-height:calc(100vh - 100px); display:flex; flex-direction:column; border:1px solid #475569;">
             <h3 id="seqModalTitle" style="margin-top:0;">🔢 Edit Route Sequence</h3>
             <div id="seqModalContent" style="overflow-y:auto; flex:1; margin-bottom:15px; display:flex; flex-direction:column; gap:10px; padding-right:10px;"></div>
             <div style="display:flex; gap:10px;">
@@ -1011,8 +1011,8 @@
     </div>
 
     <!-- EDIT TRANS MODAL (REPLACES MANUAL ENTRY) -->
-    <div id="editTransModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+    <div id="editTransModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; overflow-y:auto;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
                 <h3 id="transModalTitle" style="margin:0;">📝 Manual Entry</h3>
                 <button onclick="closeEditTransModal()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -1099,8 +1099,8 @@
     </div>
 
     <!-- HELP & SUPPORT MODAL -->
-    <div id="helpModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10002; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; max-height:85vh; display:flex; flex-direction:column; border:1px solid #475569;">
+    <div id="helpModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10002; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; overflow-y:auto;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; max-height:calc(100vh - 100px); display:flex; flex-direction:column; border:1px solid #475569;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
                 <h3 id="help-modal-title" style="margin:0;">🆘 Help & Support</h3>
                 <button onclick="closeHelpModal()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
@@ -1139,7 +1139,7 @@
     </div>
 
     <!-- EDIT PROFILE FIELD MODAL -->
-    <div id="editFieldModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px;">
+    <div id="editFieldModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px;">
         <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid #475569;">
             <h3 id="editFieldTitle" style="margin-top:0; margin-bottom: 15px; color:var(--primary);">Edit Field</h3>
             <input type="hidden" id="editFieldKey">
@@ -1155,8 +1155,8 @@
     </div>
 
     <!-- MEDIA MANAGER MODAL -->
-    <div id="mediaManagerModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10004; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:450px; padding:25px; border-radius:16px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+    <div id="mediaManagerModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10004; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; overflow-y:auto;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:450px; padding:25px; border-radius:16px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
             <h3 style="margin-top:0; margin-bottom: 5px; color:var(--primary);">🖼️ Manage Pictures</h3>
             <p style="font-size:12px; color:#94a3b8; margin-top:0; margin-bottom:20px;">Tap on any image to crop & change it.</p>
             
@@ -1190,8 +1190,8 @@
     </div>
 
     <!-- Cropping Modal -->
-    <div id="qrCropModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10010; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:600px; padding:20px; border-radius:12px; max-height:90vh; display:flex; flex-direction:column; border:1px solid #475569;">
+    <div id="qrCropModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10010; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; overflow-y:auto;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:600px; padding:20px; border-radius:12px; max-height:calc(100vh - 100px); display:flex; flex-direction:column; border:1px solid #475569;">
             <h3 id="cropModalTitle" style="margin-top:0;">Crop Image</h3>
             <div style="flex:1; overflow:hidden; display:flex; justify-content:center; align-items:center; margin-bottom:15px;">
                 <img id="qrCropImage" style="max-width:100%; max-height:100%; display:block;">
@@ -3173,7 +3173,33 @@
                 filtered.push({t, realIdx, serialNo, displayItem});
             });
             
-            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No bills found.</td></tr>';
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / gbItemsPerPage) || 1;
+            if(currentGbPage > totalPages) currentGbPage = totalPages;
+            if(currentGbPage < 1) currentGbPage = 1;
+            let startIndex = (currentGbPage - 1) * gbItemsPerPage;
+            let endIndex = Math.min(startIndex + gbItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+
+            let html = '';
+            paginated.forEach((item, displayIdx) => {
+                let {t, realIdx, serialNo, displayItem} = item;
+                let srNo = startIndex + displayIdx + 1;
+                html += `<tr style="animation-delay:${displayIdx * 0.04}s">
+                    <td><b>${srNo}</b></td>
+                    <td>GB-${serialNo}<br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
+                    <td>${t.cust}</td>
+                    <td>${displayItem}</td>
+                    <td style="color:var(--success); font-weight:bold;">₹${parseFloat(t.total||0).toFixed(2)}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="badge" style="background:var(--success)" onclick="reprintGb(${realIdx})">Print</button>
+                        <button class="badge" style="background:var(--warning); color:black" onclick="editGb(${realIdx})">Edit</button>
+                        <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
+                    </td>
+                </tr>`;
+            });
+            
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No bills found.</td></tr>';
             document.getElementById('gbSummary').innerText = `Total Collection: ₹${totalAmt.toFixed(2)}`;
             updatePaginationUI('Gb', totalItems, startIndex, endIndex, currentGbPage, totalPages);
         }
@@ -3649,7 +3675,7 @@
             });
             
             if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No customers found.</td></tr>';
-            updatePaginationUI('cust', totalCusts, startIndex, endIndex, currentCustPage, totalPages);
+            updatePaginationUI('Cust', totalCusts, startIndex, endIndex, currentCustPage, totalPages);
 
             populateTransCustSelect();
         }
