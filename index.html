@@ -94,11 +94,23 @@
             .box-btn { min-height: 90px; padding: 15px 5px; font-size: 13px; }
             .box-btn span { font-size: 24px !important; margin-bottom: 5px !important; }
             
-            /* SMART HEADER FIX FOR MOBILE */
-            #app-header { flex-wrap: wrap !important; padding: 10px 15px !important; gap: 5px 0 !important; }
-            #app-header > div:nth-child(1) { flex: 1 1 50% !important; justify-content: flex-start !important; }
-            #app-header > div:nth-child(3) { flex: 1 1 40% !important; justify-content: flex-end !important; padding-right: 0 !important; }
-            #header-company-name { position: static !important; transform: none !important; flex: 1 1 100% !important; text-align: left !important; font-size: 12px !important; color: #94a3b8 !important; margin-left: 45px !important; white-space: normal !important; overflow: visible !important; letter-spacing: normal !important; }
+             /* APP-LIKE SLEEK HEADER FOR MOBILE */
+            #app-header { padding: 10px 12px !important; height: 55px !important; box-sizing: border-box; flex-wrap: nowrap !important; background: rgba(30, 41, 59, 0.85) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+            :root.light-mode #app-header { background: rgba(255, 255, 255, 0.85) !important; }
+            #app-header > div:nth-child(1) { gap: 6px !important; flex: 1; min-width: 0; max-width: 25%; overflow: hidden; }
+            #app-header > div:nth-child(2) { flex: 2; min-width: 0; max-width: 50%; overflow: hidden; margin: 0 5px; }
+            #app-header > div:nth-child(3) { gap: 6px !important; padding-right: 25px !important; flex: 1; justify-content: flex-end; min-width: 0; max-width: 25%; overflow: hidden; }
+            #header-company-name { font-size: 14px !important; margin: 0 !important; letter-spacing: 0 !important; }
+            #header-user-name { font-size: 12px !important; font-weight: 500 !important; }
+            #header-user-info { justify-content: flex-start; }
+            #header-user-info img { width: 26px !important; height: 26px !important; margin: 0 !important; border-width: 1px !important; flex-shrink: 0; }
+           
+            #header-role { font-size: 10px !important; padding: 3px 6px !important; border-radius: 6px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; box-sizing: border-box; }
+            #global-admin-company-filter { max-width: 75px !important; font-size: 10px !important; padding: 2px 4px !important; }
+            #global-back-btn { font-size: 18px !important; }
+            #theme-toggle { top: 16px !important; right: 12px !important; font-size: 20px !important; }
+            #license-banner { top: 55px !important; }
+            #profile-dropdown { top: 60px !important; left: 10px !important; right: 10px !important; max-width: none !important; width: auto !important; }
             
             /* RESPONSIVE TABLES & FORMS */
             table { display: block; overflow-x: auto; white-space: nowrap; width: 100%; border-spacing: 0 4px; }
@@ -152,17 +164,20 @@
     <div id="theme-toggle" style="position: fixed; top: 15px; right: 20px; font-size: 24px; cursor: pointer; user-select: none; z-index: 1000; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); transition: transform 0.3s;" onclick="toggleTheme()" title="Toggle Theme">☀️</div>
 
     <!-- GLOBAL HEADER -->
-    <div id="app-header" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; background: var(--card); padding: 15px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; z-index: 999; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;">
-        <div style="display: flex; align-items: center; gap: 15px; z-index: 10;">
-            <button id="global-back-btn" class="hidden" onclick="goBack()" style="background: transparent; border: none; color: var(--text); font-size: 24px; padding: 0; cursor: pointer; outline: none;" title="Go Back">⬅️</button>
-            <div id="header-user-info" style="display:flex; align-items:center; font-weight: bold; font-size: 16px; cursor: pointer;" onclick="toggleProfileDropdown(event)" title="Profile Menu"></div>
+    <div id="app-header" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; background: var(--card); padding: 10px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; z-index: 999; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;">
+        <div style="display: flex; align-items: center; gap: 10px; z-index: 10; flex: 1; min-width: 0;">
+            <button id="global-back-btn" class="hidden" onclick="goBack()" style="background: transparent; border: none; color: var(--text); font-size: 24px; padding: 0; cursor: pointer; outline: none; flex-shrink: 0;" title="Go Back">⬅️</button>
+            <div id="header-user-info" style="display:flex; align-items:center; cursor: pointer; flex-shrink: 0;" onclick="toggleProfileDropdown(event)" title="Profile Menu"></div>
         </div>
-        <div id="header-company-name" style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; z-index: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; text-align: center;"></div>
-        <div style="display: flex; align-items: center; gap: 15px; padding-right: 40px; z-index: 10;">
-            <select id="global-admin-company-filter" onchange="applyAdminCompanyFilter()" class="hidden" style="background:var(--input); color:white; border:1px solid #475569; border-radius:6px; padding:4px 8px; font-size:12px; max-width:150px; outline:none; cursor:pointer;">
+        <div id="header-center-info" style="display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; flex: 2; min-width: 0; text-align: center; cursor: pointer;" onclick="toggleProfileDropdown(event)" title="Profile Menu">
+            <div id="header-company-name" style="font-size: 16px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;"></div>
+            <div id="header-user-name" style="font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;"></div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-right: 40px; z-index: 10; flex: 1; min-width: 0;">
+            <select id="global-admin-company-filter" onchange="applyAdminCompanyFilter()" class="hidden" style="background:var(--input); color:white; border:1px solid #475569; border-radius:6px; padding:4px 8px; font-size:12px; max-width:110px; outline:none; cursor:pointer;">
                 <option value="ALL">All Owners</option>
             </select>
-            <span id="header-role" style="background:var(--warning); color:black; padding:4px 10px; border-radius:10px; font-size:12px; font-weight:bold;"></span>
+            <span id="header-role" style="background:var(--warning); color:black; padding:4px 10px; border-radius:10px; font-size:12px; font-weight:bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px;"></span>
         </div>
     </div>
 
@@ -249,7 +264,7 @@
         <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
             <input type="text" id="regName" placeholder="Full Name" required>
             <input type="text" id="regCompany" placeholder="Dairy / Company Name" required>
-            <input type="text" id="regMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+            <input type="text" id="regMobile" placeholder="Mobile Number" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
             <input type="text" id="regEmail" placeholder="Email ID">
             <input type="text" id="regAddr" placeholder="Address">
             <input type="text" id="regUsername" placeholder="Create Login Username" required>
@@ -382,16 +397,21 @@
     <div id="user-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">🛵 Delivery Man Master</h2>
-            <input type="text" id="searchUser" placeholder="🔍 Search..." onkeyup="searchTable(this, 'userTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <input type="text" id="searchUser" placeholder="🔍 Search..." onkeyup="currentUserPage=1; renderUsers()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
             <button class="btn-save" id="btnShowNewUser" style="width:auto; padding:10px 15px;" onclick="openNewUserForm()">➕ New Delivery Man</button>
         </div>
-        <div id="user-form-section" class="hidden">
-            <div class="grid-form">
+        <div id="user-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 id="userFormTitle" style="margin:0; color:var(--primary);">➕ New Delivery Man</h3>
+                    <button type="button" onclick="closeUserForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+                </div>
+                <div class="grid-form" style="margin-bottom:0;">
                 <input type="hidden" id="editUserIdx">
                 <input type="text" id="uId" placeholder="System ID (Auto)" readonly style="opacity:0.7">
                 <input type="text" id="uUsername" placeholder="Create Login Username (Optional)">
                 <input type="text" id="uName" placeholder="Delivery Man Name" required>
-                <input type="text" id="uMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+                <input type="text" id="uMobile" placeholder="Mobile Number" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
                 <select id="uRoute" required>
                     <option value="">-- Select Route --</option>
                 </select>
@@ -401,9 +421,22 @@
                     <button class="btn-back" style="flex:1; margin:0;" onclick="closeUserForm()">Cancel</button>
                 </div>
             </div>
+            </div>
         </div>
         <div style="overflow-x: auto; margin-top: 20px;">
-            <table><thead><tr><th>Name</th><th>ID</th><th>Route</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="userTableBody"></tbody></table>
+            <table><thead><tr><th>Sr.</th><th>Name</th><th>ID</th><th>Route</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="userTableBody"></tbody></table>
+            <div id="UserPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:13px; color:#94a3b8;" id="UserPageInfo">Showing 0 entries</div>
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <select id="UserPerPage" onchange="currentUserPage=1; userItemsPerPage=parseInt(this.value); renderUsers()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                        <option value="25">25 per page</option>
+                        <option value="50">50 per page</option>
+                        <option value="100">100 per page</option>
+                    </select>
+                    <button id="btnUserPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeUserPage(-1)">⬅️ Prev</button>
+                    <button id="btnUserNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeUserPage(1)">Next ➡️</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -416,13 +449,18 @@
         <div id="ledger-cust-view">
             
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap: 10px;">
-                <select id="filterCustMilkManSelect" onchange="renderCustomers()" class="hidden" style="flex:1; max-width: 150px; background:var(--primary); color:white; border:none; font-weight:bold; padding: 8px; border-radius: 8px; margin:0;"></select>
-                <input type="text" id="searchCust" placeholder="🔍 Search..." onkeyup="searchTable(this, 'customerTableBody')" style="flex:2; padding:8px; border-radius:8px; margin:0;">
+                <select id="filterCustMilkManSelect" onchange="currentCustPage=1; renderCustomers()" class="hidden" style="flex:1; max-width: 150px; background:var(--primary); color:white; border:none; font-weight:bold; padding: 8px; border-radius: 8px; margin:0;"></select>
+                <input type="text" id="searchCust" placeholder="🔍 Search..." onkeyup="currentCustPage=1; renderCustomers()" style="flex:2; padding:8px; border-radius:8px; margin:0;">
                 <button class="btn-save" id="btnShowNewCust" style="width:auto; padding:8px 15px; margin:0; white-space:nowrap;" onclick="openNewCustForm()">➕ New</button>
             </div>
 
-            <div id="cust-form-section" class="hidden">
-                <div class="grid-form">
+            <div id="cust-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
+                <div class="modal-box" style="background:var(--card); width:100%; max-width:650px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 id="custFormTitle" style="margin:0; color:var(--primary);">➕ New Customer</h3>
+                        <button type="button" onclick="closeCustForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+                    </div>
+                    <div class="grid-form" style="margin-bottom:0;">
                 <input type="hidden" id="editCustIdx">
                 <select id="cMilkMan" onchange="autoFillCustRoute(); autoFillCustSeq()" required><option value="">-- Assign Delivery Man --</option></select>
                 <div id="cSeqContainer" style="display: flex; grid-column: 1 / -1; gap: 10px; width: 100%;">
@@ -433,12 +471,12 @@
                 <input type="text" id="cUsername" placeholder="Create Login Username (Optional)">
                 <input type="text" id="cName" placeholder="Name" required>
                 <input type="text" id="cRoute" placeholder="Route / Area" tabindex="-1" required readonly style="opacity:0.6; cursor:not-allowed; background:rgba(0,0,0,0.3);">
-                <select id="cShift" required onchange="toggleCustItemShift()"><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option><option value="Both">🌅+🌃 Both</option></select>
+                <select id="cShift" title="Select Shift" required onchange="toggleCustItemShift()"><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option><option value="Both">🌅+🌃 Both</option></select>
                 <div style="position: relative; grid-column: 1 / -1;">
                     <input type="password" id="cPass" placeholder="Set Customer Password" style="margin: 0; padding-right: 35px;">
                     <span onclick="togglePasswordVisibility('cPass', 'cPassEyeIcon')" id="cPassEyeIcon" title="Show/Hide Password" style="position: absolute; right: 12px; top: 10px; cursor: pointer; user-select: none; font-size: 16px;">👁️</span>
                 </div>
-                <input type="text" id="cMobile" placeholder="Mobile Number (Optional)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <input type="text" id="cMobile" placeholder="Mobile Number (Optional)" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                 <input type="text" id="cAddr" placeholder="Address">
                 <div style="grid-column: 1 / -1; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid #475569;">
                     <h4 style="margin-top:0; margin-bottom:10px; color:var(--primary); font-size:14px;">Assign Items & Fixed Rates</h4>
@@ -462,9 +500,23 @@
                     <button class="btn-back" style="flex:1; margin:0;" onclick="closeCustForm()">Cancel</button>
                 </div>
                 </div>
+                </div>
             </div>
             <div style="overflow-x: auto; margin-top: 20px;">
-                <table style="min-width: 600px;"><thead><tr><th>Name</th><th>Route & Shift</th><th>Delivery Man</th><th>Mobile & ID</th><th>Actions</th></tr></thead><tbody id="customerTableBody"></tbody></table>
+                <table style="min-width: 600px;"><thead><tr><th>Sr.</th><th>Name</th><th>Route & Shift</th><th>Delivery Man</th><th>Mobile & ID</th><th>Actions</th></tr></thead><tbody id="customerTableBody"></tbody></table>
+                
+                <div id="custPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                    <div style="font-size:13px; color:#94a3b8;" id="custPageInfo">Showing 0 customers</div>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <select id="custPerPage" onchange="currentCustPage=1; custItemsPerPage=parseInt(this.value); renderCustomers()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                            <option value="25">25 per page</option>
+                            <option value="50">50 per page</option>
+                            <option value="100">100 per page</option>
+                        </select>
+                        <button id="btnCustPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeCustPage(-1)">⬅️ Prev</button>
+                        <button id="btnCustNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeCustPage(1)">Next ➡️</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -506,7 +558,20 @@
             </div>
             
             <div id="trans-tab-all" class="hidden">
-                <table><thead><tr><th>Date</th><th>Customer</th><th>Item</th><th>Total</th><th>Actions</th></tr></thead><tbody id="transTableBody"></tbody></table>
+                <input type="text" id="searchTrans" placeholder="🔍 Search Entry..." onkeyup="currentTransPage=1; renderTrans()" style="flex:1; width:100%; padding:10px; border-radius:8px; margin-bottom:15px; background:rgba(0,0,0,0.2); color:white; border:1px solid #475569; box-sizing:border-box;">
+                <div style="overflow-x:auto;">
+                    <table><thead><tr><th>Sr.</th><th>Date</th><th>Customer</th><th>Item</th><th>Total</th><th>Actions</th></tr></thead><tbody id="transTableBody"></tbody></table>
+                    <div id="TransPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                        <div style="font-size:13px; color:#94a3b8;" id="TransPageInfo">Showing 0 entries</div>
+                        <div style="display:flex; gap:5px; align-items:center;">
+                            <select id="TransPerPage" onchange="currentTransPage=1; transItemsPerPage=parseInt(this.value); renderTrans()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                                <option value="25">25 per page</option><option value="50">50 per page</option><option value="100">100 per page</option>
+                            </select>
+                            <button id="btnTransPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeTransPage(-1)">⬅️ Prev</button>
+                            <button id="btnTransNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeTransPage(1)">Next ➡️</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -523,7 +588,7 @@
                 <input type="hidden" id="editGbIdx">
                 <input type="date" id="gbDate" required>
                 <input type="text" id="gbCustName" placeholder="Customer Name" required>
-                <input type="text" id="gbMobile" placeholder="Mobile Number (Optional)" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <input type="text" id="gbMobile" placeholder="Mobile Number (Optional)" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                 <input type="text" id="gbAddress" placeholder="Address (Optional)">
             </div>
             <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid #475569; margin-top: 10px;">
@@ -557,11 +622,23 @@
                     <option value="ALL">-- All Bills --</option>
                     <option value="SELF">My Bills (Owner)</option>
                 </select>
-                <input type="text" id="searchGb" placeholder="🔍 Search Bill..." onkeyup="searchTable(this, 'gbTableBody')" style="flex:1; min-width:120px; max-width:200px; padding:8px; margin:0; border-radius:8px;">
+                <input type="text" id="searchGb" placeholder="🔍 Search Bill..." onkeyup="currentGbPage=1; renderGeneralBills()" style="flex:1; min-width:120px; max-width:200px; padding:8px; margin:0; border-radius:8px;">
                 <button class="btn-save" style="width:auto; padding:8px 15px; background:var(--warning); color:black;" onclick="document.getElementById('gbFilterDate').value=''; document.getElementById('searchGb').value=''; renderGeneralBills();">Clear Filter</button>
             </div>
             <div id="gbSummary" style="margin-bottom:15px; font-size:18px; font-weight:bold; color:var(--success); text-align:right;"></div>
-            <div style="overflow-x:auto;"><table><thead><tr><th>Bill No & Date</th><th>Customer</th><th>Item</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="gbTableBody"></tbody></table></div>
+            <div style="overflow-x:auto;">
+                <table><thead><tr><th>Sr.</th><th>Bill No & Date</th><th>Customer</th><th>Item</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="gbTableBody"></tbody></table>
+                <div id="GbPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                    <div style="font-size:13px; color:#94a3b8;" id="GbPageInfo">Showing 0 entries</div>
+                    <div style="display:flex; gap:5px; align-items:center;">
+                        <select id="GbPerPage" onchange="currentGbPage=1; gbItemsPerPage=parseInt(this.value); renderGeneralBills()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                            <option value="25">25 per page</option><option value="50">50 per page</option><option value="100">100 per page</option>
+                        </select>
+                        <button id="btnGbPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeGbPage(-1)">⬅️ Prev</button>
+                        <button id="btnGbNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeGbPage(1)">Next ➡️</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -569,11 +646,16 @@
     <div id="product-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">📦 Product Master</h2>
-            <input type="text" id="searchProduct" placeholder="🔍 Search Product..." onkeyup="searchTable(this, 'productTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <input type="text" id="searchProduct" placeholder="🔍 Search Product..." onkeyup="currentProductPage=1; renderProducts()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
             <button class="btn-save" id="btnShowNewProduct" style="width:auto; padding:10px 15px;" onclick="openNewProductForm()">➕ New Product</button>
         </div>
-        <div id="product-form-section" class="hidden">
-            <div class="grid-form">
+        <div id="product-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 id="productFormTitle" style="margin:0; color:var(--primary);">➕ New Product</h3>
+                    <button type="button" onclick="closeProductForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+                </div>
+                <div class="grid-form" style="margin-bottom:0;">
                 <input type="hidden" id="editProdIdx">
                 <input type="text" id="pName" placeholder="Item Name (e.g. Cow Milk)" required>
                 <input type="number" id="pRate" placeholder="Rate (₹)" required>
@@ -588,42 +670,101 @@
                     <button class="btn-back" style="flex:1; margin:0;" onclick="closeProductForm()">Cancel</button>
                 </div>
             </div>
+            </div>
         </div>
         <div style="overflow-x: auto; margin-top: 20px;">
-            <table><thead><tr><th>Item Name</th><th>Rate (₹)</th><th>Actions</th></tr></thead><tbody id="productTableBody"></tbody></table>
+            <table><thead><tr><th>Sr.</th><th>Item Name</th><th>Rate (₹)</th><th>Actions</th></tr></thead><tbody id="productTableBody"></tbody></table>
+            <div id="ProductPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:13px; color:#94a3b8;" id="ProductPageInfo">Showing 0 entries</div>
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <select id="ProductPerPage" onchange="currentProductPage=1; productItemsPerPage=parseInt(this.value); renderProducts()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                        <option value="25">25 per page</option><option value="50">50 per page</option><option value="100">100 per page</option>
+                    </select>
+                    <button id="btnProductPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeProductPage(-1)">⬅️ Prev</button>
+                    <button id="btnProductNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeProductPage(1)">Next ➡️</button>
+                </div>
+            </div>
         </div>
     </div>
     <!-- REQUEST MASTER -->
     <div id="request-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">📝 Customer Requests</h2>
-            <input type="text" id="searchReq" placeholder="🔍 Search Request..." onkeyup="searchTable(this, 'requestTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <input type="text" id="searchReq" placeholder="🔍 Search Request..." onkeyup="currentReqPage=1; renderOwnerRequests()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
         </div>
-        <table><thead><tr><th>Date</th><th>Customer</th><th>Details</th><th>Status</th><th>Actions</th></tr></thead><tbody id="requestTableBody"></tbody></table>
+        <div style="overflow-x:auto;">
+            <table><thead><tr><th>Sr.</th><th>Date</th><th>Customer</th><th>Details</th><th>Status</th><th>Actions</th></tr></thead><tbody id="requestTableBody"></tbody></table>
+            <div id="ReqPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:13px; color:#94a3b8;" id="ReqPageInfo">Showing 0 entries</div>
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <select id="ReqPerPage" onchange="currentReqPage=1; reqItemsPerPage=parseInt(this.value); renderOwnerRequests()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                        <option value="25">25 per page</option><option value="50">50 per page</option><option value="100">100 per page</option>
+                    </select>
+                    <button id="btnReqPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeReqPage(-1)">⬅️ Prev</button>
+                    <button id="btnReqNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeReqPage(1)">Next ➡️</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ROUTE MASTER -->
     <div id="route-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">🗺️ Route Master</h2>
-            <input type="text" id="searchRoute" placeholder="🔍 Search Route..." onkeyup="searchTable(this, 'routeTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <input type="text" id="searchRoute" placeholder="🔍 Search Route..." onkeyup="currentRoutePage=1; renderRoutes()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <button class="btn-save" id="btnShowNewRoute" style="width:auto; padding:10px 15px;" onclick="openNewRouteForm()">➕ New Route</button>
         </div>
-        <div class="grid-form">
-            <input type="hidden" id="editRouteIdx">
-            <input type="text" id="rName" placeholder="Route / Area Name" required>
-            <button id="btnRouteSave" class="btn-save" onclick="saveRoute()">Save Route</button>
+        <div id="route-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 id="routeFormTitle" style="margin:0; color:var(--primary);">➕ New Route</h3>
+                    <button type="button" onclick="closeRouteForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+                </div>
+                <div class="grid-form" style="margin-bottom:0;">
+                    <input type="hidden" id="editRouteIdx">
+                    <input type="text" id="rName" placeholder="Route / Area Name" required>
+                    <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
+                        <button id="btnRouteSave" class="btn-save" style="flex:1;" onclick="saveRoute()">Save Route</button>
+                        <button class="btn-back" style="flex:1; margin:0;" onclick="closeRouteForm()">Cancel</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <table><thead><tr><th>Route Name</th><th>Actions</th></tr></thead><tbody id="routeTableBody"></tbody></table>
+        <div style="overflow-x:auto;">
+            <table><thead><tr><th>Sr.</th><th>Route Name</th><th>Actions</th></tr></thead><tbody id="routeTableBody"></tbody></table>
+            <div id="RoutePagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:13px; color:#94a3b8;" id="RoutePageInfo">Showing 0 entries</div>
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <select id="RoutePerPage" onchange="currentRoutePage=1; routeItemsPerPage=parseInt(this.value); renderRoutes()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                        <option value="25">25 per page</option><option value="50">50 per page</option><option value="100">100 per page</option>
+                    </select>
+                    <button id="btnRoutePrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeRoutePage(-1)">⬅️ Prev</button>
+                    <button id="btnRouteNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeRoutePage(1)">Next ➡️</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- OWNER MASTER -->
     <div id="owner-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">👑 Owner Master</h2>
-            <input type="text" id="searchOwner" placeholder="🔍 Search Owner..." onkeyup="searchTable(this, 'ownerTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <input type="text" id="searchOwner" placeholder="🔍 Search Owner..." onkeyup="currentOwnerPage=1; renderOwners()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
         </div>
         <p style="color: #94a3b8; margin-bottom: 20px;">Manage registered dairy owners and reset their passwords.</p>
-        <table><thead><tr><th>Name</th><th>Company</th><th>Login ID</th><th>Email</th><th>Actions</th></tr></thead><tbody id="ownerTableBody"></tbody></table>
+        <div style="overflow-x:auto;">
+            <table><thead><tr><th>Sr.</th><th>Name</th><th>Company</th><th>Login ID</th><th>Email</th><th>Actions</th></tr></thead><tbody id="ownerTableBody"></tbody></table>
+            <div id="OwnerPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:13px; color:#94a3b8;" id="OwnerPageInfo">Showing 0 entries</div>
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <select id="OwnerPerPage" onchange="currentOwnerPage=1; ownerItemsPerPage=parseInt(this.value); renderOwners()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                        <option value="25">25 per page</option><option value="50">50 per page</option><option value="100">100 per page</option>
+                    </select>
+                    <button id="btnOwnerPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeOwnerPage(-1)">⬅️ Prev</button>
+                    <button id="btnOwnerNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeOwnerPage(1)">Next ➡️</button>
+                </div>
+            </div>
+        </div>
         <button class="btn-back" onclick="showView('main-menu')">Back</button>
     </div>
 
@@ -631,45 +772,85 @@
     <div id="manager-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">💼 Manager Master</h2>
-            <input type="text" id="searchManager" placeholder="🔍 Search Manager..." onkeyup="searchTable(this, 'managerTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <input type="text" id="searchManager" placeholder="🔍 Search Manager..." onkeyup="currentManagerPage=1; renderManagers()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
             <button class="btn-save" id="btnShowNewManager" style="width:auto; padding:10px 15px;" onclick="openNewManagerForm()">➕ New Manager</button>
         </div>
-        <div class="grid-form hidden" id="manager-form-section">
+        <div id="manager-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 id="managerFormTitle" style="margin:0; color:var(--primary);">➕ New Manager</h3>
+                    <button type="button" onclick="closeManagerForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+                </div>
+                <div class="grid-form" style="margin-bottom:0;">
             <input type="hidden" id="editManagerIdx">
             <input type="text" id="mId" placeholder="Manager ID (Auto 6-Digit)" readonly style="opacity:0.7">
             <input type="text" id="mUsername" placeholder="Create Login Username">
             <input type="text" id="mName" placeholder="Manager Name" required>
-            <input type="text" id="mMobile" placeholder="Mobile Number" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+            <input type="text" id="mMobile" placeholder="Mobile Number" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
             <input type="text" id="mPass" placeholder="Set Password">
             <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
                 <button id="btnManagerSave" class="btn-save" style="flex:1;" onclick="saveManager()">Save Manager</button>
                 <button class="btn-back" style="flex:1; margin:0;" onclick="closeManagerForm()">Cancel</button>
             </div>
+                </div>
+            </div>
         </div>
-        <div style="overflow-x:auto;"><table><thead><tr><th>Name</th><th>Manager ID</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="managerTableBody"></tbody></table></div>
+        <div style="overflow-x:auto;">
+            <table><thead><tr><th>Sr.</th><th>Name</th><th>Manager ID</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="managerTableBody"></tbody></table>
+            <div id="ManagerPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:13px; color:#94a3b8;" id="ManagerPageInfo">Showing 0 entries</div>
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <select id="ManagerPerPage" onchange="currentManagerPage=1; managerItemsPerPage=parseInt(this.value); renderManagers()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                        <option value="25">25 per page</option><option value="50">50 per page</option><option value="100">100 per page</option>
+                    </select>
+                    <button id="btnManagerPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeManagerPage(-1)">⬅️ Prev</button>
+                    <button id="btnManagerNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeManagerPage(1)">Next ➡️</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- LICENSE MASTER -->
     <div id="license-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">🔑 License Master</h2>
-            <input type="text" id="searchLicense" placeholder="🔍 Search Key..." onkeyup="searchTable(this, 'licenseTableBody')" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <input type="text" id="searchLicense" placeholder="🔍 Search Key..." onkeyup="currentLicensePage=1; renderLicenses()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
             <button class="btn-save" style="width:auto; padding:10px 15px;" onclick="openLicenseForm()">➕ New Key</button>
         </div>
         <p style="color: #94a3b8; margin-bottom: 20px;">Generate and manage license keys for Owners.</p>
-        <div class="grid-form hidden" id="license-form-section" style="margin-bottom: 20px;">
-            <select id="lDuration">
-                <option value="30">1 Month (30 Days)</option>
-                <option value="90">3 Months (90 Days)</option>
-                <option value="180">6 Months (180 Days)</option>
-                <option value="365">1 Year (365 Days)</option>
-            </select>
-            <input type="text" id="lPrefix" placeholder="Prefix (Optional, e.g. VIP)">
-            <button class="btn-save" onclick="saveNewLicense()">Generate Key</button>
-            <button class="btn-back" style="margin-top:0;" onclick="document.getElementById('license-form-section').classList.add('hidden')">Cancel</button>
+        <div id="license-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(5px);">
+            <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:90vh; overflow-y:auto;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; color:var(--primary);">➕ Generate Key</h3>
+                    <button type="button" onclick="document.getElementById('license-form-section').classList.add('hidden')" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+                </div>
+                <div class="grid-form" style="margin-bottom:0;">
+                    <select id="lDuration" title="License Duration">
+                        <option value="30">1 Month (30 Days)</option>
+                        <option value="90">3 Months (90 Days)</option>
+                        <option value="180">6 Months (180 Days)</option>
+                        <option value="365">1 Year (365 Days)</option>
+                    </select>
+                    <input type="text" id="lPrefix" placeholder="Prefix (Optional, e.g. VIP)">
+                    <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
+                        <button class="btn-save" style="flex:1;" onclick="saveNewLicense()">Generate Key</button>
+                        <button class="btn-back" style="flex:1; margin:0;" onclick="document.getElementById('license-form-section').classList.add('hidden')">Cancel</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <div style="overflow-x:auto;">
-            <table><thead><tr><th>License Key</th><th>Duration</th><th>Status</th><th>Used By</th><th>Used On</th><th>Actions</th></tr></thead><tbody id="licenseTableBody"></tbody></table>
+            <table><thead><tr><th>Sr.</th><th>License Key</th><th>Duration</th><th>Status</th><th>Used By</th><th>Used On</th><th>Actions</th></tr></thead><tbody id="licenseTableBody"></tbody></table>
+            <div id="LicensePagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                <div style="font-size:13px; color:#94a3b8;" id="LicensePageInfo">Showing 0 entries</div>
+                <div style="display:flex; gap:5px; align-items:center;">
+                    <select id="LicensePerPage" onchange="currentLicensePage=1; licenseItemsPerPage=parseInt(this.value); renderLicenses()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                        <option value="25">25 per page</option><option value="50">50 per page</option><option value="100">100 per page</option>
+                    </select>
+                    <button id="btnLicensePrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeLicensePage(-1)">⬅️ Prev</button>
+                    <button id="btnLicenseNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeLicensePage(1)">Next ➡️</button>
+                </div>
+            </div>
         </div>
         <button class="btn-back" onclick="showView('main-menu')">Back</button>
     </div>
@@ -688,10 +869,20 @@
                 <input type="month" id="accMonthYear" onchange="renderAccounts()" style="flex:1; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
                 <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeAccMonth(1)">Next ➡️</button>
             </div>
-            <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="searchTable(this, 'accTableBody')" style="flex:1; min-width:150px; padding:8px; margin:0; border-radius:8px;">
+            <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="currentAccPage=1; renderAccounts()" style="flex:1; min-width:150px; padding:8px; margin:0; border-radius:8px;">
         </div>
         <div id="monthlyReport"></div>
         <button class="btn-back" onclick="showView('main-menu')">⬅️ Back to Menu</button>
+        <div id="AccPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+            <div style="font-size:13px; color:#94a3b8;" id="AccPageInfo">Showing 0 entries</div>
+            <div style="display:flex; gap:5px; align-items:center;">
+                <select id="AccPerPage" onchange="currentAccPage=1; accItemsPerPage=parseInt(this.value); renderAccounts()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
+                    <option value="25">25 per page</option><option value="50">50 per page</option><option value="100">100 per page</option>
+                </select>
+                <button id="btnAccPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeAccPage(-1)">⬅️ Prev</button>
+                <button id="btnAccNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeAccPage(1)">Next ➡️</button>
+            </div>
+        </div>
     </div>
 
     <div id="customer-self-view" class="container hidden">
@@ -723,7 +914,7 @@
                 <h3 style="margin-bottom:10px; font-size: 16px;">🛒 My Daily Requirements <span id="my-current-shift" style="font-size:12px; color:var(--warning);"></span></h3>
                 <div style="margin-bottom:15px; display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
                     <label style="font-size:13px; font-weight:bold; color:var(--primary);">My Regular Shift:</label>
-                    <select id="selfDailyShiftSelect" onchange="updateSelfShift()" style="padding:6px; flex:1; background:var(--input); color:white; border-radius:6px; border:1px solid #475569;">
+                    <select id="selfDailyShiftSelect" title="Select Shift" onchange="updateSelfShift()" style="padding:6px; flex:1; background:var(--input); color:white; border-radius:6px; border:1px solid #475569;">
                         <option value="Morning">🌅 Morning</option>
                         <option value="Evening">🌃 Evening</option>
                         <option value="Both">🌅+🌃 Both</option>
@@ -750,7 +941,7 @@
                 </p>
                 <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:flex-end; flex-wrap:wrap;">
                     <input type="date" id="tempChangeDate" onchange="renderTempChangeItems()" style="padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px;">
-                    <select id="tempChangeShift" onchange="renderTempChangeItems()" style="padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px;">
+                    <select id="tempChangeShift" title="Select Shift" onchange="renderTempChangeItems()" style="padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px;">
                         <option value="Morning">🌅 Morning</option>
                         <option value="Evening">🌃 Evening</option>
                     </select>
@@ -836,7 +1027,7 @@
                 <input type="hidden" id="editTransIdx">
                 <input type="date" id="tDateText" placeholder="Record Date" required>
                 <select id="tCustSelect" required><option value="">-- Select Customer --</option></select>
-                <select id="tShiftText" required><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option></select>
+                <select id="tShiftText" title="Select Shift" required><option value="Morning">🌅 Morning</option><option value="Evening">🌃 Evening</option></select>
             </div>
                 
                 <div id="editTransItemsSection" style="margin-top: 15px;">
@@ -884,6 +1075,26 @@
             <div style="margin-top:15px; display:flex; justify-content:flex-end;">
                 <button class="btn-back" style="width:auto; margin:0;" onclick="closeOwnerReportModal()">⬅️ Back</button>
             </div>
+        </div>
+    </div>
+
+    <!-- FULLY BLOCKED LICENSE MODAL -->
+    <div id="licenseBlockedModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(15, 23, 42, 0.98); z-index:999999; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(10px);">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid var(--danger); text-align:center; box-shadow: 0 10px 30px rgba(244, 63, 94, 0.2);">
+            <h3 style="margin-top:0; margin-bottom: 10px; color:var(--danger); font-size: 24px;">⛔ Access Blocked</h3>
+            <p style="color:#e2e8f0; font-size:14px; margin-top:0; margin-bottom:20px;">Your 7-day limited access period has ended. Please enter a valid license key to continue using the application.</p>
+            <input type="text" id="blockedLicenseKey" placeholder="Enter License Key (e.g. VIP-A1B2-C3D4)" style="width:100%; text-align:center; font-family:monospace; font-size:16px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; margin-bottom:20px; border:1px solid var(--danger); box-sizing:border-box;">
+            <button class="btn-save" id="btnSubmitBlockedLicense" style="background:var(--danger); margin-bottom:20px;" onclick="submitBlockedLicenseKey()">Verify & Unlock</button>
+            
+            <div style="padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; font-size: 13px; text-align: center; border: 1px solid #475569;">
+                <p style="margin: 0 0 8px 0; font-weight: bold; color: var(--warning);">Contact Support to Buy Key:</p>
+                <h4 style="margin: 0 0 8px 0; color: var(--primary);">Expert Computer Services</h4>
+                <p style="margin: 4px 0;">Rishi Bairagi: <a href="https://wa.me/916263494837" style="color: var(--text); text-decoration: underline; font-weight: bold;">6263494837</a></p>
+                <p style="margin: 4px 0;">Harish Kumawat: <a href="https://wa.me/919425976804" style="color: var(--text); text-decoration: underline; font-weight: bold;">9425976804</a></p>
+                <p style="margin: 4px 0;">Email: <a href="mailto:hkexpertmds@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: bold;">hkexpertmds@gmail.com</a></p>
+            </div>
+            
+            <button class="btn-back" style="margin-top:20px; border-color:#475569; color:#94a3b8;" onclick="logout()">Logout</button>
         </div>
     </div>
 
@@ -1094,6 +1305,48 @@
         let currentFeedShift = 'Morning';
         let currentFeedOffset = 0;
         let currentAdminCompanyFilter = 'ALL';
+
+        let currentCustPage = 1;
+        let custItemsPerPage = 25;
+        function changeCustPage(dir) {
+            currentCustPage += dir;
+            renderCustomers();
+        }
+        let currentUserPage = 1; let userItemsPerPage = 25; function changeUserPage(dir) { currentUserPage += dir; renderUsers(); }
+        let currentProductPage = 1; let productItemsPerPage = 25; function changeProductPage(dir) { currentProductPage += dir; renderProducts(); }
+        let currentReqPage = 1; let reqItemsPerPage = 25; function changeReqPage(dir) { currentReqPage += dir; renderOwnerRequests(); }
+        let currentRoutePage = 1; let routeItemsPerPage = 25; function changeRoutePage(dir) { currentRoutePage += dir; renderRoutes(); }
+        let currentOwnerPage = 1; let ownerItemsPerPage = 25; function changeOwnerPage(dir) { currentOwnerPage += dir; renderOwners(); }
+        let currentManagerPage = 1; let managerItemsPerPage = 25; function changeManagerPage(dir) { currentManagerPage += dir; renderManagers(); }
+        let currentLicensePage = 1; let licenseItemsPerPage = 25; function changeLicensePage(dir) { currentLicensePage += dir; renderLicenses(); }
+        let currentGbPage = 1; let gbItemsPerPage = 25; function changeGbPage(dir) { currentGbPage += dir; renderGeneralBills(); }
+        let currentTransPage = 1; let transItemsPerPage = 25; function changeTransPage(dir) { currentTransPage += dir; renderTrans(); }
+        let currentAccPage = 1; let accItemsPerPage = 25; function changeAccPage(dir) { currentAccPage += dir; renderAccounts(); }
+
+        function updatePaginationUI(prefix, totalItems, startIndex, endIndex, currentPage, totalPages) {
+            let pageInfo = document.getElementById(prefix + 'PageInfo');
+            if(pageInfo) {
+                if(totalItems === 0) pageInfo.innerText = "Showing 0 entries";
+                else pageInfo.innerText = `Showing ${startIndex + 1} to ${endIndex} of ${totalItems} entries`;
+            }
+            let prevBtn = document.getElementById('btn' + prefix + 'Prev');
+            let nextBtn = document.getElementById('btn' + prefix + 'Next');
+            if (totalPages <= 1) {
+                if(prevBtn) prevBtn.style.display = 'none';
+                if(nextBtn) nextBtn.style.display = 'none';
+            } else {
+                if(prevBtn) {
+                    prevBtn.style.display = 'inline-block';
+                    if(currentPage <= 1) { prevBtn.disabled = true; prevBtn.style.opacity = '0.4'; prevBtn.style.cursor = 'not-allowed'; }
+                    else { prevBtn.disabled = false; prevBtn.style.opacity = '1'; prevBtn.style.cursor = 'pointer'; }
+                }
+                if(nextBtn) {
+                    nextBtn.style.display = 'inline-block';
+                    if(currentPage >= totalPages) { nextBtn.disabled = true; nextBtn.style.opacity = '0.4'; nextBtn.style.cursor = 'not-allowed'; }
+                    else { nextBtn.disabled = false; nextBtn.style.opacity = '1'; nextBtn.style.cursor = 'pointer'; }
+                }
+            }
+        }
 
         function applyAdminCompanyFilter() {
             currentAdminCompanyFilter = document.getElementById('global-admin-company-filter').value;
@@ -1320,7 +1573,10 @@
         }
 
         function applyLicenseRestrictions() {
+            hideGlobalLoading(); // Fix for loading spinner stuck in limited access
+
             let banner = document.getElementById('license-banner');
+            let blockedModal = document.getElementById('licenseBlockedModal');
             if (!banner) return;
             
             const currentView = sessionStorage.getItem('lastView');
@@ -1328,31 +1584,103 @@
             
             if (isPreLogin) {
                 banner.classList.add('hidden');
+                if (blockedModal) blockedModal.classList.add('hidden');
                 document.body.style.paddingTop = '20px';
                 return;
             }
             
-            let valid = isLicenseValid();
+            if (!currentUser) return;
+            if (currentUser.type === 'Admin') return; // Admins skip this check
+
+            let expiry = null;
+            if (currentUser.type === 'Owner') {
+                expiry = currentUser.license_expiry;
+            } else {
+                let owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
+                if (owner) {
+                    expiry = owner.license_expiry;
+                } else {
+                    return; // Assume valid if owner not found in memory
+                }
+            }
+
+            let expiryDate = expiry ? new Date(expiry) : new Date(0);
+            expiryDate.setHours(0,0,0,0);
+            let today = new Date();
+            today.setHours(0,0,0,0);
+
+            let diffTime = today.getTime() - expiryDate.getTime();
+            let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
             let btnsToHide = ['btnShowNewUser', 'btnShowNewCust', 'btnShowNewProduct', 'tabGbNew'];
             
-            if (!valid && currentUser) {
-                let msg = "⚠️ LIMITED ACCESS: Owner's License expired or missing. Please ask Owner to renew.";
+            if (diffDays > 7) {
+                // Fully Blocked (After 7 Days)
+                if (banner) banner.classList.add('hidden');
+                if (blockedModal) blockedModal.classList.remove('hidden');
+                btnsToHide.forEach(id => { let el = document.getElementById(id); if (el) el.style.display = 'none'; });
+            } else if (diffDays > 0 && diffDays <= 7) {
+                // Grace Period (0 to 7 Days Limited Access)
+                if (blockedModal) blockedModal.classList.add('hidden');
+                let remaining = 7 - diffDays;
+                if (remaining < 0) remaining = 0;
+                let msg = `⚠️ LIMITED ACCESS: Owner's License expired. Account will fully lock in ${remaining} days.`;
                 if (currentUser.type === 'Owner') {
-                    msg = `⚠️ LIMITED ACCESS: Your License has expired. <button onclick="enterLicenseKey()" style="margin-left:10px; padding:4px 10px; cursor:pointer; background:white; color:var(--danger); border:none; border-radius:4px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.2);">Unlock Now</button>`;
+                    msg = `⚠️ LIMITED ACCESS: License Expired! Account fully locks in ${remaining} days. <button onclick="enterLicenseKey()" style="margin-left:10px; padding:4px 10px; cursor:pointer; background:white; color:var(--danger); border:none; border-radius:4px; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.2);">Unlock Now</button>`;
                 }
-                banner.innerHTML = msg;
-                banner.classList.remove('hidden');
+                if (banner) {
+                    banner.innerHTML = msg;
+                    banner.classList.remove('hidden');
+                }
                 document.body.style.paddingTop = '110px';
-                
-                // Hide creation buttons to restrict new entries
                 btnsToHide.forEach(id => { let el = document.getElementById(id); if (el) el.style.display = 'none'; });
             } else {
-                banner.classList.add('hidden');
+                // Active / Valid
+                if (blockedModal) blockedModal.classList.add('hidden');
+                if (banner) banner.classList.add('hidden');
                 document.body.style.paddingTop = '80px';
                 
                 // Restore buttons
                 btnsToHide.forEach(id => { let el = document.getElementById(id); if (el) el.style.display = ''; });
             }
+        }
+
+        async function submitBlockedLicenseKey() {
+            let key = document.getElementById('blockedLicenseKey').value.trim();
+            if (!key) return alert("Please enter a license key!");
+            
+            const btn = document.getElementById('btnSubmitBlockedLicense');
+            btn.innerText = "Verifying...";
+            btn.disabled = true;
+
+            const verification = await verifyLicenseKeyOnBackend(key);
+
+            if (verification && verification.success) {
+                let newExpiry = new Date(verification.new_expiry);
+                
+                let data = { ...currentUser, license_expiry: newExpiry.toISOString() };
+                try {
+                    const res = await fetch(`${API_BASE}/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                    const saved = await res.json();
+                    
+                    if (saved.success === false) { alert(saved.message); btn.innerText = "Verify & Unlock"; btn.disabled = false; return; }
+                    
+                    currentUser = { ...data, ...saved };
+                    localStorage.setItem('sessionUser', JSON.stringify(currentUser));
+                    
+                    alert(`Success! Full access granted until ${newExpiry.toLocaleDateString()}`, "success");
+                    document.getElementById('licenseBlockedModal').classList.add('hidden');
+                    
+                    applyLicenseRestrictions();
+                    showView('profile-view');
+                } catch (e) {
+                    alert("Network Error while saving key! Please try again.", "error");
+                }
+            } else {
+                alert("Invalid or Expired Key! Please contact support to get a new key.", "error");
+            }
+            btn.innerText = "Verify & Unlock";
+            btn.disabled = false;
         }
 
         // This function simulates calling a backend to verify a key.
@@ -1579,8 +1907,13 @@
         window.addEventListener('click', function(event) {
             const dropdown = document.getElementById('profile-dropdown');
             const userInfo = document.getElementById('header-user-info');
-            if (dropdown && userInfo && !dropdown.classList.contains('hidden') && !dropdown.contains(event.target) && !userInfo.contains(event.target)) {
+             const centerInfo = document.getElementById('header-center-info');
+        if (dropdown && !dropdown.classList.contains('hidden')) {
+            if (!dropdown.contains(event.target) && 
+                (!userInfo || !userInfo.contains(event.target)) &&
+                (!centerInfo || !centerInfo.contains(event.target))) {
                 dropdown.classList.add('hidden');
+            }
             }
         });
 
@@ -1867,6 +2200,19 @@
                     return false;
                 }
             }
+            
+            const mobileInputs = container.querySelectorAll('input[maxlength="10"]');
+            for (let el of mobileInputs) {
+                if (el.closest('.hidden') || el.offsetParent === null) continue;
+                let val = el.value.trim();
+                if (val && (!/^\d{10}$/.test(val))) {
+                    alert("Mobile Number must be exactly 10 digits!", "error");
+                    el.style.border = '2px solid var(--danger)';
+                    setTimeout(() => el.style.border = '1px solid transparent', 3000);
+                    el.focus();
+                    return false;
+                }
+            }
             return true;
         }
 
@@ -2081,19 +2427,20 @@
                     populateProductDropdowns();
                     populateAdminCompanyFilter();
                     refreshCurrentView();
-                    
-                    applyLicenseRestrictions(); // Apply restrictions after data sync
-                    let syncToast = document.getElementById('sync-toast');
-                    if (syncToast) syncToast.remove();
+                } else {
+                    console.warn("Background Sync Info: " + result.message);
                 }
             } catch (err) {
                 console.error(err);
-                let syncToast = document.getElementById('sync-toast');
-                if (syncToast) syncToast.remove();
-                alert("Data sync failed. Please check connection.", "error");
             } finally {
                 clearTimeout(slowDataTimer);
-                 hideGlobalLoading();
+                hideGlobalLoading();
+                let syncToast = document.getElementById('sync-toast');
+                if (syncToast) {
+                    syncToast.classList.add('fadeOut');
+                    setTimeout(() => syncToast.remove(), 300);
+                }
+                applyLicenseRestrictions(); // Ensure restrictions apply even if sync fails
             }
         }
         
@@ -2150,10 +2497,14 @@
             }
 
             let headPicUrl = currentUser.profile_pic || 'https://via.placeholder.com/30';
-            let headPic = `<img src="${headPicUrl}" title="Profile Menu" style="cursor:pointer; width:30px;height:30px;border-radius:50%;vertical-align:middle;margin-right:10px;border:2px solid var(--primary); object-fit:cover;">`;
+             let headPic = `<img src="${headPicUrl}" title="Profile Menu" style="cursor:pointer; width:30px;height:30px;border-radius:50%;vertical-align:middle;border:2px solid var(--primary); object-fit:cover;">`;
             
             let headerUserInfo = document.getElementById('header-user-info');
-            if(headerUserInfo) headerUserInfo.innerHTML = headPic + "Hi, " + currentUser.name;
+             if(headerUserInfo) headerUserInfo.innerHTML = headPic;
+            
+            let headerUserName = document.getElementById('header-user-name');
+            if(headerUserName) headerUserName.innerText = "Hi, " + currentUser.name;
+            
             let headerRole = document.getElementById('header-role');
             if(headerRole) headerRole.innerText = currentUser.type === 'Milk Man' ? 'Delivery Man' : currentUser.type;
             let headerCompany = document.getElementById('header-company-name');
@@ -2161,7 +2512,15 @@
             
             const isAdmin = currentUser.type === 'Admin';
             const adminFilter = document.getElementById('global-admin-company-filter');
-            if (adminFilter) { adminFilter.classList.toggle('hidden', !isAdmin); }
+            if (adminFilter) { 
+                if (isAdmin) {
+                    adminFilter.classList.remove('hidden');
+                    adminFilter.style.display = 'inline-block';
+                } else {
+                    adminFilter.classList.add('hidden');
+                    adminFilter.style.display = 'none';
+                }
+            }
             populateAdminCompanyFilter();
 
             const isCust = currentUser.type === 'Customer';
@@ -2344,19 +2703,18 @@
 
         function openNewUserForm() {
             resetForm('user');
+            document.getElementById('userFormTitle').innerText = "➕ New Delivery Man";
             document.getElementById('user-form-section').classList.remove('hidden');
-            document.getElementById('btnShowNewUser').classList.add('hidden');
         }
         function closeUserForm() {
             document.getElementById('user-form-section').classList.add('hidden');
-            document.getElementById('btnShowNewUser').classList.remove('hidden');
         }
         
         // --- MANAGER STAFF ---
         function openNewManagerForm() {
             resetForm('manager');
+            document.getElementById('managerFormTitle').innerText = "➕ New Manager";
             document.getElementById('manager-form-section').classList.remove('hidden');
-            document.getElementById('btnShowNewManager').classList.add('hidden');
             
             let baseId = String(currentUser.login_id);
             let ownerManagers = users.filter(u => u.type === 'Manager' && u.company === currentUser.company);
@@ -2372,7 +2730,6 @@
         }
         function closeManagerForm() {
             document.getElementById('manager-form-section').classList.add('hidden');
-            document.getElementById('btnShowNewManager').classList.remove('hidden');
         }
         
         async function saveManager() {
@@ -2392,6 +2749,7 @@
             };
             
             if(!data.name || !data.mobile) return alert("Name and Mobile are required!");
+            if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             if(idx === "" && !data.pass) return alert("Password is required for new Manager!");
             if(idx !== "") data.id = users[idx].id;
             
@@ -2406,28 +2764,47 @@
         
         function renderManagers() {
             const tbody = document.getElementById('managerTableBody');
-            let html = '';
+            let searchInput = document.getElementById('searchManager');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let filtered = [];
             users.forEach((u, i) => {
                 if(u.type !== 'Manager') return;
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
-                html += `<tr style="animation-delay:${i * 0.04}s"><td>${u.name}</td><td>${u.login_id}</td><td>${u.mobile||'-'}</td>
+                if(searchQuery) {
+                    let str = `${u.name} ${u.login_id} ${u.mobile}`.toLowerCase();
+                    if(!str.includes(searchQuery)) return;
+                }
+                filtered.push({u, realIdx: i});
+            });
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / managerItemsPerPage) || 1;
+            if(currentManagerPage > totalPages) currentManagerPage = totalPages;
+            if(currentManagerPage < 1) currentManagerPage = 1;
+            let startIndex = (currentManagerPage - 1) * managerItemsPerPage;
+            let endIndex = Math.min(startIndex + managerItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+            
+            let html = '';
+            paginated.forEach((item, displayIdx) => {
+                let {u, realIdx} = item; let srNo = startIndex + displayIdx + 1;
+                html += `<tr style="animation-delay:${displayIdx * 0.04}s"><td><b>${srNo}</b></td><td>${u.name}</td><td>${u.login_id}</td><td>${u.mobile||'-'}</td>
                 <td style="display:flex; gap:4px; flex-wrap:nowrap;">
                     <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Manager')">Pass</button>
                     <button class="badge" style="background:var(--warning); color:black" onclick="editManager(${i})">Edit</button>
-                    <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'user')">Del</button>
+                    <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'user')">Del</button>
                 </td></tr>`;
             });
-            if(tbody) tbody.innerHTML = html;
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">No managers found.</td></tr>';
+            updatePaginationUI('Manager', totalItems, startIndex, endIndex, currentManagerPage, totalPages);
         }
 
         function openNewProductForm() {
             resetForm('product');
+            document.getElementById('productFormTitle').innerText = "➕ New Product";
             document.getElementById('product-form-section').classList.remove('hidden');
-            document.getElementById('btnShowNewProduct').classList.add('hidden');
         }
         function closeProductForm() {
             document.getElementById('product-form-section').classList.add('hidden');
-            document.getElementById('btnShowNewProduct').classList.remove('hidden');
         }
 
         async function saveUser() {
@@ -2474,13 +2851,21 @@
         function openNewCustForm() {
             resetForm('cust');
             autoFillCustSeq();
+            document.getElementById('custFormTitle').innerText = "➕ New Customer";
             document.getElementById('cust-form-section').classList.remove('hidden');
-            document.getElementById('btnShowNewCust').classList.add('hidden');
         }
 
         function closeCustForm() {
             document.getElementById('cust-form-section').classList.add('hidden');
-            document.getElementById('btnShowNewCust').classList.remove('hidden');
+        }
+
+        function openNewRouteForm() {
+            resetForm('route');
+            document.getElementById('routeFormTitle').innerText = "➕ New Route";
+            document.getElementById('route-form-section').classList.remove('hidden');
+        }
+        function closeRouteForm() {
+            document.getElementById('route-form-section').classList.add('hidden');
         }
 
         // --- CUSTOMER ---
@@ -2745,19 +3130,19 @@
             const filterDateVal = document.getElementById('gbFilterDate').value;
             let filterDateStr = filterDateVal ? convertToDDMMYYYY(filterDateVal) : null;
             let filterMgr = document.getElementById('gbFilterManager') ? document.getElementById('gbFilterManager').value : 'ALL';
-            
-            let html = '';
-            let totalAmt = 0;
+            let searchInput = document.getElementById('searchGb');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
             
             let gbDisplayList = [];
             let gbCount = 0;
+            let totalAmt = 0;
             transactions.forEach((t, i) => {
                 if (t.shift === 'General Bill') {
                     gbCount++;
                     gbDisplayList.push({ t, realIdx: i, serialNo: gbCount });
                 }
             });
-            
+            let filtered = [];
             gbDisplayList.reverse().forEach(({ t, realIdx, serialNo }) => {
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && t.company !== currentAdminCompanyFilter) return;
                 if (filterDateStr && t.date !== filterDateStr) return;
@@ -2777,26 +3162,20 @@
                     if (filterMgr !== 'ALL' && filterMgr !== 'SELF' && createdBy !== filterMgr) return;
                 }
 
-                totalAmt += parseFloat(t.total || 0);
                 
                 let displayItem = formatItemDisplay(t.item);
-                let billNo = serialNo;
+                if (searchQuery) {
+                    let str = `GB-${serialNo} ${t.date} ${t.cust} ${displayItem}`.toLowerCase();
+                    if(!str.includes(searchQuery)) return;
+                }
                 
-                html += `<tr>
-                    <td><b>GB-${billNo}</b><br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
-                    <td>${t.cust}</td>
-                    <td>${displayItem}</td>
-                    <td style="color:var(--success); font-weight:bold;">₹${parseFloat(t.total).toFixed(2)}</td>
-                    <td style="white-space:nowrap;">
-                        <button class="badge" style="background:var(--warning); color:black" onclick="editGb(${realIdx})">Edit</button>
-                        <button class="badge" style="background:#4f46e5; color:white" onclick="reprintGb(${realIdx})">Print</button>
-                        <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
-                    </td>
-                </tr>`;
+                totalAmt += parseFloat(t.total || 0);
+                filtered.push({t, realIdx, serialNo, displayItem});
             });
             
-            tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">No bills found.</td></tr>';
+            tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No bills found.</td></tr>';
             document.getElementById('gbSummary').innerText = `Total Collection: ₹${totalAmt.toFixed(2)}`;
+            updatePaginationUI('Gb', totalItems, startIndex, endIndex, currentGbPage, totalPages);
         }
         
         function reprintGb(idx) {
@@ -3037,6 +3416,7 @@
                 if(idx === "") routes.push(data); else routes[idx] = data;
             }
             resetForm('route'); renderRoutes();
+            closeRouteForm();
         }
 
         // --- CUSTOMER REQUESTS ---
@@ -3155,21 +3535,39 @@
         // --- RENDER WITH LOCK LOGIC ---
         function renderUsers() {
             const tbody = document.getElementById('userTableBody'); 
-            let html = '';
+            let searchInput = document.getElementById('searchUser');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let filtered = [];
             users.forEach((u, i) => { 
                 if(u.type !== 'Milk Man') return;
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
-                
+                if (searchQuery) {
+                    let str = `${u.name} ${u.login_id} ${u.route} ${u.mobile}`.toLowerCase();
+                    if (!str.includes(searchQuery)) return;
+                }
+                filtered.push({u, realIdx: i});
+            });
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / userItemsPerPage) || 1;
+            if(currentUserPage > totalPages) currentUserPage = totalPages;
+            if(currentUserPage < 1) currentUserPage = 1;
+            let startIndex = (currentUserPage - 1) * userItemsPerPage;
+            let endIndex = Math.min(startIndex + userItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+            
+            let html = '';
+            paginated.forEach((item, displayIdx) => { 
+                let {u, realIdx} = item; let srNo = startIndex + displayIdx + 1;
                 let displayRoute = u.route;
                 if(!displayRoute || displayRoute === 'undefined') displayRoute = 'Unnamed Route';
-                
-            html += `<tr style="animation-delay:${i * 0.04}s"><td>${u.name}</td><td>${u.login_id}</td><td>${displayRoute}</td><td>${u.mobile||'-'}</td><td style="display:flex; gap:4px; flex-wrap:nowrap;">
+            html += `<tr style="animation-delay:${displayIdx * 0.04}s"><td><b>${srNo}</b></td><td>${u.name}</td><td>${u.login_id}</td><td>${displayRoute}</td><td>${u.mobile||'-'}</td><td style="display:flex; gap:4px; flex-wrap:nowrap;">
                     <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Milk Man')">Pass</button>
-                    <button class="badge" style="background:var(--warning); color:black" onclick="editUser(${i})">Edit</button>
-                    <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'user')">Del</button>
+                    <button class="badge" style="background:var(--warning); color:black" onclick="editUser(${realIdx})">Edit</button>
+                    <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'user')">Del</button>
                 </td></tr>`; 
             });
-            if(tbody) tbody.innerHTML = html;
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No delivery men found.</td></tr>';
+            updatePaginationUI('User', totalItems, startIndex, endIndex, currentUserPage, totalPages);
         }
 
         function renderCustomers() {
@@ -3195,13 +3593,35 @@
                 mmSelect.disabled = false;
             }
 
-            let html = '';
-            customers.sort((a,b) => (a.seq_no||999) - (b.seq_no||999)).forEach((c, i) => {
+            let searchInput = document.getElementById('searchCust');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            let filteredCusts = customers.filter(c => {
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return;
-                if(isMilkMan() && c.milkman_id !== currentUser.login_id) return;
-                if(selectedCustMM && c.milkman_id !== selectedCustMM) return;
-                
+                if(isMilkMan() && c.milkman_id !== currentUser.login_id) return false;
+                if(selectedCustMM && c.milkman_id !== selectedCustMM) return false;
+                if(searchQuery) {
+                    let searchStr = `${c.name} ${c.cid} ${c.mobile} ${c.route} ${c.username}`.toLowerCase();
+                    if(!searchStr.includes(searchQuery)) return false;
+                }
+                return true;
+            });
+
+            filteredCusts.sort((a,b) => (a.seq_no||999) - (b.seq_no||999));
+
+            let totalCusts = filteredCusts.length;
+            let totalPages = Math.ceil(totalCusts / custItemsPerPage) || 1;
+            if(currentCustPage > totalPages) currentCustPage = totalPages;
+            if(currentCustPage < 1) currentCustPage = 1;
+
+            let startIndex = (currentCustPage - 1) * custItemsPerPage;
+            let endIndex = Math.min(startIndex + custItemsPerPage, totalCusts);
+            let paginatedCusts = filteredCusts.slice(startIndex, endIndex);
+
+            let html = '';
+            paginatedCusts.forEach((c, i) => {
                 let realIdx = customers.indexOf(c);
+                let srNo = startIndex + i + 1;
                 let seqDisp = '';
                 if(c.shift === 'Morning') seqDisp = `M:${c.seq_no||'-'}`;
                 else if(c.shift === 'Evening') seqDisp = `E:${c.seq_no_eve||'-'}`;
@@ -3215,6 +3635,7 @@
                 }
                 
             html += `<tr style="animation-delay:${Math.min(i * 0.03, 0.5)}s">
+                        <td><b>${srNo}</b></td>
                         <td><span style="font-size:11px; color:#94a3b8;">[${seqDisp}]</span><br><b>${c.name}</b></td>
                         <td>${c.route||'-'}<br><span style="font-size:11px; color:#94a3b8;">${c.shift||'-'}</span></td>
                         <td>${mmName}</td>
@@ -3226,46 +3647,78 @@
                         </td>
                     </tr>`;
             });
-            if(tbody) tbody.innerHTML = html;
+            
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No customers found.</td></tr>';
+            updatePaginationUI('cust', totalCusts, startIndex, endIndex, currentCustPage, totalPages);
+
             populateTransCustSelect();
         }
 
         function renderProducts() {
             const tbody = document.getElementById('productTableBody'); 
-            let html = '';
+            let searchInput = document.getElementById('searchProduct');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let filtered = [];
             products.forEach((p, i) => { 
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && p.company !== currentAdminCompanyFilter) return;
-                html += `<tr style="animation-delay:${i * 0.04}s"><td>${p.item_name} <span style="font-size:11px; color:#94a3b8;">(${p.unit || '-'})</span></td><td>₹${parseFloat(p.rate).toFixed(2)}</td><td style="white-space:nowrap;">
-                    <button class="badge" style="background:var(--warning); color:black" onclick="editProduct(${i})">Edit</button>
-                    <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'product')">Del</button>
+                if(searchQuery) {
+                    let str = `${p.item_name} ${p.unit} ${p.rate}`.toLowerCase();
+                    if(!str.includes(searchQuery)) return;
+                }
+                filtered.push({p, realIdx: i});
+            });
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / productItemsPerPage) || 1;
+            if(currentProductPage > totalPages) currentProductPage = totalPages;
+            if(currentProductPage < 1) currentProductPage = 1;
+            let startIndex = (currentProductPage - 1) * productItemsPerPage;
+            let endIndex = Math.min(startIndex + productItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+            let html = '';
+            paginated.forEach((item, displayIdx) => { 
+                let {p, realIdx} = item; let srNo = startIndex + displayIdx + 1;
+                html += `<tr style="animation-delay:${displayIdx * 0.04}s"><td><b>${srNo}</b></td><td>${p.item_name} <span style="font-size:11px; color:#94a3b8;">(${p.unit || '-'})</span></td><td>₹${parseFloat(p.rate).toFixed(2)}</td><td style="white-space:nowrap;">
+                    <button class="badge" style="background:var(--warning); color:black" onclick="editProduct(${realIdx})">Edit</button>
+                    <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'product')">Del</button>
                 </td></tr>`; 
             });
-            if(tbody) tbody.innerHTML = html;
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">No products found.</td></tr>';
+            updatePaginationUI('Product', totalItems, startIndex, endIndex, currentProductPage, totalPages);
         }
 
         function renderRoutes() {
             const tbody = document.getElementById('routeTableBody'); 
-            let html = '';
+            let searchInput = document.getElementById('searchRoute');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let filtered = [];
             routes.forEach((r, i) => { 
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && r.company !== currentAdminCompanyFilter) return;
-                let rName = r.route_name;
-                if (!rName || rName === 'undefined') rName = 'Unnamed Route';
-                
-                let assigned = users.filter(u => {
-                    if(u.type !== 'Milk Man') return false;
-                    let uRoute = u.route;
-                    if(!uRoute || uRoute === 'undefined') uRoute = 'Unnamed Route';
-                    return uRoute.trim().toLowerCase() === rName.trim().toLowerCase();
-                }).map(u => u.name).join(', ');
-                
+                let rName = r.route_name; if (!rName || rName === 'undefined') rName = 'Unnamed Route';
+                let assigned = users.filter(u => { if(u.type !== 'Milk Man') return false; let uRoute = u.route; if(!uRoute || uRoute === 'undefined') uRoute = 'Unnamed Route'; return uRoute.trim().toLowerCase() === rName.trim().toLowerCase(); }).map(u => u.name).join(', ');
+                if(searchQuery) {
+                    let str = `${rName} ${assigned}`.toLowerCase();
+                    if(!str.includes(searchQuery)) return;
+                }
+                filtered.push({r, rName, assigned, realIdx: i});
+            });
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / routeItemsPerPage) || 1;
+            if(currentRoutePage > totalPages) currentRoutePage = totalPages;
+            if(currentRoutePage < 1) currentRoutePage = 1;
+            let startIndex = (currentRoutePage - 1) * routeItemsPerPage;
+            let endIndex = Math.min(startIndex + routeItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+            let html = '';
+            paginated.forEach((item, displayIdx) => { 
+                let {r, rName, assigned, realIdx} = item; let srNo = startIndex + displayIdx + 1;
                 let badge = assigned ? `<span style="font-size:11px; background:var(--success); color:white; padding:2px 6px; border-radius:4px; margin-left:8px;">🛵 ${assigned}</span>` : `<span style="font-size:11px; background:#64748b; color:white; padding:2px 6px; border-radius:4px; margin-left:8px;">Unassigned</span>`;
-
-                html += `<tr style="animation-delay:${i * 0.04}s"><td>${rName} <div style="margin-top:5px;">${badge}</div></td><td style="white-space:nowrap;">
-                    <button class="badge" style="background:var(--warning); color:black" onclick="editRoute(${i})">Edit</button>
-                    <button class="badge" style="background:var(--danger)" onclick="deleteItem(${i}, 'route')">Del</button>
+                html += `<tr style="animation-delay:${displayIdx * 0.04}s"><td><b>${srNo}</b></td><td>${rName} <div style="margin-top:5px;">${badge}</div></td><td style="white-space:nowrap;">
+                    <button class="badge" style="background:var(--warning); color:black" onclick="editRoute(${realIdx})">Edit</button>
+                    <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'route')">Del</button>
                 </td></tr>`; 
             });
-            if(tbody) tbody.innerHTML = html;
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="3" style="text-align:center;">No routes found.</td></tr>';
+            updatePaginationUI('Route', totalItems, startIndex, endIndex, currentRoutePage, totalPages);
         }
 
         function renderCustomerRequests() {
@@ -3286,16 +3739,15 @@
 
         function renderOwnerRequests() {
             const tbody = document.getElementById('requestTableBody'); 
-            let html = '';
+            let searchInput = document.getElementById('searchReq');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let filtered = [];
             requests.slice().reverse().forEach((r, i) => {
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && r.company !== currentAdminCompanyFilter) return;
                 const realIdx = requests.length - 1 - i;
-            let r_milkman_id = r.milkman_id;
-            if (!r_milkman_id) {
-                let cObj = customers.find(c => String(c.cid) === String(r.cust_id));
-                if (cObj) r_milkman_id = cObj.milkman_id;
-            }
-            if(isMilkMan() && String(r_milkman_id) !== String(currentUser.login_id)) return;
+                let r_milkman_id = r.milkman_id;
+                if (!r_milkman_id) { let cObj = customers.find(c => String(c.cid) === String(r.cust_id)); if (cObj) r_milkman_id = cObj.milkman_id; }
+                if(isMilkMan() && String(r_milkman_id) !== String(currentUser.login_id)) return;
                 let detailsHtml = r.req_qty; let actionsHtml = ''; let status = r.status || 'Pending';
             let color = status === 'Pending' ? 'var(--warning)' : (status === 'Approved' ? 'var(--success)' : 'var(--danger)');
             if (isMilkMan()) {
@@ -3316,39 +3768,79 @@
                             if (pDetails.method === 'Online' && pDetails.screenshot) detailsHtml += `<br><a href="javascript:void(0)" onclick="openScreenshotModal('${pDetails.screenshot}')" style="color:var(--primary); font-size:12px; font-weight:bold; text-decoration:underline;">View Screenshot</a>`;
                     } catch(e) {}
                 }
-                html += `<tr style="animation-delay:${i * 0.04}s">
-                    <td>${r.req_date}</td><td>${r.cust_name}</td>
+                if(searchQuery) {
+                    let str = `${r.req_date} ${r.cust_name} ${detailsHtml} ${status}`.toLowerCase();
+                    if(!str.includes(searchQuery)) return;
+                }
+                filtered.push({r, realIdx, detailsHtml, status, actionsHtml, delBtn});
+            });
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / reqItemsPerPage) || 1;
+            if(currentReqPage > totalPages) currentReqPage = totalPages;
+            if(currentReqPage < 1) currentReqPage = 1;
+            let startIndex = (currentReqPage - 1) * reqItemsPerPage;
+            let endIndex = Math.min(startIndex + reqItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+            
+            let html = '';
+            paginated.forEach((item, displayIdx) => {
+                let {r, realIdx, detailsHtml, status, actionsHtml, delBtn} = item; let srNo = startIndex + displayIdx + 1;
+                html += `<tr style="animation-delay:${displayIdx * 0.04}s">
+                    <td><b>${srNo}</b></td><td>${r.req_date}</td><td>${r.cust_name}</td>
                     <td>${detailsHtml}</td><td>${status}</td>
                 <td style="white-space:nowrap;">${actionsHtml}${delBtn}
                     </td></tr>`;
             });
-            if(tbody) tbody.innerHTML = html;
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No requests found.</td></tr>';
+            updatePaginationUI('Req', totalItems, startIndex, endIndex, currentReqPage, totalPages);
         }
 
         function renderOwners() {
             const tbody = document.getElementById('ownerTableBody'); 
-            let html = '';
+            let searchInput = document.getElementById('searchOwner');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let filtered = [];
             users.forEach((u, i) => {
                 if(u.type !== 'Owner') return;
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
-                html += `<tr style="animation-delay:${i * 0.04}s">
+                if(searchQuery) {
+                    let str = `${u.name} ${u.company} ${u.login_id} ${u.email}`.toLowerCase();
+                    if(!str.includes(searchQuery)) return;
+                }
+                filtered.push({u, realIdx: i});
+            });
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / ownerItemsPerPage) || 1;
+            if(currentOwnerPage > totalPages) currentOwnerPage = totalPages;
+            if(currentOwnerPage < 1) currentOwnerPage = 1;
+            let startIndex = (currentOwnerPage - 1) * ownerItemsPerPage;
+            let endIndex = Math.min(startIndex + ownerItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+            let html = '';
+            paginated.forEach((item, displayIdx) => {
+                let {u, realIdx} = item; let srNo = startIndex + displayIdx + 1;
+                html += `<tr style="animation-delay:${displayIdx * 0.04}s">
+                    <td><b>${srNo}</b></td>
                     <td>${u.name}</td>
                     <td>${u.company || '-'}</td>
                     <td>${u.login_id}</td>
                     <td>${u.email || '-'}</td>
                     <td style="white-space:nowrap;">
                         <button class="badge" style="background:var(--danger)" onclick="resetPassword('${u.login_id}', 'Owner')">Reset Pass</button>
-                        <button class="badge" style="background:var(--danger)" onclick="deleteOwnerByAdmin(${i})">Del</button>
+                        <button class="badge" style="background:var(--danger)" onclick="deleteOwnerByAdmin(${realIdx})">Del</button>
                     </td>
                 </tr>`;
             });
-            if(tbody) tbody.innerHTML = html;
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No owners found.</td></tr>';
+            updatePaginationUI('Owner', totalItems, startIndex, endIndex, currentOwnerPage, totalPages);
         }
 
         function renderLicenses() {
             const tbody = document.getElementById('licenseTableBody'); 
             if(!tbody) return;
-            let html = '';
+            let searchInput = document.getElementById('searchLicense');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let filtered = [];
             licenses.slice().reverse().forEach((l, i) => {
                 const realIdx = licenses.length - 1 - i;
                 let statusColor = l.status === 'Active' ? 'var(--success)' : (l.status === 'Used' ? 'var(--danger)' : 'var(--text)');
@@ -3359,8 +3851,24 @@
                     usedByDisplay = l.used_by_name ? `<b>${l.used_by_name}</b><br><span style="font-size:11px; color:#94a3b8;">ID: ${l.used_by}</span>` : l.used_by;
                     if (l.used_by_company) usedByDisplay += `<br><span style="font-size:11px; color:var(--primary);">${l.used_by_company}</span>`;
                 }
-                
-                html += `<tr style="animation-delay:${i * 0.04}s">
+                if(searchQuery) {
+                    let str = `${l.key_code} ${l.status} ${usedByDisplay} ${usedOnDate}`.toLowerCase();
+                    if(!str.includes(searchQuery)) return;
+                }
+                filtered.push({l, realIdx, statusColor, usedOnDate, usedByDisplay});
+            });
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / licenseItemsPerPage) || 1;
+            if(currentLicensePage > totalPages) currentLicensePage = totalPages;
+            if(currentLicensePage < 1) currentLicensePage = 1;
+            let startIndex = (currentLicensePage - 1) * licenseItemsPerPage;
+            let endIndex = Math.min(startIndex + licenseItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+            let html = '';
+            paginated.forEach((item, displayIdx) => {
+                let {l, realIdx, statusColor, usedOnDate, usedByDisplay} = item; let srNo = startIndex + displayIdx + 1;
+                html += `<tr style="animation-delay:${displayIdx * 0.04}s">
+                    <td><b>${srNo}</b></td>
                     <td style="font-family:monospace; font-weight:bold; color:var(--primary);">${l.key_code}</td>
                     <td>${l.duration_days} Days</td>
                     <td style="color:${statusColor}; font-weight:bold;">${l.status || 'Active'}</td>
@@ -3369,8 +3877,8 @@
                     <td><button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'license')">Del</button></td>
                 </tr>`;
             });
-            if(html === '') html = '<tr><td colspan="6" style="text-align:center; padding:15px;">No licenses generated yet.</td></tr>';
-            tbody.innerHTML = html;
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No licenses found.</td></tr>';
+            updatePaginationUI('License', totalItems, startIndex, endIndex, currentLicensePage, totalPages);
         }
 
         function openLicenseForm() { document.getElementById('lPrefix').value = ''; document.getElementById('license-form-section').classList.remove('hidden'); }
@@ -3414,6 +3922,8 @@
             let html = '<option value="">-- Select Customer --</option>';
             let filterSel = document.getElementById('filterMilkMan');
             let selectedMM = (filterSel && !filterSel.classList.contains('hidden')) ? filterSel.value : null;
+            let searchInput = document.getElementById('searchTrans');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
             customers.sort((a,b) => (a.seq_no||999) - (b.seq_no||999)).forEach((c, i) => {
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return;
@@ -3426,11 +3936,12 @@
 
         function renderTrans() {
             const tbody = document.getElementById('transTableBody');
-            if (!tbody) return; // Exit if the element isn't in the DOM
+            if (!tbody) return; 
             
             const filterDate = currentFeedDateStr;
 
-            let html = '';
+            let searchInput = document.getElementById('searchTrans');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
             
             const today_dt = new Date();
             const yest_dt = new Date();
@@ -3442,7 +3953,7 @@
             let filterSel = document.getElementById('filterMilkMan');
             let selectedMM = (filterSel && !filterSel.classList.contains('hidden')) ? filterSel.value : null;
 
-            let foundEntries = false;
+            let filtered = [];
             transactions.slice().reverse().forEach((t, i) => { 
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && t.company !== currentAdminCompanyFilter) return;
                 const realIdx = transactions.length - 1 - i;
@@ -3459,24 +3970,36 @@
                     let cObj = customers.find(c => (c.name || '').trim() === (t.cust || '').trim());
                     if (cObj && cObj.milkman_id !== selectedMM) return;
                 }
-                
-                foundEntries = true;
-                let hideClass = ''; 
-                // For Milk Man, only allow edits for recent dates, regardless of what's selected. Owner can edit anything.
-                if(isMilkMan() && !allowedDates.includes(convertToDDMMYYYY(t.date))) hideClass = 'hidden'; 
-
-                const totalDisplay = t.item === 'Payment' ? `<span style="color:var(--success)">-₹${Math.abs(parseFloat(t.total)).toFixed(2)}</span>` : `₹${parseFloat(t.total).toFixed(2)}`;
                 const displayItem = formatItemDisplay(t.item);
+                if (searchQuery) {
+                    let str = `${t.date} ${t.cust} ${displayItem}`.toLowerCase();
+                    if(!str.includes(searchQuery)) return;
+                }
                 
-                html += `<tr style="animation-delay:${Math.min(i * 0.02, 0.5)}s"><td>${t.date}</td><td>${t.cust}</td><td>${displayItem}</td><td>${totalDisplay}</td><td style="white-space:nowrap;">
+                let hideClass = ''; 
+                if(isMilkMan() && !allowedDates.includes(convertToDDMMYYYY(t.date))) hideClass = 'hidden'; 
+                const totalDisplay = t.item === 'Payment' ? `<span style="color:var(--success)">-₹${Math.abs(parseFloat(t.total)).toFixed(2)}</span>` : `₹${parseFloat(t.total).toFixed(2)}`;
+                filtered.push({t, realIdx, hideClass, totalDisplay, displayItem});
+            });
+            
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / transItemsPerPage) || 1;
+            if(currentTransPage > totalPages) currentTransPage = totalPages;
+            if(currentTransPage < 1) currentTransPage = 1;
+            let startIndex = (currentTransPage - 1) * transItemsPerPage;
+            let endIndex = Math.min(startIndex + transItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+            let html = '';
+            paginated.forEach((item, displayIdx) => { 
+                let {t, realIdx, hideClass, totalDisplay, displayItem} = item; let srNo = startIndex + displayIdx + 1;
+                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.02, 0.5)}s"><td><b>${srNo}</b></td><td>${t.date}</td><td>${t.cust}</td><td>${displayItem}</td><td>${totalDisplay}</td><td style="white-space:nowrap;">
                     <button class="badge ${hideClass}" style="background:var(--warning); color:black" onclick="editTrans(${realIdx})">Edit</button>
                     <button class="badge ${hideClass}" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
                 </td></tr>`; 
             });
-            if (!foundEntries) {
-                html = `<tr><td colspan="5" style="text-align:center; padding: 20px;">No entries found for ${filterDate}.</td></tr>`;
-            }
+            if (filtered.length === 0) { html = `<tr><td colspan="6" style="text-align:center; padding: 20px;">No entries found.</td></tr>`; }
             tbody.innerHTML = html;
+            updatePaginationUI('Trans', totalItems, startIndex, endIndex, currentTransPage, totalPages);
         }
 
         // --- CUSTOMER MULTI-ITEMS LOGIC ---
@@ -4501,9 +5024,59 @@
         }
 
         // Standard helpers (Edit/Delete/Reset)
-        function editUser(i) { const u = users[i]; document.getElementById('uName').value = u.name; document.getElementById('uId').value = u.login_id; document.getElementById('uUsername').value = u.username || ''; document.getElementById('uPass').value = ""; let up = document.getElementById('uPass'); (up.closest('.form-group-auto') || up).classList.add('hidden'); document.getElementById('uMobile').value = u.mobile || ''; let ur = u.route; if(!ur || ur==='undefined') ur = 'Unnamed Route'; populateRouteDropdown(u.login_id); document.getElementById('uRoute').value = ur; document.getElementById('editUserIdx').value = i; document.getElementById('btnUserSave').innerText = "Update Delivery Man"; document.getElementById('user-form-section').classList.remove('hidden'); document.getElementById('btnShowNewUser').classList.add('hidden'); }
-        function editProduct(i) { document.getElementById('pName').value = products[i].item_name; document.getElementById('pRate').value = products[i].rate; document.getElementById('pUnit').value = products[i].unit || 'Ltr'; document.getElementById('editProdIdx').value = i; document.getElementById('btnProdSave').innerText = "Update Product"; document.getElementById('product-form-section').classList.remove('hidden'); document.getElementById('btnShowNewProduct').classList.add('hidden'); }
-        function editRoute(i) { let rName = routes[i].route_name; if(!rName || rName==='undefined') rName=''; document.getElementById('rName').value = rName; document.getElementById('editRouteIdx').value = i; document.getElementById('btnRouteSave').innerText = "Update Route"; }
+        function editUser(i) { 
+            const u = users[i]; 
+            document.getElementById('uName').value = u.name; 
+            document.getElementById('uId').value = u.login_id; 
+            document.getElementById('uUsername').value = u.username || ''; 
+            document.getElementById('uPass').value = ""; 
+            let up = document.getElementById('uPass'); 
+            if (up) (up.closest('.form-group-auto') || up).classList.add('hidden'); 
+            document.getElementById('uMobile').value = u.mobile || ''; 
+            let ur = u.route; 
+            if(!ur || ur==='undefined') ur = 'Unnamed Route'; 
+            populateRouteDropdown(u.login_id); 
+            document.getElementById('uRoute').value = ur; 
+            document.getElementById('editUserIdx').value = i; 
+            document.getElementById('btnUserSave').innerText = "Update Delivery Man"; 
+            document.getElementById('userFormTitle').innerText = "✏️ Edit Delivery Man";
+            document.getElementById('user-form-section').classList.remove('hidden'); 
+        }
+        
+        function editProduct(i) { 
+            document.getElementById('pName').value = products[i].item_name; 
+            document.getElementById('pRate').value = products[i].rate; 
+            document.getElementById('pUnit').value = products[i].unit || 'Ltr'; 
+            document.getElementById('editProdIdx').value = i; 
+            document.getElementById('btnProdSave').innerText = "Update Product"; 
+            document.getElementById('productFormTitle').innerText = "✏️ Edit Product";
+            document.getElementById('product-form-section').classList.remove('hidden'); 
+        }
+        
+        function editRoute(i) { 
+            let rName = routes[i].route_name; 
+            if(!rName || rName==='undefined') rName=''; 
+            document.getElementById('rName').value = rName; 
+            document.getElementById('editRouteIdx').value = i; 
+            document.getElementById('btnRouteSave').innerText = "Update Route"; 
+            document.getElementById('routeFormTitle').innerText = "✏️ Edit Route";
+            document.getElementById('route-form-section').classList.remove('hidden');
+        }
+
+        function editManager(i) {
+            const u = users[i];
+            document.getElementById('mName').value = u.name;
+            document.getElementById('mId').value = u.login_id;
+            document.getElementById('mUsername').value = u.username || '';
+            document.getElementById('mPass').value = "";
+            let mp = document.getElementById('mPass'); 
+            if (mp) (mp.closest('.form-group-auto') || mp).classList.add('hidden');
+            document.getElementById('mMobile').value = u.mobile || '';
+            document.getElementById('editManagerIdx').value = i;
+            document.getElementById('btnManagerSave').innerText = "Update Manager";
+            document.getElementById('managerFormTitle').innerText = "✏️ Edit Manager";
+            document.getElementById('manager-form-section').classList.remove('hidden');
+        }
 
 
         
@@ -4565,8 +5138,8 @@
             renderCustItems();
             document.getElementById('editCustIdx').value = i; 
             document.getElementById('btnCustSave').innerText = "Update Customer"; 
+            document.getElementById('custFormTitle').innerText = "✏️ Edit Customer";
             document.getElementById('cust-form-section').classList.remove('hidden');
-            document.getElementById('btnShowNewCust').classList.add('hidden');
         }
         
         function editTrans(i) { 
@@ -5153,11 +5726,12 @@
             }
             
             const filterMM = document.getElementById('accFilterMilkMan') ? document.getElementById('accFilterMilkMan').value : null;
+            let searchInput = document.getElementById('searchAccount');
+            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
             const [selYear, selMonth] = monthInput.value.split('-').map(Number);
             let summary = {};
-            
-            // Naye aur Purane sabhi customers ko by default 0 balance ke sath load karna
+
             customers.forEach(c => {
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return;
                 if(currentUser.type !== 'Admin' && c.company !== currentUser.company) return;
@@ -5189,31 +5763,44 @@
                     else if (isCurr) summary[t.cust].currentBill += amt;
                 }
             });
+            
+            let sortedCustomers = Object.keys(summary).sort((a, b) => summary[a].seq - summary[b].seq);
+            let filtered = [];
+            for(let c of sortedCustomers) {
+                if (searchQuery && !c.toLowerCase().includes(searchQuery)) continue;
+                filtered.push({c, s: summary[c]});
+            }
 
             let sumPrevBal = 0, sumCurrentBill = 0, sumPaid = 0, sumFinalDue = 0;
+            filtered.forEach(item => {
+                let finalDue = item.s.prevBal + item.s.currentBill - item.s.paid;
+                sumPrevBal += item.s.prevBal; sumCurrentBill += item.s.currentBill; sumPaid += item.s.paid; sumFinalDue += finalDue;
+            });
             
+            let totalItems = filtered.length;
+            let totalPages = Math.ceil(totalItems / accItemsPerPage) || 1;
+            if(currentAccPage > totalPages) currentAccPage = totalPages;
+            if(currentAccPage < 1) currentAccPage = 1;
+            let startIndex = (currentAccPage - 1) * accItemsPerPage;
+            let endIndex = Math.min(startIndex + accItemsPerPage, totalItems);
+            let paginated = filtered.slice(startIndex, endIndex);
+
             let html = `<div style="max-height: 60vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 10px;">
                 <table style="margin-top: 0; border-collapse: collapse; width: 100%;">
                 <thead style="position: sticky; top: 0; background: var(--card); z-index: 10;">
-                    <tr><th>Customer</th><th>Prev Bal</th><th>Current Bill</th><th>Paid</th><th>Total Due</th><th class="no-print">Action</th></tr>
+                    <tr><th>Sr.</th><th>Customer</th><th>Prev Bal</th><th>Current Bill</th><th>Paid</th><th>Total Due</th><th class="no-print">Action</th></tr>
                 </thead>
                 <tbody id="accTableBody">`;
                 
-            let sortedCustomers = Object.keys(summary).sort((a, b) => summary[a].seq - summary[b].seq);
-            let accIndex = 0;
-            for(let c of sortedCustomers) {
-                let s = summary[c];
+            paginated.forEach((item, displayIdx) => {
+                let {c, s} = item; let srNo = startIndex + displayIdx + 1;
                 let finalDue = s.prevBal + s.currentBill - s.paid;
-                
-                sumPrevBal += s.prevBal;
-                sumCurrentBill += s.currentBill;
-                sumPaid += s.paid;
-                sumFinalDue += finalDue;
                 
                 let prevColor = s.prevBal > 0 ? 'var(--danger)' : (s.prevBal < 0 ? 'var(--success)' : 'var(--text)');
                 let finalColor = finalDue > 0 ? 'var(--danger)' : (finalDue < 0 ? 'var(--success)' : 'var(--text)');
                 
-                html += `<tr style="animation-delay:${(accIndex++) * 0.03}s">
+                html += `<tr style="animation-delay:${displayIdx * 0.03}s">
+                    <td><b>${srNo}</b></td>
                     <td>${c}</td>
                     <td style="color:${prevColor}">${s.prevBal !== 0 ? '₹' + s.prevBal.toFixed(2) : '-'}</td>
                     <td>₹${s.currentBill.toFixed(2)}</td>
@@ -5221,7 +5808,7 @@
                     <td style="color:${finalColor}"><b>₹${finalDue.toFixed(2)}</b></td>
                     <td class="no-print"><button class="badge" style="background:#10b981; color:white; padding: 6px 12px;" data-cust="${c.replace(/"/g, '&quot;')}" onclick="openOwnerReport(this.getAttribute('data-cust'))">📄 Bill</button></td>
                 </tr>`;
-            }
+            });
             
             let sumPrevColor = sumPrevBal > 0 ? 'var(--danger)' : (sumPrevBal < 0 ? 'var(--success)' : 'var(--text)');
             let sumFinalColor = sumFinalDue > 0 ? 'var(--danger)' : (sumFinalDue < 0 ? 'var(--success)' : 'var(--text)');
@@ -5229,6 +5816,7 @@
             html += `</tbody>
                 <tfoot style="position: sticky; bottom: 0; background: var(--card); font-weight: bold; border-top: 2px solid var(--primary); box-shadow: 0 -2px 10px rgba(0,0,0,0.5); z-index: 10;">
                     <tr>
+                        <td></td>
                         <td style="color:var(--primary);">TOTAL SUMMARY</td>
                         <td style="color:${sumPrevColor};">₹${sumPrevBal.toFixed(2)}</td>
                         <td style="color:var(--danger);">₹${sumCurrentBill.toFixed(2)}</td>
@@ -5240,6 +5828,7 @@
             </table></div>`;
 
             div.innerHTML = html;
+            updatePaginationUI('Acc', totalItems, startIndex, endIndex, currentAccPage, totalPages);
         }
 
         let currentLedgerView = 'cust';
@@ -5363,7 +5952,7 @@
         function injectAutoLabels() {
             const elements = document.querySelectorAll('input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"]):not([type="file"]), select');
             elements.forEach(el => {
-                if (['selfReportMonthYear', 'feedCustomDate', 'tPaymentAmt'].includes(el.id)) return;
+                 if (['selfReportMonthYear', 'feedCustomDate', 'tPaymentAmt', 'global-admin-company-filter'].includes(el.id)) return;
                 if (el.id.toLowerCase().includes('search')) return;
                 
                 let labelText = el.getAttribute('placeholder') || el.getAttribute('title');
