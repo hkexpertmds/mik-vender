@@ -18,9 +18,9 @@
         body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(-45deg, #0f172a, #1e1b4b, #0f172a, #064e3b); background-size: 400% 400%; animation: gradientBG 15s ease infinite; color: var(--text); margin: 0; display: flex; justify-content: center; padding: 20px; transition: background 0.3s, color 0.3s, opacity 0.5s ease; min-height: 100vh; }
         :root.light-mode body { background: linear-gradient(-45deg, #f1f5f9, #e0e7ff, #f8fafc, #d1fae5); background-size: 400% 400%; animation: gradientBG 15s ease infinite; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px) scale(0.98); filter: blur(5px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
-        .container { width: 100%; max-width: 950px; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 2rem; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); transition: all 0.3s ease; animation: fadeInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .container { width: 100%; max-width: 950px; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 2rem; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: fadeInUp 0.2s ease-out; }
         :root.light-mode .container { background: rgba(255, 255, 255, 0.75); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); }
         .hidden { display: none !important; }
         h2, h3 { color: var(--primary); margin-top: 0; }
@@ -76,7 +76,7 @@
         
         .box-btn { padding: 20px 10px; min-height: 110px; text-align: center; font-size: 15px; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.3; }
         .box-btn:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 25px -5px rgba(0,0,0,0.4); filter: brightness(1.15); }
-        .box-btn { animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
+        .box-btn { animation: fadeInUp 0.3s ease-out backwards; }
         .menu-grid button:nth-child(1) { animation-delay: 0.05s; }
         .menu-grid button:nth-child(2) { animation-delay: 0.10s; }
         .menu-grid button:nth-child(3) { animation-delay: 0.15s; }
@@ -97,20 +97,20 @@
              /* APP-LIKE SLEEK HEADER FOR MOBILE */
             #app-header { padding: 10px 12px !important; height: 55px !important; box-sizing: border-box; flex-wrap: nowrap !important; background: rgba(30, 41, 59, 0.85) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
             :root.light-mode #app-header { background: rgba(255, 255, 255, 0.85) !important; }
-            #app-header > div:nth-child(1) { gap: 6px !important; flex: 1; min-width: 0; max-width: 25%; overflow: hidden; }
-            #app-header > div:nth-child(2) { flex: 2; min-width: 0; max-width: 50%; overflow: hidden; margin: 0 5px; }
-            #app-header > div:nth-child(3) { gap: 6px !important; padding-right: 25px !important; flex: 1; justify-content: flex-end; min-width: 0; max-width: 25%; overflow: hidden; }
+            #app-header > div:nth-child(1) { gap: 6px !important; flex: 0 0 auto !important; min-width: 0; max-width: none !important; overflow: visible !important; }
+            #app-header > div:nth-child(2) { flex: 1 1 auto !important; min-width: 0; max-width: none !important; overflow: hidden !important; margin: 0 10px !important; align-items: flex-start !important; text-align: left !important; }
+            #app-header > div:nth-child(3) { gap: 6px !important; padding-right: 25px !important; flex: 0 0 auto !important; justify-content: flex-end !important; min-width: 0; max-width: none !important; overflow: visible !important; }
             #header-company-name { font-size: 14px !important; margin: 0 !important; letter-spacing: 0 !important; }
-            #header-user-name { font-size: 12px !important; font-weight: 500 !important; }
+            #header-user-name { font-size: 11px !important; font-weight: 500 !important; }
             #header-user-info { justify-content: flex-start; }
-            #header-user-info img { width: 26px !important; height: 26px !important; margin: 0 !important; border-width: 1px !important; flex-shrink: 0; }
+             #header-user-info img { width: 36px !important; height: 36px !important; margin: 0 !important; border-width: 1px !important; flex-shrink: 0; }
            
             #header-role { font-size: 10px !important; padding: 3px 6px !important; border-radius: 6px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; box-sizing: border-box; }
             #global-admin-company-filter { max-width: 75px !important; font-size: 10px !important; padding: 2px 4px !important; }
             #global-back-btn { font-size: 18px !important; }
             #theme-toggle { top: 16px !important; right: 12px !important; font-size: 20px !important; }
             #license-banner { top: 55px !important; }
-            #profile-dropdown { top: 60px !important; left: 10px !important; right: 10px !important; max-width: none !important; width: auto !important; }
+            #profile-dropdown { top: 60px !important; left: 10px !important; right: auto !important; max-width: none !important; width: 220px !important; }
             
             /* RESPONSIVE TABLES & FORMS */
             table { display: block; overflow-x: auto; white-space: nowrap; width: 100%; border-spacing: 0 4px; }
@@ -132,10 +132,10 @@
         @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
 
-        .modal-box { animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes modalPop { from { opacity: 0; transform: scale(0.85) translateY(20px); filter: blur(4px); } to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); } }
-        tbody tr { animation: fadeRow 0.4s ease-out backwards; }
-        @keyframes fadeRow { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
+        .modal-box { animation: modalPop 0.2s ease-out; }
+        @keyframes modalPop { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        tbody tr { animation: fadeRow 0.15s ease-out backwards; }
+        @keyframes fadeRow { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
 
         /* FAQ Accordion Styles */
         .faq-item { background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 10px; overflow: hidden; transition: all 0.3s; }
@@ -153,6 +153,7 @@
         .profile-list-item:hover { background: rgba(99, 102, 241, 0.1); }
         .profile-list-item:last-child { border-bottom: none; }
         :root.light-mode .profile-list-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
+        #header-company-name::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
@@ -165,15 +166,15 @@
 
     <!-- GLOBAL HEADER -->
     <div id="app-header" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; background: var(--card); padding: 10px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; z-index: 999; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;">
-        <div style="display: flex; align-items: center; gap: 10px; z-index: 10; flex: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 10px; z-index: 10; flex: 0 0 auto; min-width: 0;">
             <button id="global-back-btn" class="hidden" onclick="goBack()" style="background: transparent; border: none; color: var(--text); font-size: 24px; padding: 0; cursor: pointer; outline: none; flex-shrink: 0;" title="Go Back">⬅️</button>
             <div id="header-user-info" style="display:flex; align-items:center; cursor: pointer; flex-shrink: 0;" onclick="toggleProfileDropdown(event)" title="Profile Menu"></div>
         </div>
-        <div id="header-center-info" style="display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; flex: 2; min-width: 0; text-align: center; cursor: pointer;" onclick="toggleProfileDropdown(event)" title="Profile Menu">
-            <div id="header-company-name" style="font-size: 16px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;"></div>
-            <div id="header-user-name" style="font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;"></div>
+        <div id="header-center-info" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; z-index: 1; flex: 1 1 auto; min-width: 0; text-align: left; padding: 0 10px; cursor: pointer; overflow: hidden;" onclick="toggleProfileDropdown(event)" title="Profile Menu">
+            <div id="header-company-name" style="font-size: 16px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; width: 100%; display: block; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;"></div>
+            <div id="header-user-name" style="font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; width: 100%; display: block; overflow: hidden; text-overflow: ellipsis;"></div>
         </div>
-        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-right: 40px; z-index: 10; flex: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-right: 40px; z-index: 10; flex: 0 0 auto; min-width: 0;">
             <select id="global-admin-company-filter" onchange="applyAdminCompanyFilter()" class="hidden" style="background:var(--input); color:white; border:1px solid #475569; border-radius:6px; padding:4px 8px; font-size:12px; max-width:110px; outline:none; cursor:pointer;">
                 <option value="ALL">All Owners</option>
             </select>
@@ -313,11 +314,11 @@
                     <option value="">-- District --</option>
                 </select>
             </div>
+            <input type="text" id="regRefCode" placeholder="Referral Code (Optional)">
             <div style="position: relative;">
                 <input type="password" id="regPass" placeholder="Create Password" style="margin: 0; padding-right: 35px;" required>
                 <span onclick="togglePasswordVisibility('regPass', 'regEyeIcon')" id="regEyeIcon" title="Show/Hide Password" style="position: absolute; right: 12px; top: 10px; cursor: pointer; user-select: none; font-size: 16px;">👁️</span>
             </div>
-            <input type="text" id="regRefCode" placeholder="Reference Code (Optional, 4 Digits)" maxlength="4" style="text-transform:uppercase; letter-spacing:2px; font-weight:bold; text-align:center; margin-top:10px;">
             <button class="btn-save" style="margin-top: 10px;" onclick="registerOwner()">Sign Up</button>
             <button class="btn-back" onclick="showView('login-page')">Back</button>
         </div>
@@ -375,6 +376,10 @@
                 <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Email ID</span><br><b id="lbl-email" style="font-size:15px; color:var(--text);">...</b></div>
                 <span style="color:var(--primary); font-size:18px;">✎</span>
             </div>
+            <div class="profile-list-item" id="row-company" onclick="openEditField('display_company', 'Display Company / Dairy Name', 'text')">
+                <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Print / Display Name</span><br><b id="lbl-company" style="font-size:15px; color:var(--text);">...</b></div>
+                <span style="color:var(--primary); font-size:18px;">✎</span>
+            </div>
             <div class="profile-list-item" id="row-addr" onclick="openEditField('addr', 'Address', 'text')">
                 <div style="flex:1;"><span style="font-size:12px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px;">Address</span><br><b id="lbl-addr" style="font-size:15px; color:var(--text);">...</b></div>
                 <span style="color:var(--primary); font-size:18px;">✎</span>
@@ -413,7 +418,7 @@
                 <input type="text" id="uId" placeholder="System ID (Auto)" readonly style="opacity:0.7">
                 <input type="text" id="uUsername" placeholder="Create Login Username (Optional)">
                 <input type="text" id="uName" placeholder="Delivery Man Name" required>
-                <input type="text" id="uMobile" placeholder="Mobile Number" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+                <input type="text" id="uMobile" placeholder="Mobile Number (Optional)" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                 <select id="uRoute" required>
                     <option value="">-- Select Route --</option>
                 </select>
@@ -769,7 +774,8 @@
         </div>
         <button class="btn-back" onclick="showView('main-menu')">Back</button>
     </div>
-     <!-- REFERRAL MASTER -->
+
+    <!-- REFERRAL MASTER -->
     <div id="referral-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">🤝 Referral Partners</h2>
@@ -813,7 +819,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- MANAGER MASTER -->
     <div id="manager-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
@@ -832,8 +838,19 @@
             <input type="text" id="mId" placeholder="Manager ID (Auto 6-Digit)" readonly style="opacity:0.7">
             <input type="text" id="mUsername" placeholder="Create Login Username">
             <input type="text" id="mName" placeholder="Manager Name" required>
-            <input type="text" id="mMobile" placeholder="Mobile Number" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
+            <input type="text" id="mMobile" placeholder="Mobile Number (Optional)" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
             <input type="text" id="mPass" placeholder="Set Password">
+            <input type="text" id="mAddress" placeholder="Address (For Bill Print)">
+            
+            <div style="grid-column: 1 / -1; display:flex; align-items:center; gap:10px; margin-top: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                <img id="mLogoPreview" src="https://via.placeholder.com/80?text=No+Logo" style="width:80px; height:50px; object-fit:contain; border:1px solid #475569; background:white;">
+                <div style="flex:1;">
+                    <label style="font-size:12px; color:var(--primary); font-weight:bold;">Manager's Bill Logo (Optional)</label>
+                    <input type="file" id="mLogoInput" accept="image/*" style="padding: 5px; font-size: 12px; width: 100%; margin-top: 5px;" onchange="handleManagerLogoUpload(event)">
+                    <input type="hidden" id="mLogoBase64">
+                </div>
+            </div>
+
             <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
                 <button id="btnManagerSave" class="btn-save" style="flex:1;" onclick="saveManager()">Save Manager</button>
                 <button class="btn-back" style="flex:1; margin:0;" onclick="closeManagerForm()">Cancel</button>
@@ -856,6 +873,19 @@
         </div>
     </div>
 
+    <!-- NEW: SHARE SUCCESS MODAL (Fixes auto-share block) -->
+    <div id="shareSuccessModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px;">
+        <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid #475569; text-align:center;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🎉</div>
+            <h3 id="shareSuccessTitle" style="margin-top:0; margin-bottom: 10px; color:var(--success); font-size: 22px;">Saved Successfully!</h3>
+            <p style="color:#94a3b8; font-size:14px; margin-top:0; margin-bottom:20px;">Do you want to send the ID & Password to <b id="shareSuccessName" style="color:var(--text)"></b> via WhatsApp/SMS?</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-save" id="btnShareNowAction" style="background:var(--success);">📤 Share Now</button>
+                <button class="btn-back" style="margin:0;" onclick="document.getElementById('shareSuccessModal').classList.add('hidden')">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- LICENSE MASTER -->
     <div id="license-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
@@ -868,7 +898,7 @@
             <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0; color:var(--primary);">➕ Generate Key</h3>
-                    <button type="button" onclick="document.getElementById('license-form-section').classList.add('hidden')" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
+                    <button type="button" onclick="closeLicenseForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
                 </div>
                 <div class="grid-form" style="margin-bottom:0;">
                     <select id="lDuration" title="License Duration">
@@ -880,7 +910,7 @@
                     <input type="text" id="lPrefix" placeholder="Prefix (Optional, e.g. VIP)">
                     <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
                         <button class="btn-save" style="flex:1;" onclick="saveNewLicense()">Generate Key</button>
-                        <button class="btn-back" style="flex:1; margin:0;" onclick="document.getElementById('license-form-section').classList.add('hidden')">Cancel</button>
+                        <button class="btn-back" style="flex:1; margin:0;" onclick="closeLicenseForm()">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -907,15 +937,15 @@
             <button class="btn-save" style="background:var(--warning); color:black; padding: 8px 15px; width:auto; margin-left:auto;" onclick="downloadAccountSummary()">🖨️ Download List</button>
         </div>
         <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:center; flex-wrap: wrap; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; border:1px solid #475569;">
-            <select id="accFilterMilkMan" onchange="renderAccounts()" style="flex:1; min-width: 150px; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
+            <select id="accFilterMilkMan" onchange="renderAccounts()" style="flex:1; min-width: 150px; padding:0 8px; height:38px; box-sizing:border-box; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
                 <option value="">-- All Delivery Men --</option>
             </select>
             <div style="display:flex; align-items:center; gap:5px; flex:1; min-width: 200px;">
-                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeAccMonth(-1)">⬅️ Prev</button>
-                <input type="month" id="accMonthYear" onchange="renderAccounts()" style="flex:1; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
-                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeAccMonth(1)">Next ➡️</button>
+                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeAccMonth(-1)">⬅️ Prev</button>
+                <input type="month" id="accMonthYear" onchange="renderAccounts()" style="flex:1; padding:0 8px; height:38px; box-sizing:border-box; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
+                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeAccMonth(1)">Next ➡️</button>
             </div>
-            <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="currentAccPage=1; renderAccounts()" style="flex:1; min-width:150px; padding:8px; margin:0; border-radius:8px;">
+            <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="currentAccPage=1; renderAccounts()" style="flex:1; min-width:150px; padding:0 8px; height:38px; box-sizing:border-box; margin:0; border-radius:8px;">
         </div>
         <div id="monthlyReport"></div>
         <button class="btn-back" onclick="showView('main-menu')">⬅️ Back to Menu</button>
@@ -946,10 +976,10 @@
         <!-- TAB: STATEMENT -->
         <div id="self-tab-statement">
             <div style="display:flex; gap:10px; margin-bottom: 20px; align-items:center; flex-wrap: wrap;">
-                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeSelfMonth(-1)">⬅️ Prev</button>
-                <input type="month" id="selfReportMonthYear" onchange="renderSelfLedger()" style="flex:1; max-width: 180px; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px;">
-                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeSelfMonth(1)">Next ➡️</button>
-                <button class="btn-save" style="background:var(--warning); color:black; padding: 8px 15px; width:auto; margin-left:auto;" onclick="downloadSelfReport()">🖨️ Download Bill</button>
+                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeSelfMonth(-1)">⬅️ Prev</button>
+                <input type="month" id="selfReportMonthYear" onchange="renderSelfLedger()" style="flex:1; max-width: 180px; padding:0 8px; height:38px; box-sizing:border-box; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
+                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeSelfMonth(1)">Next ➡️</button>
+                <button class="btn-save" style="background:var(--warning); color:black; padding:0 15px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; width:auto; margin:0 0 0 auto;" onclick="downloadSelfReport()">🖨️ Download Bill</button>
             </div>
             <div id="self-ledger-data" style="max-height: 55vh; overflow-y: auto; overflow-x: auto; padding-right: 5px;"></div>
         </div>
@@ -1111,10 +1141,10 @@
             </div>
             
             <div style="display:flex; gap:10px; margin-bottom: 20px; align-items:center; flex-wrap: wrap;">
-                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeOwnerMonth(-1)">⬅️ Prev</button>
-                <input type="month" id="ownerReportMonthYear" onchange="renderOwnerReport()" style="flex:1; max-width: 180px; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px;">
-                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeOwnerMonth(1)">Next ➡️</button>
-                <button class="btn-save" style="background:var(--warning); color:black; padding: 8px 15px; width:auto; margin-left:auto;" onclick="downloadOwnerReport()">🖨️ Download Bill</button>
+                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeOwnerMonth(-1)">⬅️ Prev</button>
+                <input type="month" id="ownerReportMonthYear" onchange="renderOwnerReport()" style="flex:1; max-width: 180px; padding:0 8px; height:38px; box-sizing:border-box; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
+                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeOwnerMonth(1)">Next ➡️</button>
+                <button class="btn-save" style="background:var(--warning); color:black; padding:0 15px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; width:auto; margin:0 0 0 auto;" onclick="downloadOwnerReport()">🖨️ Download Bill</button>
             </div>
             
             <div id="owner-report-data" style="overflow-y:auto; flex:1; padding-right:10px;"></div>
@@ -1317,6 +1347,11 @@
             return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth()+1).padStart(2, '0')}-${d.getFullYear()}`;
         }
         
+        function getLocalISODate(d = new Date()) {
+            if (isNaN(d)) return "";
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+        
         // --- GLOBAL SEARCH FUNCTION ---
         function searchTable(inputElem, tbodyId) {
             let filter = inputElem.value.toLowerCase();
@@ -1414,6 +1449,51 @@
         function applyAdminCompanyFilter() {
             currentAdminCompanyFilter = document.getElementById('global-admin-company-filter').value;
             refreshCurrentView();
+        }
+
+        function populateMilkManDropdowns() {
+            if(!currentUser) return;
+            const getHtml = () => {
+                let html = '';
+                users.forEach(u => {
+                    if (u.type === 'Milk Man') {
+                        if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
+                        html += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
+                    }
+                });
+                return html;
+            };
+
+            let mmSelect = document.getElementById('cMilkMan');
+            if (mmSelect) {
+                let oldVal = mmSelect.value;
+                let mmHtml = '<option value="">-- Assign Delivery Man --</option>';
+                if (isMilkMan()) mmHtml = `<option value="${currentUser.login_id}">${currentUser.name} (${currentUser.login_id})</option>`;
+                else mmHtml += getHtml();
+                mmSelect.innerHTML = mmHtml;
+                if(oldVal) mmSelect.value = oldVal;
+            }
+
+            let custFilterSel = document.getElementById('filterCustMilkManSelect');
+            if (custFilterSel) {
+                let oldVal = custFilterSel.value;
+                custFilterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>' + getHtml();
+                if(oldVal) custFilterSel.value = oldVal;
+            }
+
+            let filterSel = document.getElementById('filterMilkMan');
+            if (filterSel) {
+                let oldVal = filterSel.value;
+                filterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>' + getHtml();
+                if(oldVal) filterSel.value = oldVal;
+            }
+            
+            let accFilterSel = document.getElementById('accFilterMilkMan');
+            if (accFilterSel) {
+                let oldVal = accFilterSel.value;
+                accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>' + getHtml();
+                if(oldVal) accFilterSel.value = oldVal;
+            }
         }
 
         const stateCityMap = {
@@ -1588,29 +1668,82 @@
         }
 
         function shareApp() {
-    const shareData = {
-        title: 'My Vender App',
-        text: 'Check out My Vender, the smart way to manage daily deliveries and Monthly Bills!',
-        url: window.location.origin + window.location.pathname
-    };
+            const shareData = {
+                title: 'My Vender App',
+                text: 'Check out My Vender, the smart way to manage daily deliveries and Monthly Bills!',
+                url: window.location.origin + window.location.pathname
+            };
 
-    // Pehle check karein ki kya Android interface available hai
-    if (window.AndroidPrint && window.AndroidPrint.shareApp) {
-        window.AndroidPrint.shareApp(shareData.title, shareData.text, shareData.url);
-    } 
-    // Agar Android nahi hai (browser hai), toh normal Web Share try karein
-    else if (navigator.share) {
-        navigator.share(shareData).catch((err) => {
-            if(err.name !== "AbortError") console.error("Share failed:", err.message);
-        });
-    } 
-    // Kuch nahi toh clipboard
-    else {
-        navigator.clipboard.writeText(shareData.url).then(() => {
-            alert("App link copied to clipboard!");
-        });
-    }
-}
+            if (window.AndroidPrint && window.AndroidPrint.shareApp) {
+                window.AndroidPrint.shareApp(shareData.title, shareData.text, shareData.url);
+            } else if (navigator.share && window.isSecureContext) {
+                navigator.share(shareData).catch((err) => {
+                    if(err.name !== "AbortError") fallbackShare(shareData.text + " " + shareData.url);
+                });
+            } else {
+                fallbackShare(shareData.text + " " + shareData.url);
+            }
+        }
+
+        // --- NEW WHATSAPP DIRECT SHARE FALLBACK ---
+        function fallbackShare(text, mobile = null) {
+            let waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+            if (mobile && String(mobile).length === 10) {
+                waUrl = `https://api.whatsapp.com/send?phone=91${mobile}&text=${encodeURIComponent(text)}`;
+            }
+
+            if (confirm("📱 Click OK to open WhatsApp directly.\n\nClick Cancel to just copy the text.")) {
+                window.open(waUrl, '_blank');
+            } else {
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert("✅ Copied to clipboard! You can paste it anywhere.", "success");
+                    }).catch(() => prompt("Copy the text below:", text));
+                } else {
+                    prompt("Copy the text below:", text);
+                }
+            }
+        }
+
+        function openShareSuccessModal(name, role, login_id, username, mobile, rawPass, customTitle = "Saved Successfully!") {
+            document.getElementById('shareSuccessTitle').innerText = customTitle;
+            document.getElementById('shareSuccessName').innerText = name;
+            document.getElementById('shareSuccessModal').classList.remove('hidden');
+            document.getElementById('btnShareNowAction').onclick = function() {
+                document.getElementById('shareSuccessModal').classList.add('hidden');
+                shareCredentials(name, role, login_id, username, mobile, rawPass);
+            };
+        }
+
+        // --- MANUAL CREDENTIAL SHARE FUNCTION ---
+        function shareCredentials(name, role, systemId, username, mobile, password = null) {
+            let loginId = systemId;
+            if (username && String(username).trim() !== '') loginId = username;
+            if (mobile && String(mobile).trim() !== '') loginId = mobile; // Highest priority to Mobile
+
+            let passText = password;
+            if (!passText) {
+                passText = prompt(`Enter Password for ${name} to share (Leave blank to hide):`);
+                if (passText === null) return; // Cancelled
+                if (passText.trim() === '') passText = "******** (Contact Owner)";
+            }
+
+            let webLink = window.location.origin + window.location.pathname;
+            let appLink = "https://my-vender-app.com"; // Yahan aap apna original App link daal sakte hain
+
+            let text = `Hello ${name},\nHere are your ${role} Login Details:\n\nID: ${loginId}\nPassword: ${passText}\n\nApp Link: ${appLink}\nWeb Link: ${webLink}`;
+            const shareData = { title: `${role} Login Details`, text: text };
+
+            if (window.AndroidPrint && window.AndroidPrint.shareApp) { 
+                window.AndroidPrint.shareApp(shareData.title, shareData.text, webLink); 
+            } else if (navigator.share && window.isSecureContext) { 
+                navigator.share(shareData).catch((err) => { 
+                    if(err.name !== "AbortError") fallbackShare(text, mobile); 
+                }); 
+            } else { 
+                fallbackShare(text, mobile); 
+            }
+        }
 
         // --- SUBSCRIPTION & LICENSE KEY LOGIC ---
         function isLicenseValid() {
@@ -2025,7 +2158,7 @@
         
         // Android Hardware Back Button Hook
         window.onAndroidBack = function() {
-            let modals = ['profile-dropdown', 'seqModal', 'editTransModal', 'ownerReportModal', 'helpModal', 'licenseModal', 'editFieldModal', 'mediaManagerModal', 'qrCropModal', 'screenshotModal', 'printPreviewModal'];
+            let modals = ['profile-dropdown', 'seqModal', 'ownerReportModal', 'helpModal', 'licenseModal', 'editFieldModal', 'mediaManagerModal', 'qrCropModal', 'screenshotModal', 'printPreviewModal'];
             for(let m of modals) { let el = document.getElementById(m); if(el && !el.classList.contains('hidden')) { el.classList.add('hidden'); return true; } }
             let hash = window.location.hash.replace('#', '');
             let homeViews = ['main-menu', 'ledger-master', 'customer-self-view', 'landing-page', 'login-page'];
@@ -2078,6 +2211,13 @@
                 document.getElementById('mmQrPic').src = currentQrCodeBase64 || 'https://via.placeholder.com/150';
                 document.getElementById('mmLogoPic').src = currentCompanyLogoBase64 || 'https://via.placeholder.com/150';
                 document.getElementById('mmOwnerSection').classList.remove('hidden');
+                
+                let logoSec = document.getElementById('mmLogoPic').parentElement;
+                if (currentUser.type === 'Manager') {
+                    if(logoSec) logoSec.classList.add('hidden');
+                } else {
+                    if(logoSec) logoSec.classList.remove('hidden');
+                }
             } else {
                 document.getElementById('mmOwnerSection').classList.add('hidden');
             }
@@ -2198,7 +2338,15 @@
             document.getElementById('editFieldTitle').innerText = 'Edit ' + title;
             document.getElementById('editFieldKey').value = key;
             document.getElementById('editFieldValue').type = type;
-            document.getElementById('editFieldValue').value = (key === 'pass' || key === 'cpass') ? '' : (currentUser[key === 'addr' && currentUser.type !== 'Customer' ? 'address' : key] || '');
+             
+            let val = '';
+            if (key !== 'pass' && key !== 'cpass') {
+                if (key === 'addr' && currentUser.type !== 'Customer') val = currentUser.address || '';
+                else if (key === 'display_company') val = currentUser.display_company || currentUser.company || '';
+                else val = currentUser[key] || '';
+            }
+            document.getElementById('editFieldValue').value = val;
+            
             document.getElementById('editFieldEye').classList.toggle('hidden', type !== 'password');
             document.getElementById('editFieldModal').classList.remove('hidden');
             setTimeout(() => document.getElementById('editFieldValue').focus(), 100);
@@ -2355,7 +2503,7 @@
                 address: finalAddress,
                 mobile: document.getElementById('regMobile').value,
                 license_expiry: expiryDate.toISOString(),
-                ref_code: document.getElementById('regRefCode').value.trim()
+                ref_code: document.getElementById('regRefCode') ? document.getElementById('regRefCode').value.trim() : ''
             };
             if(!data.name || !data.username || !data.city || data.city.length !== 2 || !data.pass || !data.company || !data.mobile) return alert("Please fill all required fields and select a State / District!");
             if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
@@ -2427,8 +2575,8 @@
                         try {
                             let parsed = JSON.parse(offlineData);
                             users = parsed.users || []; customers = parsed.customers || [];
-                            transactions = parsed.transactions || []; products = parsed.products || [];
-                            requests = parsed.requests || []; routes = parsed.routes || [];
+                        transactions = (parsed.transactions || []).reverse(); products = parsed.products || [];
+                        requests = (parsed.requests || []).reverse(); routes = parsed.routes || [];
                             licenses = parsed.licenses || [];
                         } catch(e){}
                     }
@@ -2495,8 +2643,8 @@
                     users = result.data.users || []; customers = result.data.customers || [];
                     if (currentUser.type === 'Customer') customers.push(currentUser);
                     if (currentUser.type === 'Customer' && !customers.find(c => String(c.cid) === String(currentUser.login_id))) customers.push(currentUser);
-                    transactions = result.data.transactions || []; products = result.data.products || [];
-                    requests = result.data.requests || []; routes = result.data.routes || [];
+                    transactions = (result.data.transactions || []).reverse(); products = result.data.products || [];
+                    requests = (result.data.requests || []).reverse(); routes = result.data.routes || [];
                     licenses = result.data.licenses || [];
                     
                     populateProductDropdowns();
@@ -2520,22 +2668,13 @@
         }
         
         function refreshCurrentView() {
+            populateMilkManDropdowns();
             const id = sessionStorage.getItem('lastView');
             if(id === 'user-master') { populateRouteDropdown(); renderUsers(); }
             if(id === 'ledger-master') { renderCustomers(); renderTrans(); if(currentUser.type === 'Milk Man') renderTransFeed(); }
             if(id === 'accounts-user') {
-            let accFilterSel = document.getElementById('accFilterMilkMan');
-            if (accFilterSel) {
-                let oldVal = accFilterSel.value;
-                accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>';
-                users.filter(u => u.type === 'Milk Man').forEach(u => {
-                        if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
-                    accFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
-                });
-                if(oldVal) accFilterSel.value = oldVal;
+                renderAccounts();
             }
-            renderAccounts();
-        }
             if(id === 'customer-self-view') { renderSelfLedger(); renderSelfCustItems(); renderCustomerRequests(); }
             if(id === 'product-master') { renderProducts(); }
             if(id === 'request-master') { renderOwnerRequests(); }
@@ -2573,18 +2712,18 @@
             }
 
             let headPicUrl = currentUser.profile_pic || 'https://via.placeholder.com/30';
-             let headPic = `<img src="${headPicUrl}" title="Profile Menu" style="cursor:pointer; width:30px;height:30px;border-radius:50%;vertical-align:middle;border:2px solid var(--primary); object-fit:cover;">`;
+             let headPic = `<img src="${headPicUrl}" title="Profile Menu" style="cursor:pointer; width:40px;height:40px;border-radius:50%;vertical-align:middle;border:2px solid var(--primary); object-fit:cover;">`;
             
             let headerUserInfo = document.getElementById('header-user-info');
              if(headerUserInfo) headerUserInfo.innerHTML = headPic;
             
             let headerUserName = document.getElementById('header-user-name');
-            if(headerUserName) headerUserName.innerText = "Hi, " + currentUser.name;
+            if(headerUserName) headerUserName.innerText = currentUser.name;
             
             let headerRole = document.getElementById('header-role');
             if(headerRole) headerRole.innerText = currentUser.type === 'Milk Man' ? 'Delivery Man' : currentUser.type;
             let headerCompany = document.getElementById('header-company-name');
-            if(headerCompany) headerCompany.innerText = currentUser.company || 'DAIRY LEDGER';
+            if(headerCompany) headerCompany.innerText = currentUser.display_company || currentUser.company || 'DAIRY LEDGER';
             
             const isAdmin = currentUser.type === 'Admin';
             const adminFilter = document.getElementById('global-admin-company-filter');
@@ -2598,6 +2737,7 @@
                 }
             }
             populateAdminCompanyFilter();
+            populateMilkManDropdowns();
 
             const isCust = currentUser.type === 'Customer';
             const isMilkMan = currentUser.type === 'Milk Man';
@@ -2627,12 +2767,19 @@
         }
 
         function showView(id, isBack = false) {
+            let targetEl = document.getElementById(id);
+            if (!targetEl) {
+                id = currentUser ? (currentUser.type === 'Milk Man' ? 'ledger-master' : (currentUser.type === 'Customer' ? 'customer-self-view' : 'main-menu')) : 'landing-page';
+                targetEl = document.getElementById(id);
+                if (!targetEl) return;
+            }
+
             if (!isBack && window.location.hash !== `#${id}`) {
                 history.pushState({ view: id }, '', `#${id}`);
             }
 
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+            targetEl.classList.remove('hidden');
             
             // Clear all search inputs when changing views
             document.querySelectorAll('input[id^="search"]').forEach(inp => inp.value = "");
@@ -2657,8 +2804,14 @@
                 document.getElementById('lbl-email').innerText = currentUser.email || '-';
                 document.getElementById('lbl-addr').innerText = currentUser.address || currentUser.addr || '-';
                 
+                let companyRow = document.getElementById('row-company');
+                if (companyRow) {
+                    companyRow.classList.toggle('hidden', currentUser.type !== 'Owner');
+                    document.getElementById('lbl-company').innerText = currentUser.display_company || currentUser.company || '-';
+                }
+                
                 document.getElementById('row-email').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
-                document.getElementById('row-addr').classList.toggle('hidden', currentUser.type === 'Milk Man');
+                document.getElementById('row-addr').classList.toggle('hidden', currentUser.type === 'Milk Man' || currentUser.type === 'Manager');
                 document.getElementById('row-pass').classList.toggle('hidden', currentUser.type === 'Customer');
                 
                 // Set up License Display Row for Owner
@@ -2676,31 +2829,25 @@
 
             if(id === 'user-master') { 
                 resetForm('user'); 
-                closeUserForm();
                 populateRouteDropdown();
                 renderUsers(); 
             }
             if(id === 'ledger-master') { 
-                renderCustomers(); renderTrans(); 
                 resetForm('cust');
                 if(currentUser.type === 'Milk Man') {
-                    switchLedger('trans'); // Default to entries for Milk Man
-                    switchLedgerTransTab('feed'); // Default to daily feed for Milk Man
+                    if (!isBack) {
+                        switchLedger('trans');
+                        switchLedgerTransTab('feed');
+                    } else {
+                        switchLedger(currentLedgerView);
+                        if (currentLedgerView === 'cust') renderCustomers();
+                    }
                 } else {
-                    switchLedger('cust'); // Default to customers for Owner/Admin
+                    switchLedger(currentLedgerView);
+                    if (currentLedgerView === 'cust') renderCustomers();
                 }
             }
            if(id === 'accounts-user') {
-                let accFilterSel = document.getElementById('accFilterMilkMan');
-                if (accFilterSel) {
-                    let oldVal = accFilterSel.value;
-                    accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>';
-                    users.filter(u => u.type === 'Milk Man').forEach(u => {
-                        if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
-                        accFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
-                    });
-                    if(oldVal) accFilterSel.value = oldVal;
-                }
                 renderAccounts();
             }
             if(id === 'customer-self-view') { 
@@ -2710,7 +2857,7 @@
                 switchSelfTab('statement'); // Tab ko Statement par reset karo
                 const tempDateEl = document.getElementById('tempChangeDate');
                 tempDateEl.value = ''; // Clear date on view load
-                tempDateEl.min = new Date().toISOString().split("T")[0]; // Set min date to today
+                tempDateEl.min = getLocalISODate(); // Set min date to today
                 document.getElementById('temp-change-items-view').innerHTML = '<p style="font-size:13px; color:#94a3b8;">Please select a date to make a change.</p>';
                 
                 const custObj = customers.find(c => String(c.cid) === String(currentUser.login_id));
@@ -2738,13 +2885,13 @@
 
                 togglePaymentFields();
             }
-            if(id === 'product-master') { resetForm('product'); closeProductForm(); renderProducts(); }
+            if(id === 'product-master') { resetForm('product'); renderProducts(); }
             if(id === 'request-master') { renderOwnerRequests(); }
             if(id === 'route-master') { resetForm('route'); renderRoutes(); } // This was missing from the previous diff, adding it back.
             if(id === 'owner-master') { renderOwners(); }
             if(id === 'referral-master') { renderReferrals(); }
-            if(id === 'manager-master') { resetForm('manager'); closeManagerForm(); renderManagers(); }
-            if(id === 'license-master') { document.getElementById('license-form-section').classList.add('hidden'); renderLicenses(); }
+            if(id === 'manager-master') { resetForm('manager'); renderManagers(); }
+            if(id === 'license-master') { renderLicenses(); }
             
             if(id === 'general-bill-view') {
                 clearGbForm();
@@ -2782,17 +2929,15 @@
         function openNewUserForm() {
             resetForm('user');
             document.getElementById('userFormTitle').innerText = "➕ New Delivery Man";
-            document.getElementById('user-form-section').classList.remove('hidden');
+            showView('user-form-view');
         }
-        function closeUserForm() {
-            document.getElementById('user-form-section').classList.add('hidden');
-        }
+        function closeUserForm() { goBack(); }
         
         // --- MANAGER STAFF ---
         function openNewManagerForm() {
             resetForm('manager');
             document.getElementById('managerFormTitle').innerText = "➕ New Manager";
-            document.getElementById('manager-form-section').classList.remove('hidden');
+            showView('manager-form-view');
             
             let baseId = String(currentUser.login_id);
             let ownerManagers = users.filter(u => u.type === 'Manager' && u.company === currentUser.company);
@@ -2806,15 +2951,32 @@
             });
             document.getElementById('mId').value = baseId + (maxSuffix + 1);
         }
-        function closeManagerForm() {
-            document.getElementById('manager-form-section').classList.add('hidden');
+        function closeManagerForm() { goBack(); }
+
+        async function handleManagerLogoUpload(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const btn = document.getElementById('btnManagerSave');
+            let origText = btn.innerText;
+            btn.innerText = "Compressing Logo...";
+            btn.disabled = true;
+            try {
+                let base64 = await compressImage(file, 300, 150, 0.7); // Compress logo
+                document.getElementById('mLogoBase64').value = base64;
+                document.getElementById('mLogoPreview').src = base64;
+            } catch(err) {
+                alert("Error reading image file.", "error");
+            }
+            btn.innerText = origText;
+            btn.disabled = false;
         }
         
         async function saveManager() {
             if(currentUser.type !== 'Owner') return;
-            if (!validateForm('manager-master')) return;
+            if (!validateForm('manager-form-view')) return;
             document.getElementById('btnManagerSave').innerText = "Saving...";
             const idx = document.getElementById('editManagerIdx').value;
+            let rawPass = document.getElementById('mPass').value;
             
             let data = {
                 name: document.getElementById('mName').value,
@@ -2823,11 +2985,13 @@
                 type: 'Manager',
                 company: currentUser.company,
                 mobile: document.getElementById('mMobile').value,
+                address: document.getElementById('mAddress').value,
+                company_logo: document.getElementById('mLogoBase64').value,
                 login_id: document.getElementById('mId').value
             };
             
-            if(!data.name || !data.mobile) return alert("Name and Mobile are required!");
-            if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
+            if(!data.name) return alert("Name is required!");
+            if(data.mobile && data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             if(idx === "" && !data.pass) return alert("Password is required for new Manager!");
             if(idx !== "") data.id = users[idx].id;
             
@@ -2835,7 +2999,13 @@
             const savedData = await res.json();
             if (savedData.success === false) { alert(savedData.message); document.getElementById('btnManagerSave').innerText = idx === "" ? "Save Manager" : "Update Manager"; return; }
             
-            if(idx === "") users.push(savedData); else users[idx] = savedData;
+            if(idx === "") {
+                users.push(savedData);
+                openShareSuccessModal(savedData.name, 'Manager', savedData.login_id, savedData.username, savedData.mobile, rawPass);
+            } else {
+                users[idx] = savedData;
+                alert("Manager updated successfully!", "success");
+            }
             resetForm('manager'); renderManagers();
             closeManagerForm();
         }
@@ -2865,10 +3035,11 @@
             let html = '';
             paginated.forEach((item, displayIdx) => {
                 let {u, realIdx} = item; let srNo = startIndex + displayIdx + 1;
-                html += `<tr style="animation-delay:${displayIdx * 0.04}s"><td><b>${srNo}</b></td><td>${u.name}</td><td>${u.login_id}</td><td>${u.mobile||'-'}</td>
+                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s"><td><b>${srNo}</b></td><td>${u.name}</td><td>${u.login_id}</td><td>${u.mobile||'-'}</td>
                 <td style="display:flex; gap:4px; flex-wrap:nowrap;">
                     <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Manager')">Pass</button>
-                    <button class="badge" style="background:var(--warning); color:black" onclick="editManager(${i})">Edit</button>
+                    <button class="badge" style="background:var(--success)" onclick="shareCredentials('${u.name.replace(/'/g, "\\'")}', 'Manager', '${u.login_id}', '${(u.username||'').replace(/'/g, "\\'")}', '${u.mobile||''}')">Share</button>
+                    <button class="badge" style="background:var(--warning); color:black" onclick="editManager(${realIdx})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'user')">Del</button>
                 </td></tr>`;
             });
@@ -2879,17 +3050,16 @@
         function openNewProductForm() {
             resetForm('product');
             document.getElementById('productFormTitle').innerText = "➕ New Product";
-            document.getElementById('product-form-section').classList.remove('hidden');
+            showView('product-form-view');
         }
-        function closeProductForm() {
-            document.getElementById('product-form-section').classList.add('hidden');
-        }
+        function closeProductForm() { goBack(); }
 
         async function saveUser() {
             if(isMilkMan()) { alert("Access Denied!"); return; }
-            if (!validateForm('user-master')) return;
+            if (!validateForm('user-form-view')) return;
             document.getElementById('btnUserSave').innerText = "Saving...";
             const idx = document.getElementById('editUserIdx').value;
+            let rawPass = document.getElementById('uPass').value;
             
             let uUsername = document.getElementById('uUsername').value.trim();
 
@@ -2903,8 +3073,8 @@
                 route: document.getElementById('uRoute').value
             };
             
-            if(!data.name || !data.mobile) return alert("Name and Mobile are required!");
-            if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
+            if(!data.name) return alert("Name is required!");
+            if(data.mobile && data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             if(idx === "" && !data.pass) return alert("Password is required for new Delivery Man!");
             if(!data.route) return alert("Route is mandatory! Please assign a Route.");
             
@@ -2922,7 +3092,14 @@
                     return;
                 }
 
-                if(idx === "") users.push(savedData); else users[idx] = savedData;
+                if(idx === "") {
+                    users.push(savedData);
+                    openShareSuccessModal(savedData.name, 'Delivery Man', savedData.login_id, savedData.username, savedData.mobile, rawPass);
+                } else {
+                    users[idx] = savedData;
+                    alert("Delivery Man updated successfully!", "success");
+                }
+                populateMilkManDropdowns();
                 resetForm('user'); populateRouteDropdown(); renderUsers();
                 closeUserForm();
             } catch (error) {
@@ -2935,28 +3112,25 @@
             resetForm('cust');
             autoFillCustSeq();
             document.getElementById('custFormTitle').innerText = "➕ New Customer";
-            document.getElementById('cust-form-section').classList.remove('hidden');
+            showView('cust-form-view');
         }
 
-        function closeCustForm() {
-            document.getElementById('cust-form-section').classList.add('hidden');
-        }
+        function closeCustForm() { goBack(); }
 
         function openNewRouteForm() {
             resetForm('route');
             document.getElementById('routeFormTitle').innerText = "➕ New Route";
-            document.getElementById('route-form-section').classList.remove('hidden');
+            showView('route-form-view');
         }
-        function closeRouteForm() {
-            document.getElementById('route-form-section').classList.add('hidden');
-        }
+        function closeRouteForm() { goBack(); }
 
         // --- CUSTOMER ---
         async function saveCustomer() {
-            if (!validateForm('ledger-cust-view')) return;
+            if (!validateForm('cust-form-view')) return;
             document.getElementById('btnCustSave').innerText = "Saving...";
             const idx = document.getElementById('editCustIdx').value;
             if (idx === "" && !document.getElementById('cPass').value) return alert("Error: Please set a password for the new Customer!");
+            let rawPass = document.getElementById('cPass').value;
             if(!document.getElementById('cMilkMan').value) return alert("Error: Please assign a Delivery Man to this customer!");
             
             let cUsername = document.getElementById('cUsername').value.trim();
@@ -3053,7 +3227,13 @@
                     return;
                 }
 
-                if(idx === "") customers.push(savedData); else customers[idx] = savedData;
+                if(idx === "") {
+                    customers.push(savedData);
+                    openShareSuccessModal(savedData.name, 'Customer', savedData.cid, savedData.username, savedData.mobile, rawPass);
+                } else {
+                    customers[idx] = savedData;
+                    alert("Customer updated successfully!", "success");
+                }
                 resetForm('cust'); renderCustomers();
                 closeCustForm();
             } catch (error) {
@@ -3081,7 +3261,7 @@
         function openNewTransModal() {
             document.getElementById('transModalTitle').innerText = "➕ New Entry";
             document.getElementById('editTransIdx').value = "";
-            document.getElementById('tDateText').value = new Date().toISOString().split('T')[0];
+            document.getElementById('tDateText').value = getLocalISODate();
             document.getElementById('tDateText').readOnly = false; document.getElementById('tDateText').style.opacity = "1";
             
             document.getElementById('tCustSelect').value = ""; document.getElementById('tCustSelect').disabled = false; document.getElementById('tCustSelect').style.opacity = "1";
@@ -3096,11 +3276,11 @@
             products.forEach(p => select.innerHTML += `<option value="${p.item_name}" data-rate="${p.rate}">${p.item_name} (${p.unit || '-'})</option>`);
             
             switchTransModalType('Items');
-            document.getElementById('editTransModal').classList.remove('hidden');
+            showView('trans-form-view');
         }
 
         async function saveTransaction() {
-            if (!validateForm('editTransModal')) return;
+            if (!validateForm('trans-form-view')) return;
             const btn = document.getElementById('btnTransSave'); btn.innerText = "Saving..."; btn.disabled = true;
             const idx = document.getElementById('editTransIdx').value;
             
@@ -3150,14 +3330,14 @@
             });
             document.getElementById('gb-tab-' + tab).classList.remove('hidden');
             document.getElementById('tabGb' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active-tab');
-            if(tab === 'old') renderGeneralBills();
+            if(tab === 'old') setTimeout(() => renderGeneralBills(), 10);
         }
 
         function clearGbForm() {
             if(document.getElementById('editGbIdx')) document.getElementById('editGbIdx').value = "";
             if(document.getElementById('btnSaveGbMain')) document.getElementById('btnSaveGbMain').innerText = "Generate & Print Bill";
             const dObj = new Date();
-            if(document.getElementById('gbDate')) document.getElementById('gbDate').value = dObj.toISOString().split('T')[0];
+            if(document.getElementById('gbDate')) document.getElementById('gbDate').value = getLocalISODate(dObj);
             if(document.getElementById('gbCustName')) document.getElementById('gbCustName').value = '';
             if(document.getElementById('gbMobile')) document.getElementById('gbMobile').value = '';
             if(document.getElementById('gbAddress')) document.getElementById('gbAddress').value = '';
@@ -3222,12 +3402,12 @@
             let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
             
             let gbDisplayList = [];
-            let gbCount = 0;
+            let currentGbCount = 0;
             let totalAmt = 0;
             transactions.forEach((t, i) => {
                 if (t.shift === 'General Bill') {
-                    gbCount++;
-                    gbDisplayList.push({ t, realIdx: i, serialNo: gbCount });
+                    currentGbCount++;
+                    gbDisplayList.push({ t, realIdx: i, serialNo: currentGbCount });
                 }
             });
             let filtered = [];
@@ -3273,7 +3453,7 @@
             paginated.forEach((item, displayIdx) => {
                 let {t, realIdx, serialNo, displayItem} = item;
                 let srNo = startIndex + displayIdx + 1;
-                html += `<tr style="animation-delay:${displayIdx * 0.04}s">
+                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s">
                     <td><b>${srNo}</b></td>
                     <td>GB-${serialNo}<br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
                     <td>${t.cust}</td>
@@ -3302,10 +3482,13 @@
                 itemsArr = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
             }
             
-            let serialNo = 0;
-            for (let i = 0; i <= idx; i++) {
-                if (transactions[i].shift === 'General Bill') serialNo++;
-            }
+            let currentGbIdx = 0;
+            transactions.forEach((tr, i) => {
+                if (tr.shift === 'General Bill') {
+                    if (i <= idx) currentGbIdx++;
+                }
+            });
+            let serialNo = currentGbIdx;
             
             let mobileNum = ''; let address = '';
             let creatorDetails = null;
@@ -3332,7 +3515,7 @@
                     dObj = new Date(`${new Date().getFullYear()}-${p[1]}-${p[0]}`);
                 }
             }
-            if(!isNaN(dObj)) document.getElementById('gbDate').value = dObj.toISOString().split('T')[0];
+            if(!isNaN(dObj)) document.getElementById('gbDate').value = getLocalISODate(dObj);
             
             document.getElementById('gbCustName').value = t.cust;
             let mobileNum = ''; let address = '';
@@ -3379,7 +3562,7 @@
                 creator_name: currentUser.name,
                 creator_mobile: currentUser.mobile,
                 creator_address: currentUser.address || currentUser.addr,
-                creator_company: currentUser.company,
+                creator_company: currentUser.display_company || currentUser.company,
                 creator_logo: currentUser.company_logo
             };
             
@@ -3422,7 +3605,7 @@
         }
         
         function printBillHTML(serialNo, dateStr, custName, mobileNum, address, itemsArr, total, creatorDetails = null) {
-            let companyName = (creatorDetails && creatorDetails.creator_company) ? creatorDetails.creator_company : (currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger');
+            let companyName = (creatorDetails && creatorDetails.creator_company) ? creatorDetails.creator_company : (currentUser.display_company || (currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger'));
             let ownerAddress = (creatorDetails && creatorDetails.creator_address !== undefined) ? creatorDetails.creator_address : (currentUser.address || currentUser.addr || '');
             let ownerMobile = (creatorDetails && creatorDetails.creator_mobile !== undefined) ? creatorDetails.creator_mobile : (currentUser.mobile || '');
             let ownerLogo = (creatorDetails && creatorDetails.creator_logo !== undefined) ? creatorDetails.creator_logo : (currentUser.company_logo || '');
@@ -3477,7 +3660,7 @@
 
         // --- PRODUCTS ---
         async function saveProduct() {
-            if (!validateForm('product-master')) return;
+            if (!validateForm('product-form-view')) return;
             const idx = document.getElementById('editProdIdx').value;
             const pName = document.getElementById('pName').value.trim();
             const pRate = parseFloat(document.getElementById('pRate').value) || 0;
@@ -3512,7 +3695,7 @@
 
         // --- ROUTES ---
         async function saveRoute() {
-            if (!validateForm('route-master')) return;
+            if (!validateForm('route-form-view')) return;
             document.getElementById('btnRouteSave').innerText = "Saving...";
             const idx = document.getElementById('editRouteIdx').value;
             let data = { route_name: document.getElementById('rName').value, company: currentUser.company };
@@ -3579,6 +3762,8 @@
                     else { if (height > maxHeight) { width = Math.round(width *= maxHeight / height); height = maxHeight; } }
                     canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = "#FFFFFF"; // Fix transparent PNGs turning black
+                    ctx.fillRect(0, 0, width, height);
                     ctx.drawImage(img, 0, 0, width, height);
                     resolve(canvas.toDataURL('image/jpeg', quality));
                 };
@@ -3681,8 +3866,9 @@
                 let {u, realIdx} = item; let srNo = startIndex + displayIdx + 1;
                 let displayRoute = u.route;
                 if(!displayRoute || displayRoute === 'undefined') displayRoute = 'Unnamed Route';
-            html += `<tr style="animation-delay:${displayIdx * 0.04}s"><td><b>${srNo}</b></td><td>${u.name}</td><td>${u.login_id}</td><td>${displayRoute}</td><td>${u.mobile||'-'}</td><td style="display:flex; gap:4px; flex-wrap:nowrap;">
+            html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s"><td><b>${srNo}</b></td><td>${u.name}</td><td>${u.login_id}</td><td>${displayRoute}</td><td>${u.mobile||'-'}</td><td style="display:flex; gap:4px; flex-wrap:nowrap;">
                     <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Milk Man')">Pass</button>
+                    <button class="badge" style="background:var(--success)" onclick="shareCredentials('${u.name.replace(/'/g, "\\'")}', 'Delivery Man', '${u.login_id}', '${(u.username||'').replace(/'/g, "\\'")}', '${u.mobile||''}')">Share</button>
                     <button class="badge" style="background:var(--warning); color:black" onclick="editUser(${realIdx})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'user')">Del</button>
                 </td></tr>`; 
@@ -3695,17 +3881,9 @@
             const tbody = document.getElementById('customerTableBody');
             const mmSelect = document.getElementById('cMilkMan');
             
-            let mmHtml = '<option value="">-- Assign Delivery Man --</option>';
-            
             let custFilterSel = document.getElementById('filterCustMilkManSelect');
             let selectedCustMM = (custFilterSel && !custFilterSel.classList.contains('hidden')) ? custFilterSel.value : null;
 
-            if (isMilkMan()) {
-                mmHtml = `<option value="${currentUser.login_id}">${currentUser.name} (${currentUser.login_id})</option>`;
-            } else {
-                users.forEach(u => { if(u.type === 'Milk Man') mmHtml += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; });
-            }
-            if(mmSelect) mmSelect.innerHTML = mmHtml;
             if (isMilkMan() && mmSelect) {
                 mmSelect.value = currentUser.login_id;
                 mmSelect.disabled = true; // Block reassignment to other milk men
@@ -3728,7 +3906,7 @@
                 return true;
             });
 
-            filteredCusts.sort((a,b) => (a.seq_no||999) - (b.seq_no||999));
+            filteredCusts.sort((a,b) => (a.seq_no||a.seq_no_eve||999) - (b.seq_no||b.seq_no_eve||999));
 
             let totalCusts = filteredCusts.length;
             let totalPages = Math.ceil(totalCusts / custItemsPerPage) || 1;
@@ -3763,6 +3941,7 @@
                     <td>${c.mobile||'-'}<br><span style="font-size:11px; color:#94a3b8;">ID: ${c.cid}</span><br><span style="font-size:11px; color:var(--primary);">User: ${c.username||'-'}</span></td>
                         <td style="display:flex; gap:4px; flex-wrap:nowrap;">
                             ${!isMilkMan() ? `<button class="badge" style="background:var(--primary)" onclick="resetPassword('${c.cid}', 'Customer')">Pass</button>` : ''}
+                            <button class="badge" style="background:var(--success)" onclick="shareCredentials('${c.name.replace(/'/g, "\\'")}', 'Customer', '${c.cid}', '${(c.username||'').replace(/'/g, "\\'")}', '${c.mobile||''}')">Share</button>
                             <button class="badge" style="background:var(--warning); color:black" onclick="editCust(${realIdx})">Edit</button>
                             <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'cust')">Del</button>
                         </td>
@@ -3798,7 +3977,7 @@
             let html = '';
             paginated.forEach((item, displayIdx) => { 
                 let {p, realIdx} = item; let srNo = startIndex + displayIdx + 1;
-                html += `<tr style="animation-delay:${displayIdx * 0.04}s"><td><b>${srNo}</b></td><td>${p.item_name} <span style="font-size:11px; color:#94a3b8;">(${p.unit || '-'})</span></td><td>₹${parseFloat(p.rate).toFixed(2)}</td><td style="white-space:nowrap;">
+                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s"><td><b>${srNo}</b></td><td>${p.item_name} <span style="font-size:11px; color:#94a3b8;">(${p.unit || '-'})</span></td><td>₹${parseFloat(p.rate).toFixed(2)}</td><td style="white-space:nowrap;">
                     <button class="badge" style="background:var(--warning); color:black" onclick="editProduct(${realIdx})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'product')">Del</button>
                 </td></tr>`; 
@@ -3833,7 +4012,7 @@
             paginated.forEach((item, displayIdx) => { 
                 let {r, rName, assigned, realIdx} = item; let srNo = startIndex + displayIdx + 1;
                 let badge = assigned ? `<span style="font-size:11px; background:var(--success); color:white; padding:2px 6px; border-radius:4px; margin-left:8px;">🛵 ${assigned}</span>` : `<span style="font-size:11px; background:#64748b; color:white; padding:2px 6px; border-radius:4px; margin-left:8px;">Unassigned</span>`;
-                html += `<tr style="animation-delay:${displayIdx * 0.04}s"><td><b>${srNo}</b></td><td>${rName} <div style="margin-top:5px;">${badge}</div></td><td style="white-space:nowrap;">
+                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s"><td><b>${srNo}</b></td><td>${rName} <div style="margin-top:5px;">${badge}</div></td><td style="white-space:nowrap;">
                     <button class="badge" style="background:var(--warning); color:black" onclick="editRoute(${realIdx})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'route')">Del</button>
                 </td></tr>`; 
@@ -3847,7 +4026,7 @@
             const payUl = document.getElementById('custPaymentList');
             if(!msgUl || !payUl) return; 
             let msgHtml = ''; let payHtml = '';
-            requests.filter(r => String(r.cust_id) === String(currentUser.login_id)).forEach(r => {
+            requests.slice().reverse().filter(r => String(r.cust_id) === String(currentUser.login_id)).forEach(r => {
                 let status = r.status || 'Pending';
                 let color = status === 'Pending' ? 'var(--warning)' : (status === 'Approved' ? 'var(--success)' : 'var(--danger)');
                 let li = `<li style="margin-bottom:5px;">On <b>${r.req_date}</b>: ${r.req_qty} <span style="color:${color}; border:1px solid ${color}; padding:2px 5px; border-radius:4px; font-size:10px; margin-left:5px;">${status}</span></li>`;
@@ -3906,7 +4085,7 @@
             let html = '';
             paginated.forEach((item, displayIdx) => {
                 let {r, realIdx, detailsHtml, status, actionsHtml, delBtn} = item; let srNo = startIndex + displayIdx + 1;
-                html += `<tr style="animation-delay:${displayIdx * 0.04}s">
+                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s">
                     <td><b>${srNo}</b></td><td>${r.req_date}</td><td>${r.cust_name}</td>
                     <td>${detailsHtml}</td><td>${status}</td>
                 <td style="white-space:nowrap;">${actionsHtml}${delBtn}
@@ -3940,7 +4119,7 @@
             let html = '';
             paginated.forEach((item, displayIdx) => {
                 let {u, realIdx} = item; let srNo = startIndex + displayIdx + 1;
-                html += `<tr style="animation-delay:${displayIdx * 0.04}s">
+                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s">
                     <td><b>${srNo}</b></td>
                     <td>${u.name}</td>
                     <td>${u.company || '-'}</td>
@@ -3964,12 +4143,10 @@
             document.getElementById('refCode').value = Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('referralFormTitle').innerText = "➕ New Partner";
             document.getElementById('btnReferralSave').innerText = "Save";
-            document.getElementById('referral-form-section').classList.remove('hidden');
+            showView('referral-form-view');
         }
 
-        function closeReferralForm() {
-            document.getElementById('referral-form-section').classList.add('hidden');
-        }
+        function closeReferralForm() { goBack(); }
 
         async function saveReferral() {
             const name = document.getElementById('refName').value.trim();
@@ -4001,7 +4178,7 @@
             document.getElementById('editReferralIdx').value = idx; document.getElementById('refName').value = u.name;
             document.getElementById('refMobile').value = u.mobile; document.getElementById('refCode').value = u.ref_code || Math.floor(1000 + Math.random() * 9000).toString();
             document.getElementById('referralFormTitle').innerText = "✏️ Edit Partner"; document.getElementById('btnReferralSave').innerText = "Update";
-            document.getElementById('referral-form-section').classList.remove('hidden');
+            showView('referral-form-view');
         }
 
         function renderReferrals() {
@@ -4059,7 +4236,7 @@
             let html = '';
             paginated.forEach((item, displayIdx) => {
                 let {l, realIdx, statusColor, usedOnDate, usedByDisplay} = item; let srNo = startIndex + displayIdx + 1;
-                html += `<tr style="animation-delay:${displayIdx * 0.04}s">
+                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s">
                     <td><b>${srNo}</b></td>
                     <td style="font-family:monospace; font-weight:bold; color:var(--primary);">${l.key_code}</td>
                     <td>${l.duration_days} Days</td>
@@ -4073,7 +4250,8 @@
             updatePaginationUI('License', totalItems, startIndex, endIndex, currentLicensePage, totalPages);
         }
 
-        function openLicenseForm() { document.getElementById('lPrefix').value = ''; document.getElementById('license-form-section').classList.remove('hidden'); }
+        function openLicenseForm() { document.getElementById('lPrefix').value = ''; showView('license-form-view'); }
+        function closeLicenseForm() { goBack(); }
 
         async function saveNewLicense() {
             const duration = parseInt(document.getElementById('lDuration').value);
@@ -4089,9 +4267,9 @@
             try {
                 const res = await fetch(`${API_BASE}/licenses`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 const saved = await res.json();
-                if(saved.success === false) { alert(saved.message); } else { licenses.push(saved); renderLicenses(); document.getElementById('license-form-section').classList.add('hidden'); alert(`Generated Key: ${keyCode}`, 'success'); }
+                if(saved.success === false) { alert(saved.message); } else { licenses.push(saved); renderLicenses(); closeLicenseForm(); alert(`Generated Key: ${keyCode}`, 'success'); }
             } catch(e) {
-                data.id = Math.floor(Math.random() * 10000); licenses.push(data); renderLicenses(); document.getElementById('license-form-section').classList.add('hidden'); alert(`Generated Key: ${keyCode}\n(Saved Locally)`, 'success');
+                data.id = Math.floor(Math.random() * 10000); licenses.push(data); renderLicenses(); closeLicenseForm(); alert(`Generated Key: ${keyCode}\n(Saved Locally)`, 'success');
             }
             if(btn) { btn.innerText = originalText; btn.disabled = false; }
         }
@@ -4117,7 +4295,7 @@
             let searchInput = document.getElementById('searchTrans');
             let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-            customers.sort((a,b) => (a.seq_no||999) - (b.seq_no||999)).forEach((c, i) => {
+            customers.sort((a,b) => (a.seq_no||a.seq_no_eve||999) - (b.seq_no||b.seq_no_eve||999)).forEach((c, i) => {
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && c.company !== currentAdminCompanyFilter) return;
                 if(isMilkMan() && c.milkman_id !== currentUser.login_id) return;
                 if(selectedMM && c.milkman_id !== selectedMM) return;
@@ -5232,7 +5410,7 @@
             document.getElementById('editUserIdx').value = i; 
             document.getElementById('btnUserSave').innerText = "Update Delivery Man"; 
             document.getElementById('userFormTitle').innerText = "✏️ Edit Delivery Man";
-            document.getElementById('user-form-section').classList.remove('hidden'); 
+            showView('user-form-view'); 
         }
         
         function editProduct(i) { 
@@ -5242,7 +5420,7 @@
             document.getElementById('editProdIdx').value = i; 
             document.getElementById('btnProdSave').innerText = "Update Product"; 
             document.getElementById('productFormTitle').innerText = "✏️ Edit Product";
-            document.getElementById('product-form-section').classList.remove('hidden'); 
+            showView('product-form-view'); 
         }
         
         function editRoute(i) { 
@@ -5252,7 +5430,7 @@
             document.getElementById('editRouteIdx').value = i; 
             document.getElementById('btnRouteSave').innerText = "Update Route"; 
             document.getElementById('routeFormTitle').innerText = "✏️ Edit Route";
-            document.getElementById('route-form-section').classList.remove('hidden');
+            showView('route-form-view');
         }
 
         function editManager(i) {
@@ -5264,10 +5442,13 @@
             let mp = document.getElementById('mPass'); 
             if (mp) (mp.closest('.form-group-auto') || mp).classList.add('hidden');
             document.getElementById('mMobile').value = u.mobile || '';
+            document.getElementById('mAddress').value = u.address || u.addr || '';
+            document.getElementById('mLogoBase64').value = u.company_logo || '';
+            document.getElementById('mLogoPreview').src = u.company_logo || 'https://via.placeholder.com/80?text=No+Logo';
             document.getElementById('editManagerIdx').value = i;
             document.getElementById('btnManagerSave').innerText = "Update Manager";
             document.getElementById('managerFormTitle').innerText = "✏️ Edit Manager";
-            document.getElementById('manager-form-section').classList.remove('hidden');
+            showView('manager-form-view');
         }
 
 
@@ -5331,7 +5512,7 @@
             document.getElementById('editCustIdx').value = i; 
             document.getElementById('btnCustSave').innerText = "Update Customer"; 
             document.getElementById('custFormTitle').innerText = "✏️ Edit Customer";
-            document.getElementById('cust-form-section').classList.remove('hidden');
+            showView('cust-form-view');
         }
         
         function editTrans(i) { 
@@ -5383,12 +5564,10 @@
             }
             document.getElementById('btnTransSave').innerText = "Update Entry";
             
-            document.getElementById('editTransModal').classList.remove('hidden');
+            showView('trans-form-view');
         }
         
-        function closeEditTransModal() {
-            document.getElementById('editTransModal').classList.add('hidden');
-        }
+        function closeEditTransModal() { goBack(); }
 
         async function deleteItem(idx, type) {
             if (type === 'product') {
@@ -5414,11 +5593,15 @@
                     transactions.splice(idx, 1);
                     renderTrans(); // Refresh the "All Trans" list
                     renderTransFeed(); // Refresh the "Daily Feed" to show the entry as pending again
+                    if (document.getElementById('general-bill-view') && !document.getElementById('general-bill-view').classList.contains('hidden')) {
+                        renderGeneralBills();
+                    }
                     return; // Prevent full view reload
                 }
                 if(type === 'user') {
                     await fetch(`${API_BASE}/users/${users[idx].id}`, { method: 'DELETE' });
                     users.splice(idx, 1);
+                    populateMilkManDropdowns();
                 }
                 if(type === 'route') {
                     await fetch(`${API_BASE}/routes/${routes[idx].id}`, { method: 'DELETE' });
@@ -5445,6 +5628,7 @@
             if (sessionStorage.getItem('lastView') === 'general-bill-view') nextView = 'general-bill-view';
             if(type === 'user') {
                 if (sessionStorage.getItem('lastView') === 'referral-master') nextView = 'referral-master';
+                else if (sessionStorage.getItem('lastView') === 'manager-master') nextView = 'manager-master';
                 else nextView = 'user-master';
             } else if(type === 'route') nextView = 'route-master';
             else if(type === 'product') nextView = 'product-master';
@@ -5483,8 +5667,11 @@
             }
             if(type==='manager') { 
                 document.getElementById('editManagerIdx').value = ""; document.getElementById('btnManagerSave').innerText = "Save Manager"; 
-                ['mName','mPass','mMobile','mUsername'].forEach(id=>document.getElementById(id).value=""); 
+                ['mName','mPass','mMobile','mUsername','mAddress'].forEach(id=>{let el=document.getElementById(id); if(el) el.value="";}); 
                 document.getElementById('mId').value = ""; 
+                document.getElementById('mLogoBase64').value = "";
+                document.getElementById('mLogoPreview').src = "https://via.placeholder.com/80?text=No+Logo";
+                let minp = document.getElementById('mLogoInput'); if(minp) minp.value = "";
             }
             if(type==='product') { 
                 document.getElementById('editProdIdx').value = ""; document.getElementById('btnProdSave').innerText = "Save Product"; 
@@ -5503,30 +5690,21 @@
             let enteredPass = prompt(`⚠️ Enter your Admin password to CONFIRM deletion of Owner: ${ownerToDelete.name} (${ownerToDelete.company}):`);
             if (!enteredPass) return;
 
-            let auth = JSON.parse(localStorage.getItem('sessionAuth'));
-            let validPass = auth ? auth.pass : (currentUser ? currentUser.pass : null);
-            
-            if (enteredPass !== validPass) {
-                return alert("❌ Incorrect Password! Account deletion aborted.", "error");
-            }
-
             if (!confirm(`FINAL WARNING: This will permanently delete Owner ${ownerToDelete.name} and ALL their company data (${ownerToDelete.company}). This cannot be undone!`)) return;
 
             try {
-                let promises = [];
                 let companyToDelete = ownerToDelete.company;
                 
-                if (users) users.filter(u => u.company === companyToDelete).forEach(u => promises.push(fetch(`${API_BASE}/users/${u.id}`, {method: 'DELETE'})));
-                if (customers) customers.filter(c => c.company === companyToDelete).forEach(c => promises.push(fetch(`${API_BASE}/customers/${c.id}`, {method: 'DELETE'})));
-                if (transactions) transactions.filter(t => t.company === companyToDelete).forEach(t => promises.push(fetch(`${API_BASE}/transactions/${t.id}`, {method: 'DELETE'})));
-                if (products) products.filter(p => p.company === companyToDelete).forEach(p => promises.push(fetch(`${API_BASE}/products/${p.id}`, {method: 'DELETE'})));
-                if (routes) routes.filter(r => r.company === companyToDelete).forEach(r => promises.push(fetch(`${API_BASE}/routes/${r.id}`, {method: 'DELETE'})));
-                if (requests) requests.filter(r => r.company === companyToDelete).forEach(r => promises.push(fetch(`${API_BASE}/requests/${r.id}`, {method: 'DELETE'})));
-
-                promises.push(fetch(`${API_BASE}/users/${ownerToDelete.id}`, {method: 'DELETE'}));
-                promises.push(fetch(`${API_BASE}/delete_account`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ login_id: ownerToDelete.login_id, company: companyToDelete, pass: ownerToDelete.pass, admin_override: true }) }));
-
-                await Promise.allSettled(promises);
+                const res = await fetch(`${API_BASE}/delete_account`, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ login_id: ownerToDelete.login_id, company: companyToDelete, admin_pass: enteredPass, admin_override: true }) 
+                });
+                const result = await res.json();
+                
+                if (result.success === false) {
+                    return alert(result.message, "error");
+                }
                 
                 users = users.filter(u => u.company !== companyToDelete && u.id !== ownerToDelete.id);
                 customers = customers.filter(c => c.company !== companyToDelete);
@@ -5804,12 +5982,12 @@
                 @page { margin: 0.5cm; }
             </style></head><body>`;
 
-            let companyName = currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger';
+            let companyName = currentUser.display_company || (currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger');
             let ownerAddress = currentUser.address || currentUser.addr || '';
             let ownerMobile = currentUser.mobile || '';
             let companyLogo = currentUser.company_logo || '';
             
-            if (!companyLogo && (currentUser.type === 'Customer' || currentUser.type === 'Milk Man')) {
+            if (!companyLogo && (currentUser.type === 'Customer' || currentUser.type === 'Milk Man' || currentUser.type === 'Manager')) {
                 let owner = users.find(u => (u.type === 'Owner' || u.type === 'Manager') && u.company === currentUser.company);
                 if (owner && owner.company_logo) companyLogo = owner.company_logo;
                 else if (currentUser.owner_logo) companyLogo = currentUser.owner_logo;
@@ -6045,15 +6223,12 @@
                 currentLedgerView = type;
             }
             
+            populateMilkManDropdowns();
+
             if(type === 'cust') {
-                closeCustForm();
                 let custFilterSel = document.getElementById('filterCustMilkManSelect');
                 if (currentUser && currentUser.type !== 'Milk Man' && currentUser.type !== 'Customer') {
                     custFilterSel.classList.remove('hidden');
-                    let oldVal = custFilterSel.value;
-                    custFilterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>';
-                    users.filter(u => u.type === 'Milk Man').forEach(u => { custFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; });
-                    custFilterSel.value = oldVal;
                 } else if(custFilterSel) {
                     custFilterSel.classList.add('hidden');
                 }
@@ -6061,15 +6236,13 @@
                 let filterSel = document.getElementById('filterMilkMan');
                 if (currentUser && currentUser.type !== 'Milk Man' && currentUser.type !== 'Customer') {
                     filterSel.classList.remove('hidden');
-                    let oldVal = filterSel.value;
-                    filterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>';
-                    users.filter(u => u.type === 'Milk Man').forEach(u => { filterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; });
-                    filterSel.value = oldVal;
                 } else if(filterSel) {
                     filterSel.classList.add('hidden');
                 }
                 populateTransCustSelect();
-                renderTransFeed(); renderTrans(); 
+                setTimeout(() => {
+                    renderTransFeed(); renderTrans(); 
+                }, 10);
             }
         }
 
@@ -6183,8 +6356,41 @@
             });
         }
 
+
+    function convertModalsToPages() {
+        const modalsToConvert = [
+            { id: 'user-form-section', newId: 'user-form-view' },
+            { id: 'cust-form-section', newId: 'cust-form-view' },
+            { id: 'product-form-section', newId: 'product-form-view' },
+            { id: 'route-form-section', newId: 'route-form-view' },
+            { id: 'referral-form-section', newId: 'referral-form-view' },
+            { id: 'manager-form-section', newId: 'manager-form-view' },
+            { id: 'license-form-section', newId: 'license-form-view' },
+            { id: 'editTransModal', newId: 'trans-form-view' }
+        ];
+        modalsToConvert.forEach(m => {
+            let el = document.getElementById(m.id);
+            if(el) {
+                let modalBox = el.querySelector('.modal-box');
+                if(modalBox) {
+                    let newContainer = document.createElement('div');
+                    newContainer.id = m.newId;
+                    newContainer.className = 'container hidden';
+                    newContainer.innerHTML = modalBox.innerHTML;
+                    let headerBtn = newContainer.querySelector('button[style*="transparent"]');
+                    if(headerBtn) headerBtn.style.display = 'none';
+                    let h3 = newContainer.querySelector('h3');
+                    if(h3) { let h2 = document.createElement('h2'); h2.innerHTML = h3.innerHTML; h2.id = h3.id; h2.style.marginBottom = '20px'; h3.replaceWith(h2); }
+                    document.body.appendChild(newContainer);
+                    el.remove();
+                }
+            }
+        });
+    }
+
         // --- ON PAGE LOAD (AUTO LOGIN) ---
         window.onload = () => {
+            convertModalsToPages(); // Dynamically fix HTML mismatch
             injectAutoLabels(); // Build dynamic labels before login executes
             applyTranslations(); // FAQ Content Setup Before Login
             const session = localStorage.getItem('sessionAuth');
@@ -6207,8 +6413,8 @@
                     try {
                         let parsed = JSON.parse(offlineData);
                         users = parsed.users || []; customers = parsed.customers || [];
-                        transactions = parsed.transactions || []; products = parsed.products || [];
-                        requests = parsed.requests || []; routes = parsed.routes || [];
+                        transactions = (parsed.transactions || []).reverse(); products = parsed.products || [];
+                        requests = (parsed.requests || []).reverse(); routes = parsed.routes || [];
                         licenses = parsed.licenses || [];
                     } catch(e){}
                 }
@@ -6270,6 +6476,10 @@
                 const response = await fetch(`${API_BASE}/reset_password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const result = await response.json();
                 alert(result.message, result.success ? 'success' : 'error');
+                if (result.success) {
+                    let u = users.find(x => x.login_id === targetId) || customers.find(x => x.cid === targetId);
+                    if(u) openShareSuccessModal(u.name, targetType, targetId, u.username, u.mobile, newPassword, "Password Reset Successfully!");
+                }
             } catch(e) {
                 alert("Network Error: Failed to reset password.", "error");
             }
