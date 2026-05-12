@@ -351,7 +351,7 @@
         <!-- Main Header -->
         <div style="text-align:center; padding-bottom: 20px;">
             <div style="position:relative; display:inline-block;">
-                <img id="mainProfilePic" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); background: white;">
+                <img id="mainProfilePic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='30' text-anchor='middle'%3E👤%3C/text%3E%3C/svg%3E" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); background: white;">
                 <div style="position:absolute; bottom:0; right:0; background:var(--primary); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid var(--card);" onclick="openMediaManager('profile')" title="Change Picture">📷</div>
             </div>
             <h3 style="margin:10px 0 5px 0; color:var(--text); font-size: 20px;" id="mainProfileName">Name</h3>
@@ -843,7 +843,7 @@
             <input type="text" id="mAddress" placeholder="Address (For Bill Print)">
             
             <div style="grid-column: 1 / -1; display:flex; align-items:center; gap:10px; margin-top: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
-                <img id="mLogoPreview" src="https://via.placeholder.com/80?text=No+Logo" style="width:80px; height:50px; object-fit:contain; border:1px solid #475569; background:white;">
+                <img id="mLogoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3ELOGO%3C/text%3E%3C/svg%3E" style="width:80px; height:50px; object-fit:contain; border:1px solid #475569; background:white;">
                 <div style="flex:1;">
                     <label style="font-size:12px; color:var(--primary); font-weight:bold;">Manager's Bill Logo (Optional)</label>
                     <input type="file" id="mLogoInput" accept="image/*" style="padding: 5px; font-size: 12px; width: 100%; margin-top: 5px;" onchange="handleManagerLogoUpload(event)">
@@ -1060,7 +1060,7 @@
                     </div>
                     <div id="payOnlineFields" class="hidden">
                         <div style="text-align:center; margin-bottom:15px;">
-                            <img id="paymentQrCode" src="https://via.placeholder.com/200" style="width:200px; height:200px; border-radius:10px; object-fit:cover; border:2px solid var(--primary);">
+                            <img id="paymentQrCode" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3EQR CODE%3C/text%3E%3C/svg%3E" style="width:200px; height:200px; border-radius:10px; object-fit:cover; border:2px solid var(--primary);">
                             <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Scan to Pay</p>
                         </div>
                         <label for="payScreenshot" style="font-size:12px; color:#94a3b8; margin-bottom:5px; display:block;">Upload Screenshot:</label>
@@ -1256,7 +1256,7 @@
             <div style="display:flex; flex-direction:column; gap:20px;">
                 <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; text-align:center; border:1px dashed #475569;">
                     <h4 style="margin:0 0 10px 0; color:var(--text); font-size:14px;">Profile Picture</h4>
-                    <img id="mmProfilePic" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:2px solid var(--primary); cursor:pointer; background:white;" onclick="document.getElementById('mmProfileInput').click()">
+                    <img id="mmProfilePic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='30' text-anchor='middle'%3E👤%3C/text%3E%3C/svg%3E" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:2px solid var(--primary); cursor:pointer; background:white;" onclick="document.getElementById('mmProfileInput').click()">
                     <input type="file" id="mmProfileInput" accept="image/*" class="hidden" onchange="handlePicUpload(event, 'profile')">
                 </div>
 
@@ -1264,13 +1264,13 @@
                     <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; text-align:center; border:1px dashed #475569;">
                         <h4 style="margin:0 0 5px 0; color:var(--text); font-size:14px;">Payment QR Code</h4>
                         <p style="font-size:11px; color:#94a3b8; margin:0 0 10px 0;">Customers scan this to pay you.</p>
-                        <img id="mmQrPic" src="https://via.placeholder.com/150" style="width:150px; height:150px; border-radius:10px; object-fit:cover; border:2px solid var(--success); cursor:pointer; background:white;" onclick="document.getElementById('mmQrInput').click()">
+                        <img id="mmQrPic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3EQR CODE%3C/text%3E%3C/svg%3E" style="width:150px; height:150px; border-radius:10px; object-fit:cover; border:2px solid var(--success); cursor:pointer; background:white;" onclick="document.getElementById('mmQrInput').click()">
                         <input type="file" id="mmQrInput" accept="image/*" class="hidden" onchange="handlePicUpload(event, 'qr')">
                     </div>
                     <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; text-align:center; border:1px dashed #475569;">
                         <h4 style="margin:0 0 5px 0; color:var(--text); font-size:14px;">Company Logo</h4>
                         <p style="font-size:11px; color:#94a3b8; margin:0 0 10px 0;">This logo will appear on your printed bills.</p>
-                        <img id="mmLogoPic" src="https://via.placeholder.com/150" style="width:150px; height:100px; border-radius:10px; object-fit:contain; border:2px solid var(--warning); cursor:pointer; background:white;" onclick="document.getElementById('mmLogoInput').click()">
+                        <img id="mmLogoPic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3ELOGO%3C/text%3E%3C/svg%3E" style="width:150px; height:100px; border-radius:10px; object-fit:contain; border:2px solid var(--warning); cursor:pointer; background:white;" onclick="document.getElementById('mmLogoInput').click()">
                         <input type="file" id="mmLogoInput" accept="image/*" class="hidden" onchange="handlePicUpload(event, 'logo')">
                     </div>
                 </div>
@@ -1391,6 +1391,11 @@
                          //? 'http://rick-pc:5000/api'
                         // ? 'http://127.0.0.1:5000/api' 
                          : window.location.origin + '/api';
+        
+        const PL_USER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='30' text-anchor='middle'%3E👤%3C/text%3E%3C/svg%3E";
+        const PL_LOGO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3ELOGO%3C/text%3E%3C/svg%3E";
+        const PL_QR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3EQR CODE%3C/text%3E%3C/svg%3E";
+
         let currentUser = null;
         let currentLoginRole = '';
 
@@ -2203,13 +2208,13 @@
 
         function openMediaManager(defaultTarget = null) {
             currentProfilePicBase64 = currentUser.profile_pic || '';
-            document.getElementById('mmProfilePic').src = currentProfilePicBase64 || 'https://via.placeholder.com/100';
+            document.getElementById('mmProfilePic').src = currentProfilePicBase64 || PL_USER;
             
             if (currentUser.type === 'Owner' || currentUser.type === 'Manager') {
                 currentQrCodeBase64 = currentUser.qr_code || '';
                 currentCompanyLogoBase64 = currentUser.company_logo || '';
-                document.getElementById('mmQrPic').src = currentQrCodeBase64 || 'https://via.placeholder.com/150';
-                document.getElementById('mmLogoPic').src = currentCompanyLogoBase64 || 'https://via.placeholder.com/150';
+                document.getElementById('mmQrPic').src = currentQrCodeBase64 || PL_QR;
+                document.getElementById('mmLogoPic').src = currentCompanyLogoBase64 || PL_LOGO;
                 document.getElementById('mmOwnerSection').classList.remove('hidden');
                 
                 let logoSec = document.getElementById('mmLogoPic').parentElement;
@@ -2711,7 +2716,7 @@
                 feedDateInput.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
             }
 
-            let headPicUrl = currentUser.profile_pic || 'https://via.placeholder.com/30';
+            let headPicUrl = currentUser.profile_pic || PL_USER;
              let headPic = `<img src="${headPicUrl}" title="Profile Menu" style="cursor:pointer; width:40px;height:40px;border-radius:50%;vertical-align:middle;border:2px solid var(--primary); object-fit:cover;">`;
             
             let headerUserInfo = document.getElementById('header-user-info');
@@ -2795,7 +2800,7 @@
             document.getElementById('global-back-btn').classList.toggle('hidden', id === homeId);
             
             if(id === 'profile-view') {
-                document.getElementById('mainProfilePic').src = currentUser.profile_pic || 'https://via.placeholder.com/100';
+                document.getElementById('mainProfilePic').src = currentUser.profile_pic || PL_USER;
                 document.getElementById('mainProfileName').innerText = currentUser.name || '';
                 document.getElementById('mainProfileRole').innerText = currentUser.type || '';
                 document.getElementById('lbl-name').innerText = currentUser.name || '';
@@ -2875,7 +2880,7 @@
                 }
 
                 const owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
-                let qrSrc = 'https://via.placeholder.com/200?text=QR+Not+Available';
+                 let qrSrc = PL_QR;
                 if (owner && owner.qr_code) {
                     qrSrc = owner.qr_code;
                 } else if (currentUser.owner_qr) { 
@@ -5444,7 +5449,7 @@
             document.getElementById('mMobile').value = u.mobile || '';
             document.getElementById('mAddress').value = u.address || u.addr || '';
             document.getElementById('mLogoBase64').value = u.company_logo || '';
-            document.getElementById('mLogoPreview').src = u.company_logo || 'https://via.placeholder.com/80?text=No+Logo';
+            document.getElementById('mLogoPreview').src = u.company_logo || PL_LOGO;
             document.getElementById('editManagerIdx').value = i;
             document.getElementById('btnManagerSave').innerText = "Update Manager";
             document.getElementById('managerFormTitle').innerText = "✏️ Edit Manager";
@@ -5670,7 +5675,7 @@
                 ['mName','mPass','mMobile','mUsername','mAddress'].forEach(id=>{let el=document.getElementById(id); if(el) el.value="";}); 
                 document.getElementById('mId').value = ""; 
                 document.getElementById('mLogoBase64').value = "";
-                document.getElementById('mLogoPreview').src = "https://via.placeholder.com/80?text=No+Logo";
+                document.getElementById('mLogoPreview').src = PL_LOGO;
                 let minp = document.getElementById('mLogoInput'); if(minp) minp.value = "";
             }
             if(type==='product') { 
