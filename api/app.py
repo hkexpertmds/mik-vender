@@ -7,7 +7,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
 import datetime
-import json
 
 load_dotenv()
 
@@ -73,7 +72,7 @@ def favicon():
 def register():
     data = request.json
     district_val = data.get('district') or data.get('city') or '00'
-    district_code = str(district_val).upper()[:2].ljust(2, '0')
+    district_code = str(district_val).upper()[:2]
     
     username = (data.get('username') or '').strip()
     if not username:
@@ -95,22 +94,11 @@ def register():
         return jsonify({"success": False, "message": "This Username is already taken! Please try another."})
 
     # Auto Generate Owner ID
-    res = supabase.table('sys_users').select('login_id').eq('type', 'Owner').ilike('login_id', f'{district_code}%').order('id', desc=True).limit(1).execute()
-    next_index = 0
-    if res.data and res.data[0].get('login_id'):
-        last_id = res.data[0]['login_id']
-        seq_str = last_id[len(district_code):]
-        try:
-            next_index = int(seq_str, 36) + 1
-        except ValueError:
-            pass
-    new_owner_id = f"{district_code}{get_alphanumeric_sequence(next_index, 3)}"
+    res = supabase.table('sys_users').select('id', count='exact').eq('type', 'Owner').ilike('login_id', f'{district_code}%').execute()
+    owner_count = res.count if res.count else 0
+    new_owner_id = f"{district_code}{get_alphanumeric_sequence(owner_count, 3)}"
 
-    raw_pass = data.get('pass')
-    if not raw_pass:
-        return jsonify({"success": False, "message": "Password is required!"})
-
-    hashed_pass = generate_password_hash(raw_pass)
+    hashed_pass = generate_password_hash(data['pass'])
     
     insert_data = {
         "name": data['name'],
@@ -189,6 +177,10 @@ def login():
 
     company = user.get('company', '')
 
+    # 🚀 SPEED FIX: Faltu heavy Base64 images aur passwords ko background list se hata diya
+    u_cols = 'id, name, login_id, type, company, email, address, route, mobile, qr_code, license_expiry, ref_code'
+    c_cols = 'id, name, addr, cid, defItem, defQty, defRate, company, milkman_id, route, shift, mobile, seq_no, seq_no_eve'
+
     user_to_return = user.copy()
 
     # --- PYTHON FIX: INJECT OWNER'S LICENSE EXPIRY FOR ALL STAFF/CUSTOMERS ---
@@ -258,7 +250,7 @@ def sync_data():
 
         if expiry_str:
             try:
-                expiry_date = datetime.datetime.fromisoformat(expiry_str.replace('Z', '+00:00'))
+                expiry_date = datetime.datetime.fromisoformat(expiry_str)
                 if expiry_date.tzinfo is None:
                     expiry_date = expiry_date.replace(tzinfo=datetime.timezone.utc)
                 
@@ -274,9 +266,9 @@ def sync_data():
                 pass
     # ------------------------------------------
 
-    # 🚀 DB FIX: Use '*' to prevent backend crashes if new columns are missing in Supabase.
-    u_cols = '*'
-    c_cols = '*'
+    # 🚀 SPEED FIX: Removed heavy 'qr_code' from background fetching to reduce megabytes of payload
+    u_cols = 'id, name, login_id, type, company, display_company, email, address, route, mobile, license_expiry, ref_code, company_logo'
+    c_cols = 'id, name, addr, cid, defItem, defQty, defRate, company, milkman_id, route, shift, mobile, seq_no, seq_no_eve'
 
     def safe_get(f):
         try:
@@ -313,6 +305,7 @@ def sync_data():
         licenses = safe_get(f_l)
         
         if role == 'Manager':
+            import json
             filtered_t = []
             for t in transactions:
                 if t.get('shift') == 'General Bill':
@@ -326,8 +319,6 @@ def sync_data():
                             pass
                     if created_by == login_id:
                         filtered_t.append(t)
-                else:
-                    filtered_t.append(t)
             transactions = filtered_t
             customers, requests, routes, licenses = [], [], [], []
 
@@ -344,19 +335,14 @@ def sync_data():
     elif role == 'Milk Man':
         milkman_customers_res = supabase.table('sys_customers').select(c_cols).eq('company', company).eq('milkman_id', login_id).execute()
         milkman_customers = milkman_customers_res.data if milkman_customers_res.data else []
-        
-        if milkman_customers:
-            for c in milkman_customers:
-                c.pop('cpass', None)
-                
         customer_names = [c['name'] for c in milkman_customers]
         customer_ids = [c['cid'] for c in milkman_customers]
 
         def get_mm_trans():
             if not customer_names: return []
-            lower_names = [n.strip().lower() for n in customer_names if n]
-            all_trans = supabase.table('sys_trans').select('*').eq('company', company).order('id', desc=True).limit(1000).execute().data
-            return [t for t in all_trans if (t.get('cust') or '').strip().lower() in lower_names][:150]
+            if len(customer_names) > 40:
+                return supabase.table('sys_trans').select('*').eq('company', company).order('id', desc=True).limit(150).execute().data
+            return supabase.table('sys_trans').select('*').eq('company', company).in_('cust', customer_names).order('id', desc=True).limit(150).execute().data
 
         with ThreadPoolExecutor(max_workers=4) as executor:
             f_t = executor.submit(get_mm_trans)
@@ -364,9 +350,9 @@ def sync_data():
             
             def get_mm_requests():
                 if not customer_ids: return []
-                str_ids = [str(cid).strip().lower() for cid in customer_ids if cid]
-                all_reqs = supabase.table('sys_requests').select('*').eq('company', company).order('id', desc=True).limit(500).execute().data
-                return [r for r in all_reqs if str(r.get('cust_id') or '').strip().lower() in str_ids][:50]
+                if len(customer_ids) > 40:
+                    return supabase.table('sys_requests').select('*').eq('company', company).order('id', desc=True).limit(20).execute().data
+                return supabase.table('sys_requests').select('*').eq('company', company).in_('cust_id', customer_ids).order('id', desc=True).limit(20).execute().data
                 
             f_r = executor.submit(get_mm_requests)
             f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
@@ -382,12 +368,9 @@ def sync_data():
             f_p = executor.submit(lambda: supabase.table('sys_products').select('*').eq('company', company).execute().data)
             f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('cust_id', login_id).eq('company', company).order('id', desc=True).limit(15).execute().data)
             f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
-            f_u = executor.submit(lambda: supabase.table('sys_users').select('*').in_('type', ['Owner', 'Milk Man', 'Manager']).eq('company', company).execute().data)
+            f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols + ', qr_code, company_logo').in_('type', ['Owner', 'Milk Man', 'Manager']).eq('company', company).execute().data)
         
         owner_users = safe_get(f_u)
-        if owner_users:
-            for u in owner_users:
-                u.pop('pass', None)
         owner_qr = owner_users[0].get('qr_code', '') if owner_users else ''
         return jsonify({"success": True, "data": {"users": owner_users, "customers": [], "transactions": safe_get(f_t), "products": safe_get(f_p), "requests": safe_get(f_r), "routes": safe_get(f_ro), "licenses": [], "owner_qr": owner_qr}})
     return jsonify({"success": False})
@@ -500,8 +483,7 @@ def save_data(table_name):
             q = supabase.table(db_table).select('id').eq('cust', data.get('cust')).eq('date', data.get('date')).eq('company', data.get('company'))
             
             if shift_val:
-                safe_shift = str(shift_val).replace('"', '')
-                q = q.or_(f'shift.eq."{safe_shift}",shift.is.null')
+                q = q.or_(f'shift.eq."{shift_val}",shift.is.null')
                 
             if data.get('item') == 'Payment':
                 q = q.eq('item', 'Payment')
@@ -516,70 +498,31 @@ def save_data(table_name):
                 return jsonify(res.data[0] if res.data else data)
 
     # INSERT NEW RECORD
-    raw_pass = None
     if table_name == 'users':
         if data.get('type') == 'Milk Man':
             owner_res = supabase.table('sys_users').select('login_id').eq('type', 'Owner').eq('company', data.get('company')).execute()
             owner_id = owner_res.data[0]['login_id'] if owner_res.data else "XX"
             
-            res = supabase.table('sys_users').select('login_id').eq('type', 'Milk Man').ilike('login_id', f'{owner_id}%').order('id', desc=True).limit(1).execute()
-            next_index = 0
-            if res.data and res.data[0].get('login_id'):
-                last_id = res.data[0]['login_id']
-                seq_str = last_id[len(owner_id):]
-                try:
-                    next_index = int(seq_str, 36) + 1
-                except ValueError:
-                    pass
-            data['login_id'] = f"{owner_id}{get_alphanumeric_sequence(next_index, 2)}"
+            res = supabase.table('sys_users').select('id', count='exact').eq('type', 'Milk Man').ilike('login_id', f'{owner_id}%').execute()
+            mm_count = res.count if res.count else 0
+            data['login_id'] = f"{owner_id}{get_alphanumeric_sequence(mm_count, 2)}"
             
-        if data.get('pass'): 
-            raw_pass = data['pass']
-            data['pass'] = generate_password_hash(data['pass'])
+        if data.get('pass'): data['pass'] = generate_password_hash(data['pass'])
         else: data['pass'] = None
 
     elif table_name == 'customers':
         milkman_id = data.get('milkman_id')
         if not milkman_id:
             return jsonify({"success": False, "message": "Milkman ID is required"}), 400
-        
-        res = supabase.table('sys_customers').select('cid').eq('milkman_id', milkman_id).order('id', desc=True).limit(1).execute()
-        next_index = 0
-        if res.data and res.data[0].get('cid'):
-            last_id = res.data[0]['cid']
-            seq_str = last_id[len(milkman_id):]
-            try:
-                next_index = int(seq_str, 36) + 1
-            except ValueError:
-                pass
-        data['cid'] = f"{milkman_id}{get_alphanumeric_sequence(next_index, 2)}"
-        if data.get('cpass'): 
-            raw_pass = data['cpass']
-            data['cpass'] = generate_password_hash(data['cpass'])
+        res = supabase.table('sys_customers').select('id', count='exact').eq('milkman_id', milkman_id).execute()
+        cust_count = res.count if res.count else 0
+        data['cid'] = f"{milkman_id}{get_alphanumeric_sequence(cust_count, 2)}"
+        if data.get('cpass'): data['cpass'] = generate_password_hash(data['cpass'])
         else: data['cpass'] = None
 
     try:
         res = supabase.table(db_table).insert(data).execute()
-        saved_data = res.data[0] if res.data else data
-        
-        # --- SEND SMS NOTIFICATION (ID, PASS & APP LINK) ---
-        if table_name in ['users', 'customers']:
-            mobile = saved_data.get('mobile', '')
-            login_id = saved_data.get('login_id') or saved_data.get('cid')
-            role_name = saved_data.get('type', 'Customer')
-            
-            if mobile and len(str(mobile)) == 10:
-                app_link = "https://my-vender-app.com" # Apni website/app ka link yahan daalein
-                sms_message = f"Welcome! Your {role_name} ID: {login_id}, Pass: {raw_pass or 'Not Set'}. Login App: {app_link}"
-                
-                # NOTE: Asli SMS bhejne ke liye (Fast2SMS/Twilio) yahan unka API integration likhein.
-                print(f"🔔 MOCK SMS SENT TO {mobile}: {sms_message}")
-                saved_data['sms_status'] = 'sent'
-            else:
-                saved_data['sms_status'] = 'no_number'
-        # ---------------------------------------------------
-        
-        return jsonify(saved_data)
+        return jsonify(res.data[0] if res.data else data)
     except Exception as e:
         return jsonify({"success": False, "message": str(e)})
 
@@ -589,10 +532,6 @@ def reset_password():
     requester_id = data.get('requester_id')
     target_id = data.get('target_id')
     target_type = data.get('target_type')
-    new_password = data.get('new_password')
-
-    if not new_password:
-        return jsonify({"success": False, "message": "New password is required!"}), 400
 
     if not requester_id or not target_id or not target_type:
         return jsonify({"success": False, "message": "Invalid request. Missing parameters."}), 400
@@ -605,7 +544,7 @@ def reset_password():
     requester_role = requester_res.data[0]['type']
 
     if requester_role == 'Admin' or (requester_role == 'Owner' and target_type in ['Milk Man', 'Customer', 'Manager']):
-        hashed_pass = generate_password_hash(new_password)
+        hashed_pass = generate_password_hash(data['new_password'])
         table_to_update = 'sys_customers' if target_type == 'Customer' else 'sys_users'
         id_field = 'cid' if target_type == 'Customer' else 'login_id'
         pass_field = 'cpass' if target_type == 'Customer' else 'pass'
@@ -714,7 +653,7 @@ def verify_key():
         base_date = datetime.datetime.now(datetime.timezone.utc)
         if current_expiry_str:
             try:
-                current_expiry_date = datetime.datetime.fromisoformat(current_expiry_str.replace('Z', '+00:00'))
+                current_expiry_date = datetime.datetime.fromisoformat(current_expiry_str)
                 # If the stored date is naive, assume it's UTC
                 if current_expiry_date.tzinfo is None:
                     current_expiry_date = current_expiry_date.replace(tzinfo=datetime.timezone.utc)
@@ -777,8 +716,6 @@ def get_opening_balance():
                     t_year, t_month = int(parts[0]), int(parts[1])
                 elif len(parts[2]) == 4: # DD-MM-YYYY
                     t_year, t_month = int(parts[2]), int(parts[1])
-                elif len(parts[2]) == 2: # DD-MM-YY
-                    t_year, t_month = 2000 + int(parts[2]), int(parts[1])
         except (ValueError, IndexError):
             continue
             
