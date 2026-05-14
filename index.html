@@ -97,20 +97,20 @@
              /* APP-LIKE SLEEK HEADER FOR MOBILE */
             #app-header { padding: 10px 12px !important; height: 55px !important; box-sizing: border-box; flex-wrap: nowrap !important; background: rgba(30, 41, 59, 0.85) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
             :root.light-mode #app-header { background: rgba(255, 255, 255, 0.85) !important; }
-            #app-header > div:nth-child(1) { gap: 6px !important; flex: 0 0 auto !important; min-width: 0; max-width: none !important; overflow: visible !important; }
-            #app-header > div:nth-child(2) { flex: 1 1 auto !important; min-width: 0; max-width: none !important; overflow: hidden !important; margin: 0 10px !important; align-items: flex-start !important; text-align: left !important; }
-            #app-header > div:nth-child(3) { gap: 6px !important; padding-right: 25px !important; flex: 0 0 auto !important; justify-content: flex-end !important; min-width: 0; max-width: none !important; overflow: visible !important; }
+            #app-header > div:nth-child(1) { gap: 6px !important; flex: 1; min-width: 0; max-width: 25%; overflow: hidden; }
+            #app-header > div:nth-child(2) { flex: 2; min-width: 0; max-width: 50%; overflow: hidden; margin: 0 5px; }
+            #app-header > div:nth-child(3) { gap: 6px !important; padding-right: 25px !important; flex: 1; justify-content: flex-end; min-width: 0; max-width: 25%; overflow: hidden; }
             #header-company-name { font-size: 14px !important; margin: 0 !important; letter-spacing: 0 !important; }
-            #header-user-name { font-size: 11px !important; font-weight: 500 !important; }
+            #header-user-name { font-size: 12px !important; font-weight: 500 !important; }
             #header-user-info { justify-content: flex-start; }
-             #header-user-info img { width: 36px !important; height: 36px !important; margin: 0 !important; border-width: 1px !important; flex-shrink: 0; }
+            #header-user-info img { width: 26px !important; height: 26px !important; margin: 0 !important; border-width: 1px !important; flex-shrink: 0; }
            
             #header-role { font-size: 10px !important; padding: 3px 6px !important; border-radius: 6px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block; box-sizing: border-box; }
             #global-admin-company-filter { max-width: 75px !important; font-size: 10px !important; padding: 2px 4px !important; }
             #global-back-btn { font-size: 18px !important; }
             #theme-toggle { top: 16px !important; right: 12px !important; font-size: 20px !important; }
             #license-banner { top: 55px !important; }
-            #profile-dropdown { top: 60px !important; left: 10px !important; right: auto !important; max-width: none !important; width: 220px !important; }
+            #profile-dropdown { top: 60px !important; left: 10px !important; right: 10px !important; max-width: none !important; width: auto !important; }
             
             /* RESPONSIVE TABLES & FORMS */
             table { display: block; overflow-x: auto; white-space: nowrap; width: 100%; border-spacing: 0 4px; }
@@ -153,7 +153,6 @@
         .profile-list-item:hover { background: rgba(99, 102, 241, 0.1); }
         .profile-list-item:last-child { border-bottom: none; }
         :root.light-mode .profile-list-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
-        #header-company-name::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
@@ -166,15 +165,15 @@
 
     <!-- GLOBAL HEADER -->
     <div id="app-header" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; background: var(--card); padding: 10px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; z-index: 999; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s;">
-        <div style="display: flex; align-items: center; gap: 10px; z-index: 10; flex: 0 0 auto; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 10px; z-index: 10; flex: 1; min-width: 0;">
             <button id="global-back-btn" class="hidden" onclick="goBack()" style="background: transparent; border: none; color: var(--text); font-size: 24px; padding: 0; cursor: pointer; outline: none; flex-shrink: 0;" title="Go Back">⬅️</button>
             <div id="header-user-info" style="display:flex; align-items:center; cursor: pointer; flex-shrink: 0;" onclick="toggleProfileDropdown(event)" title="Profile Menu"></div>
         </div>
-        <div id="header-center-info" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; z-index: 1; flex: 1 1 auto; min-width: 0; text-align: left; padding: 0 10px; cursor: pointer; overflow: hidden;" onclick="toggleProfileDropdown(event)" title="Profile Menu">
-            <div id="header-company-name" style="font-size: 16px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; width: 100%; display: block; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;"></div>
-            <div id="header-user-name" style="font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; width: 100%; display: block; overflow: hidden; text-overflow: ellipsis;"></div>
+        <div id="header-center-info" style="display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; flex: 2; min-width: 0; text-align: center; cursor: pointer;" onclick="toggleProfileDropdown(event)" title="Profile Menu">
+            <div id="header-company-name" style="font-size: 16px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;"></div>
+            <div id="header-user-name" style="font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;"></div>
         </div>
-        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-right: 40px; z-index: 10; flex: 0 0 auto; min-width: 0;">
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-right: 40px; z-index: 10; flex: 1; min-width: 0;">
             <select id="global-admin-company-filter" onchange="applyAdminCompanyFilter()" class="hidden" style="background:var(--input); color:white; border:1px solid #475569; border-radius:6px; padding:4px 8px; font-size:12px; max-width:110px; outline:none; cursor:pointer;">
                 <option value="ALL">All Owners</option>
             </select>
@@ -335,7 +334,6 @@
             <button id="btn-req" class="btn-save box-btn" style="background:#ea580c" onclick="showView('request-master')"><span style="font-size:28px; margin-bottom:8px;">📝</span>Customer Requests</button>
             <button id="btn-acc" class="btn-save box-btn" style="background:#1e40af" onclick="showView('accounts-user')"><span style="font-size:28px; margin-bottom:8px;">💰</span>Accounts Summary</button>
             <button id="btn-owner-master" class="btn-save box-btn" style="background:#6d28d9" onclick="showView('owner-master')"><span style="font-size:28px; margin-bottom:8px;">👑</span>Manage Owners</button>
-            <button id="btn-referral-master" class="btn-save box-btn hidden" style="background:#0ea5e9" onclick="showView('referral-master')"><span style="font-size:28px; margin-bottom:8px;">🤝</span>Manage Referrals</button>
             <button id="btn-manager-master" class="btn-save box-btn hidden" style="background:#059669" onclick="showView('manager-master')"><span style="font-size:28px; margin-bottom:8px;">💼</span>Manage Managers</button>
             <button id="btn-license-master" class="btn-save box-btn hidden" style="background:#b91c1c" onclick="showView('license-master')"><span style="font-size:28px; margin-bottom:8px;">🔑</span>Manage Licenses</button>
             <button id="btn-manual-bill" class="btn-save box-btn hidden" style="background:#0284c7" onclick="showView('general-bill-view')"><span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill</button>
@@ -351,7 +349,7 @@
         <!-- Main Header -->
         <div style="text-align:center; padding-bottom: 20px;">
             <div style="position:relative; display:inline-block;">
-                <img id="mainProfilePic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='30' text-anchor='middle'%3E👤%3C/text%3E%3C/svg%3E" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); background: white;">
+                <img id="mainProfilePic" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); background: white;">
                 <div style="position:absolute; bottom:0; right:0; background:var(--primary); width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid var(--card);" onclick="openMediaManager('profile')" title="Change Picture">📷</div>
             </div>
             <h3 style="margin:10px 0 5px 0; color:var(--text); font-size: 20px;" id="mainProfileName">Name</h3>
@@ -418,7 +416,7 @@
                 <input type="text" id="uId" placeholder="System ID (Auto)" readonly style="opacity:0.7">
                 <input type="text" id="uUsername" placeholder="Create Login Username (Optional)">
                 <input type="text" id="uName" placeholder="Delivery Man Name" required>
-                <input type="text" id="uMobile" placeholder="Mobile Number (Optional)" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                <input type="text" id="uMobile" placeholder="Mobile Number" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
                 <select id="uRoute" required>
                     <option value="">-- Select Route --</option>
                 </select>
@@ -838,12 +836,12 @@
             <input type="text" id="mId" placeholder="Manager ID (Auto 6-Digit)" readonly style="opacity:0.7">
             <input type="text" id="mUsername" placeholder="Create Login Username">
             <input type="text" id="mName" placeholder="Manager Name" required>
-            <input type="text" id="mMobile" placeholder="Mobile Number (Optional)" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            <input type="text" id="mMobile" placeholder="Mobile Number" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')" required>
             <input type="text" id="mPass" placeholder="Set Password">
             <input type="text" id="mAddress" placeholder="Address (For Bill Print)">
             
             <div style="grid-column: 1 / -1; display:flex; align-items:center; gap:10px; margin-top: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
-                <img id="mLogoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3ELOGO%3C/text%3E%3C/svg%3E" style="width:80px; height:50px; object-fit:contain; border:1px solid #475569; background:white;">
+                <img id="mLogoPreview" src="https://via.placeholder.com/80?text=No+Logo" style="width:80px; height:50px; object-fit:contain; border:1px solid #475569; background:white;">
                 <div style="flex:1;">
                     <label style="font-size:12px; color:var(--primary); font-weight:bold;">Manager's Bill Logo (Optional)</label>
                     <input type="file" id="mLogoInput" accept="image/*" style="padding: 5px; font-size: 12px; width: 100%; margin-top: 5px;" onchange="handleManagerLogoUpload(event)">
@@ -869,19 +867,6 @@
                     <button id="btnManagerPrev" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeManagerPage(-1)">⬅️ Prev</button>
                     <button id="btnManagerNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeManagerPage(1)">Next ➡️</button>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- NEW: SHARE SUCCESS MODAL (Fixes auto-share block) -->
-    <div id="shareSuccessModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid #475569; text-align:center;">
-            <div style="font-size: 50px; margin-bottom: 10px;">🎉</div>
-            <h3 id="shareSuccessTitle" style="margin-top:0; margin-bottom: 10px; color:var(--success); font-size: 22px;">Saved Successfully!</h3>
-            <p style="color:#94a3b8; font-size:14px; margin-top:0; margin-bottom:20px;">Do you want to send the ID & Password to <b id="shareSuccessName" style="color:var(--text)"></b> via WhatsApp/SMS?</p>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-save" id="btnShareNowAction" style="background:var(--success);">📤 Share Now</button>
-                <button class="btn-back" style="margin:0;" onclick="document.getElementById('shareSuccessModal').classList.add('hidden')">Close</button>
             </div>
         </div>
     </div>
@@ -937,15 +922,15 @@
             <button class="btn-save" style="background:var(--warning); color:black; padding: 8px 15px; width:auto; margin-left:auto;" onclick="downloadAccountSummary()">🖨️ Download List</button>
         </div>
         <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:center; flex-wrap: wrap; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; border:1px solid #475569;">
-            <select id="accFilterMilkMan" onchange="renderAccounts()" style="flex:1; min-width: 150px; padding:0 8px; height:38px; box-sizing:border-box; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
+            <select id="accFilterMilkMan" onchange="renderAccounts()" style="flex:1; min-width: 150px; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
                 <option value="">-- All Delivery Men --</option>
             </select>
             <div style="display:flex; align-items:center; gap:5px; flex:1; min-width: 200px;">
-                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeAccMonth(-1)">⬅️ Prev</button>
-                <input type="month" id="accMonthYear" onchange="renderAccounts()" style="flex:1; padding:0 8px; height:38px; box-sizing:border-box; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
-                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeAccMonth(1)">Next ➡️</button>
+                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeAccMonth(-1)">⬅️ Prev</button>
+                <input type="month" id="accMonthYear" onchange="renderAccounts()" style="flex:1; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
+                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeAccMonth(1)">Next ➡️</button>
             </div>
-            <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="currentAccPage=1; renderAccounts()" style="flex:1; min-width:150px; padding:0 8px; height:38px; box-sizing:border-box; margin:0; border-radius:8px;">
+            <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="currentAccPage=1; renderAccounts()" style="flex:1; min-width:150px; padding:8px; margin:0; border-radius:8px;">
         </div>
         <div id="monthlyReport"></div>
         <button class="btn-back" onclick="showView('main-menu')">⬅️ Back to Menu</button>
@@ -976,10 +961,10 @@
         <!-- TAB: STATEMENT -->
         <div id="self-tab-statement">
             <div style="display:flex; gap:10px; margin-bottom: 20px; align-items:center; flex-wrap: wrap;">
-                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeSelfMonth(-1)">⬅️ Prev</button>
-                <input type="month" id="selfReportMonthYear" onchange="renderSelfLedger()" style="flex:1; max-width: 180px; padding:0 8px; height:38px; box-sizing:border-box; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
-                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeSelfMonth(1)">Next ➡️</button>
-                <button class="btn-save" style="background:var(--warning); color:black; padding:0 15px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; width:auto; margin:0 0 0 auto;" onclick="downloadSelfReport()">🖨️ Download Bill</button>
+                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeSelfMonth(-1)">⬅️ Prev</button>
+                <input type="month" id="selfReportMonthYear" onchange="renderSelfLedger()" style="flex:1; max-width: 180px; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px;">
+                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeSelfMonth(1)">Next ➡️</button>
+                <button class="btn-save" style="background:var(--warning); color:black; padding: 8px 15px; width:auto; margin-left:auto;" onclick="downloadSelfReport()">🖨️ Download Bill</button>
             </div>
             <div id="self-ledger-data" style="max-height: 55vh; overflow-y: auto; overflow-x: auto; padding-right: 5px;"></div>
         </div>
@@ -1060,7 +1045,7 @@
                     </div>
                     <div id="payOnlineFields" class="hidden">
                         <div style="text-align:center; margin-bottom:15px;">
-                            <img id="paymentQrCode" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3EQR CODE%3C/text%3E%3C/svg%3E" style="width:200px; height:200px; border-radius:10px; object-fit:cover; border:2px solid var(--primary);">
+                            <img id="paymentQrCode" src="https://via.placeholder.com/200" style="width:200px; height:200px; border-radius:10px; object-fit:cover; border:2px solid var(--primary);">
                             <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Scan to Pay</p>
                         </div>
                         <label for="payScreenshot" style="font-size:12px; color:#94a3b8; margin-bottom:5px; display:block;">Upload Screenshot:</label>
@@ -1141,10 +1126,10 @@
             </div>
             
             <div style="display:flex; gap:10px; margin-bottom: 20px; align-items:center; flex-wrap: wrap;">
-                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeOwnerMonth(-1)">⬅️ Prev</button>
-                <input type="month" id="ownerReportMonthYear" onchange="renderOwnerReport()" style="flex:1; max-width: 180px; padding:0 8px; height:38px; box-sizing:border-box; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
-                <button class="badge" style="background:var(--primary); padding:0 12px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; font-size:13px; margin:0;" onclick="changeOwnerMonth(1)">Next ➡️</button>
-                <button class="btn-save" style="background:var(--warning); color:black; padding:0 15px; height:38px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; width:auto; margin:0 0 0 auto;" onclick="downloadOwnerReport()">🖨️ Download Bill</button>
+                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeOwnerMonth(-1)">⬅️ Prev</button>
+                <input type="month" id="ownerReportMonthYear" onchange="renderOwnerReport()" style="flex:1; max-width: 180px; padding:8px; background:var(--input); color:white; border:1px solid #475569; border-radius:8px;">
+                <button class="badge" style="background:var(--primary); padding: 8px 12px; font-size:14px;" onclick="changeOwnerMonth(1)">Next ➡️</button>
+                <button class="btn-save" style="background:var(--warning); color:black; padding: 8px 15px; width:auto; margin-left:auto;" onclick="downloadOwnerReport()">🖨️ Download Bill</button>
             </div>
             
             <div id="owner-report-data" style="overflow-y:auto; flex:1; padding-right:10px;"></div>
@@ -1256,7 +1241,7 @@
             <div style="display:flex; flex-direction:column; gap:20px;">
                 <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; text-align:center; border:1px dashed #475569;">
                     <h4 style="margin:0 0 10px 0; color:var(--text); font-size:14px;">Profile Picture</h4>
-                    <img id="mmProfilePic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='30' text-anchor='middle'%3E👤%3C/text%3E%3C/svg%3E" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:2px solid var(--primary); cursor:pointer; background:white;" onclick="document.getElementById('mmProfileInput').click()">
+                    <img id="mmProfilePic" src="https://via.placeholder.com/100" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:2px solid var(--primary); cursor:pointer; background:white;" onclick="document.getElementById('mmProfileInput').click()">
                     <input type="file" id="mmProfileInput" accept="image/*" class="hidden" onchange="handlePicUpload(event, 'profile')">
                 </div>
 
@@ -1264,13 +1249,13 @@
                     <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; text-align:center; border:1px dashed #475569;">
                         <h4 style="margin:0 0 5px 0; color:var(--text); font-size:14px;">Payment QR Code</h4>
                         <p style="font-size:11px; color:#94a3b8; margin:0 0 10px 0;">Customers scan this to pay you.</p>
-                        <img id="mmQrPic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3EQR CODE%3C/text%3E%3C/svg%3E" style="width:150px; height:150px; border-radius:10px; object-fit:cover; border:2px solid var(--success); cursor:pointer; background:white;" onclick="document.getElementById('mmQrInput').click()">
+                        <img id="mmQrPic" src="https://via.placeholder.com/150" style="width:150px; height:150px; border-radius:10px; object-fit:cover; border:2px solid var(--success); cursor:pointer; background:white;" onclick="document.getElementById('mmQrInput').click()">
                         <input type="file" id="mmQrInput" accept="image/*" class="hidden" onchange="handlePicUpload(event, 'qr')">
                     </div>
                     <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; text-align:center; border:1px dashed #475569;">
                         <h4 style="margin:0 0 5px 0; color:var(--text); font-size:14px;">Company Logo</h4>
                         <p style="font-size:11px; color:#94a3b8; margin:0 0 10px 0;">This logo will appear on your printed bills.</p>
-                        <img id="mmLogoPic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3ELOGO%3C/text%3E%3C/svg%3E" style="width:150px; height:100px; border-radius:10px; object-fit:contain; border:2px solid var(--warning); cursor:pointer; background:white;" onclick="document.getElementById('mmLogoInput').click()">
+                        <img id="mmLogoPic" src="https://via.placeholder.com/150" style="width:150px; height:100px; border-radius:10px; object-fit:contain; border:2px solid var(--warning); cursor:pointer; background:white;" onclick="document.getElementById('mmLogoInput').click()">
                         <input type="file" id="mmLogoInput" accept="image/*" class="hidden" onchange="handlePicUpload(event, 'logo')">
                     </div>
                 </div>
@@ -1391,11 +1376,6 @@
                          //? 'http://rick-pc:5000/api'
                         // ? 'http://127.0.0.1:5000/api' 
                          : window.location.origin + '/api';
-        
-        const PL_USER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='30' text-anchor='middle'%3E👤%3C/text%3E%3C/svg%3E";
-        const PL_LOGO = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3ELOGO%3C/text%3E%3C/svg%3E";
-        const PL_QR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3EQR CODE%3C/text%3E%3C/svg%3E";
-
         let currentUser = null;
         let currentLoginRole = '';
 
@@ -1454,51 +1434,6 @@
         function applyAdminCompanyFilter() {
             currentAdminCompanyFilter = document.getElementById('global-admin-company-filter').value;
             refreshCurrentView();
-        }
-
-        function populateMilkManDropdowns() {
-            if(!currentUser) return;
-            const getHtml = () => {
-                let html = '';
-                users.forEach(u => {
-                    if (u.type === 'Milk Man') {
-                        if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
-                        html += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
-                    }
-                });
-                return html;
-            };
-
-            let mmSelect = document.getElementById('cMilkMan');
-            if (mmSelect) {
-                let oldVal = mmSelect.value;
-                let mmHtml = '<option value="">-- Assign Delivery Man --</option>';
-                if (isMilkMan()) mmHtml = `<option value="${currentUser.login_id}">${currentUser.name} (${currentUser.login_id})</option>`;
-                else mmHtml += getHtml();
-                mmSelect.innerHTML = mmHtml;
-                if(oldVal) mmSelect.value = oldVal;
-            }
-
-            let custFilterSel = document.getElementById('filterCustMilkManSelect');
-            if (custFilterSel) {
-                let oldVal = custFilterSel.value;
-                custFilterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>' + getHtml();
-                if(oldVal) custFilterSel.value = oldVal;
-            }
-
-            let filterSel = document.getElementById('filterMilkMan');
-            if (filterSel) {
-                let oldVal = filterSel.value;
-                filterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>' + getHtml();
-                if(oldVal) filterSel.value = oldVal;
-            }
-            
-            let accFilterSel = document.getElementById('accFilterMilkMan');
-            if (accFilterSel) {
-                let oldVal = accFilterSel.value;
-                accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>' + getHtml();
-                if(oldVal) accFilterSel.value = oldVal;
-            }
         }
 
         const stateCityMap = {
@@ -1673,82 +1608,29 @@
         }
 
         function shareApp() {
-            const shareData = {
-                title: 'My Vender App',
-                text: 'Check out My Vender, the smart way to manage daily deliveries and Monthly Bills!',
-                url: window.location.origin + window.location.pathname
-            };
+    const shareData = {
+        title: 'My Vender App',
+        text: 'Check out My Vender, the smart way to manage daily deliveries and Monthly Bills!',
+        url: window.location.origin + window.location.pathname
+    };
 
-            if (window.AndroidPrint && window.AndroidPrint.shareApp) {
-                window.AndroidPrint.shareApp(shareData.title, shareData.text, shareData.url);
-            } else if (navigator.share && window.isSecureContext) {
-                navigator.share(shareData).catch((err) => {
-                    if(err.name !== "AbortError") fallbackShare(shareData.text + " " + shareData.url);
-                });
-            } else {
-                fallbackShare(shareData.text + " " + shareData.url);
-            }
-        }
-
-        // --- NEW WHATSAPP DIRECT SHARE FALLBACK ---
-        function fallbackShare(text, mobile = null) {
-            let waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-            if (mobile && String(mobile).length === 10) {
-                waUrl = `https://api.whatsapp.com/send?phone=91${mobile}&text=${encodeURIComponent(text)}`;
-            }
-
-            if (confirm("📱 Click OK to open WhatsApp directly.\n\nClick Cancel to just copy the text.")) {
-                window.open(waUrl, '_blank');
-            } else {
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        alert("✅ Copied to clipboard! You can paste it anywhere.", "success");
-                    }).catch(() => prompt("Copy the text below:", text));
-                } else {
-                    prompt("Copy the text below:", text);
-                }
-            }
-        }
-
-        function openShareSuccessModal(name, role, login_id, username, mobile, rawPass, customTitle = "Saved Successfully!") {
-            document.getElementById('shareSuccessTitle').innerText = customTitle;
-            document.getElementById('shareSuccessName').innerText = name;
-            document.getElementById('shareSuccessModal').classList.remove('hidden');
-            document.getElementById('btnShareNowAction').onclick = function() {
-                document.getElementById('shareSuccessModal').classList.add('hidden');
-                shareCredentials(name, role, login_id, username, mobile, rawPass);
-            };
-        }
-
-        // --- MANUAL CREDENTIAL SHARE FUNCTION ---
-        function shareCredentials(name, role, systemId, username, mobile, password = null) {
-            let loginId = systemId;
-            if (username && String(username).trim() !== '') loginId = username;
-            if (mobile && String(mobile).trim() !== '') loginId = mobile; // Highest priority to Mobile
-
-            let passText = password;
-            if (!passText) {
-                passText = prompt(`Enter Password for ${name} to share (Leave blank to hide):`);
-                if (passText === null) return; // Cancelled
-                if (passText.trim() === '') passText = "******** (Contact Owner)";
-            }
-
-            let webLink = window.location.origin + window.location.pathname;
-            let appLink = "https://my-vender-app.com"; // Yahan aap apna original App link daal sakte hain
-
-            let text = `Hello ${name},\nHere are your ${role} Login Details:\n\nID: ${loginId}\nPassword: ${passText}\n\nApp Link: ${appLink}\nWeb Link: ${webLink}`;
-            const shareData = { title: `${role} Login Details`, text: text };
-
-            if (window.AndroidPrint && window.AndroidPrint.shareApp) { 
-                window.AndroidPrint.shareApp(shareData.title, shareData.text, webLink); 
-            } else if (navigator.share && window.isSecureContext) { 
-                navigator.share(shareData).catch((err) => { 
-                    if(err.name !== "AbortError") fallbackShare(text, mobile); 
-                }); 
-            } else { 
-                fallbackShare(text, mobile); 
-            }
-        }
+    // Pehle check karein ki kya Android interface available hai
+    if (window.AndroidPrint && window.AndroidPrint.shareApp) {
+        window.AndroidPrint.shareApp(shareData.title, shareData.text, shareData.url);
+    } 
+    // Agar Android nahi hai (browser hai), toh normal Web Share try karein
+    else if (navigator.share) {
+        navigator.share(shareData).catch((err) => {
+            if(err.name !== "AbortError") console.error("Share failed:", err.message);
+        });
+    } 
+    // Kuch nahi toh clipboard
+    else {
+        navigator.clipboard.writeText(shareData.url).then(() => {
+            alert("App link copied to clipboard!");
+        });
+    }
+}
 
         // --- SUBSCRIPTION & LICENSE KEY LOGIC ---
         function isLicenseValid() {
@@ -2208,13 +2090,13 @@
 
         function openMediaManager(defaultTarget = null) {
             currentProfilePicBase64 = currentUser.profile_pic || '';
-            document.getElementById('mmProfilePic').src = currentProfilePicBase64 || PL_USER;
+            document.getElementById('mmProfilePic').src = currentProfilePicBase64 || 'https://via.placeholder.com/100';
             
             if (currentUser.type === 'Owner' || currentUser.type === 'Manager') {
                 currentQrCodeBase64 = currentUser.qr_code || '';
                 currentCompanyLogoBase64 = currentUser.company_logo || '';
-                document.getElementById('mmQrPic').src = currentQrCodeBase64 || PL_QR;
-                document.getElementById('mmLogoPic').src = currentCompanyLogoBase64 || PL_LOGO;
+                document.getElementById('mmQrPic').src = currentQrCodeBase64 || 'https://via.placeholder.com/150';
+                document.getElementById('mmLogoPic').src = currentCompanyLogoBase64 || 'https://via.placeholder.com/150';
                 document.getElementById('mmOwnerSection').classList.remove('hidden');
                 
                 let logoSec = document.getElementById('mmLogoPic').parentElement;
@@ -2343,15 +2225,7 @@
             document.getElementById('editFieldTitle').innerText = 'Edit ' + title;
             document.getElementById('editFieldKey').value = key;
             document.getElementById('editFieldValue').type = type;
-             
-            let val = '';
-            if (key !== 'pass' && key !== 'cpass') {
-                if (key === 'addr' && currentUser.type !== 'Customer') val = currentUser.address || '';
-                else if (key === 'display_company') val = currentUser.display_company || currentUser.company || '';
-                else val = currentUser[key] || '';
-            }
-            document.getElementById('editFieldValue').value = val;
-            
+            document.getElementById('editFieldValue').value = (key === 'pass' || key === 'cpass') ? '' : (currentUser[key === 'addr' && currentUser.type !== 'Customer' ? 'address' : key] || '');
             document.getElementById('editFieldEye').classList.toggle('hidden', type !== 'password');
             document.getElementById('editFieldModal').classList.remove('hidden');
             setTimeout(() => document.getElementById('editFieldValue').focus(), 100);
@@ -2580,8 +2454,8 @@
                         try {
                             let parsed = JSON.parse(offlineData);
                             users = parsed.users || []; customers = parsed.customers || [];
-                        transactions = (parsed.transactions || []).reverse(); products = parsed.products || [];
-                        requests = (parsed.requests || []).reverse(); routes = parsed.routes || [];
+                            transactions = parsed.transactions || []; products = parsed.products || [];
+                            requests = parsed.requests || []; routes = parsed.routes || [];
                             licenses = parsed.licenses || [];
                         } catch(e){}
                     }
@@ -2648,8 +2522,8 @@
                     users = result.data.users || []; customers = result.data.customers || [];
                     if (currentUser.type === 'Customer') customers.push(currentUser);
                     if (currentUser.type === 'Customer' && !customers.find(c => String(c.cid) === String(currentUser.login_id))) customers.push(currentUser);
-                    transactions = (result.data.transactions || []).reverse(); products = result.data.products || [];
-                    requests = (result.data.requests || []).reverse(); routes = result.data.routes || [];
+                    transactions = result.data.transactions || []; products = result.data.products || [];
+                    requests = result.data.requests || []; routes = result.data.routes || [];
                     licenses = result.data.licenses || [];
                     
                     populateProductDropdowns();
@@ -2673,13 +2547,22 @@
         }
         
         function refreshCurrentView() {
-            populateMilkManDropdowns();
             const id = sessionStorage.getItem('lastView');
             if(id === 'user-master') { populateRouteDropdown(); renderUsers(); }
             if(id === 'ledger-master') { renderCustomers(); renderTrans(); if(currentUser.type === 'Milk Man') renderTransFeed(); }
             if(id === 'accounts-user') {
-                renderAccounts();
+            let accFilterSel = document.getElementById('accFilterMilkMan');
+            if (accFilterSel) {
+                let oldVal = accFilterSel.value;
+                accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>';
+                users.filter(u => u.type === 'Milk Man').forEach(u => {
+                        if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
+                    accFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
+                });
+                if(oldVal) accFilterSel.value = oldVal;
             }
+            renderAccounts();
+        }
             if(id === 'customer-self-view') { renderSelfLedger(); renderSelfCustItems(); renderCustomerRequests(); }
             if(id === 'product-master') { renderProducts(); }
             if(id === 'request-master') { renderOwnerRequests(); }
@@ -2716,14 +2599,14 @@
                 feedDateInput.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
             }
 
-            let headPicUrl = currentUser.profile_pic || PL_USER;
-             let headPic = `<img src="${headPicUrl}" title="Profile Menu" style="cursor:pointer; width:40px;height:40px;border-radius:50%;vertical-align:middle;border:2px solid var(--primary); object-fit:cover;">`;
+            let headPicUrl = currentUser.profile_pic || 'https://via.placeholder.com/30';
+             let headPic = `<img src="${headPicUrl}" title="Profile Menu" style="cursor:pointer; width:30px;height:30px;border-radius:50%;vertical-align:middle;border:2px solid var(--primary); object-fit:cover;">`;
             
             let headerUserInfo = document.getElementById('header-user-info');
              if(headerUserInfo) headerUserInfo.innerHTML = headPic;
             
             let headerUserName = document.getElementById('header-user-name');
-            if(headerUserName) headerUserName.innerText = currentUser.name;
+            if(headerUserName) headerUserName.innerText = "Hi, " + currentUser.name;
             
             let headerRole = document.getElementById('header-role');
             if(headerRole) headerRole.innerText = currentUser.type === 'Milk Man' ? 'Delivery Man' : currentUser.type;
@@ -2742,7 +2625,6 @@
                 }
             }
             populateAdminCompanyFilter();
-            populateMilkManDropdowns();
 
             const isCust = currentUser.type === 'Customer';
             const isMilkMan = currentUser.type === 'Milk Man';
@@ -2800,7 +2682,7 @@
             document.getElementById('global-back-btn').classList.toggle('hidden', id === homeId);
             
             if(id === 'profile-view') {
-                document.getElementById('mainProfilePic').src = currentUser.profile_pic || PL_USER;
+                document.getElementById('mainProfilePic').src = currentUser.profile_pic || 'https://via.placeholder.com/100';
                 document.getElementById('mainProfileName').innerText = currentUser.name || '';
                 document.getElementById('mainProfileRole').innerText = currentUser.type || '';
                 document.getElementById('lbl-name').innerText = currentUser.name || '';
@@ -2840,19 +2722,24 @@
             if(id === 'ledger-master') { 
                 resetForm('cust');
                 if(currentUser.type === 'Milk Man') {
-                    if (!isBack) {
-                        switchLedger('trans');
-                        switchLedgerTransTab('feed');
-                    } else {
-                        switchLedger(currentLedgerView);
-                        if (currentLedgerView === 'cust') renderCustomers();
-                    }
+                    switchLedger('trans'); // Default to entries for Milk Man
+                    switchLedgerTransTab('feed'); // Default to daily feed for Milk Man
                 } else {
-                    switchLedger(currentLedgerView);
-                    if (currentLedgerView === 'cust') renderCustomers();
+                    switchLedger('cust'); // Default to customers for Owner/Admin
+                    renderCustomers();
                 }
             }
            if(id === 'accounts-user') {
+                let accFilterSel = document.getElementById('accFilterMilkMan');
+                if (accFilterSel) {
+                    let oldVal = accFilterSel.value;
+                    accFilterSel.innerHTML = '<option value="">-- All Delivery Men --</option>';
+                    users.filter(u => u.type === 'Milk Man').forEach(u => {
+                        if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
+                        accFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`;
+                    });
+                    if(oldVal) accFilterSel.value = oldVal;
+                }
                 renderAccounts();
             }
             if(id === 'customer-self-view') { 
@@ -2880,7 +2767,7 @@
                 }
 
                 const owner = users.find(u => u.type === 'Owner' && u.company === currentUser.company);
-                 let qrSrc = PL_QR;
+                let qrSrc = 'https://via.placeholder.com/200?text=QR+Not+Available';
                 if (owner && owner.qr_code) {
                     qrSrc = owner.qr_code;
                 } else if (currentUser.owner_qr) { 
@@ -2936,7 +2823,9 @@
             document.getElementById('userFormTitle').innerText = "➕ New Delivery Man";
             showView('user-form-view');
         }
-        function closeUserForm() { goBack(); }
+        function closeUserForm() {
+            showView('user-master');
+        }
         
         // --- MANAGER STAFF ---
         function openNewManagerForm() {
@@ -2956,7 +2845,9 @@
             });
             document.getElementById('mId').value = baseId + (maxSuffix + 1);
         }
-        function closeManagerForm() { goBack(); }
+        function closeManagerForm() {
+            showView('manager-master');
+        }
 
         async function handleManagerLogoUpload(e) {
             const file = e.target.files[0];
@@ -2981,7 +2872,6 @@
             if (!validateForm('manager-form-view')) return;
             document.getElementById('btnManagerSave').innerText = "Saving...";
             const idx = document.getElementById('editManagerIdx').value;
-            let rawPass = document.getElementById('mPass').value;
             
             let data = {
                 name: document.getElementById('mName').value,
@@ -2995,8 +2885,8 @@
                 login_id: document.getElementById('mId').value
             };
             
-            if(!data.name) return alert("Name is required!");
-            if(data.mobile && data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
+            if(!data.name || !data.mobile) return alert("Name and Mobile are required!");
+            if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             if(idx === "" && !data.pass) return alert("Password is required for new Manager!");
             if(idx !== "") data.id = users[idx].id;
             
@@ -3004,13 +2894,7 @@
             const savedData = await res.json();
             if (savedData.success === false) { alert(savedData.message); document.getElementById('btnManagerSave').innerText = idx === "" ? "Save Manager" : "Update Manager"; return; }
             
-            if(idx === "") {
-                users.push(savedData);
-                openShareSuccessModal(savedData.name, 'Manager', savedData.login_id, savedData.username, savedData.mobile, rawPass);
-            } else {
-                users[idx] = savedData;
-                alert("Manager updated successfully!", "success");
-            }
+            if(idx === "") users.push(savedData); else users[idx] = savedData;
             resetForm('manager'); renderManagers();
             closeManagerForm();
         }
@@ -3043,7 +2927,6 @@
                 html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s"><td><b>${srNo}</b></td><td>${u.name}</td><td>${u.login_id}</td><td>${u.mobile||'-'}</td>
                 <td style="display:flex; gap:4px; flex-wrap:nowrap;">
                     <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Manager')">Pass</button>
-                    <button class="badge" style="background:var(--success)" onclick="shareCredentials('${u.name.replace(/'/g, "\\'")}', 'Manager', '${u.login_id}', '${(u.username||'').replace(/'/g, "\\'")}', '${u.mobile||''}')">Share</button>
                     <button class="badge" style="background:var(--warning); color:black" onclick="editManager(${realIdx})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'user')">Del</button>
                 </td></tr>`;
@@ -3057,14 +2940,15 @@
             document.getElementById('productFormTitle').innerText = "➕ New Product";
             showView('product-form-view');
         }
-        function closeProductForm() { goBack(); }
+        function closeProductForm() {
+            showView('product-master');
+        }
 
         async function saveUser() {
             if(isMilkMan()) { alert("Access Denied!"); return; }
             if (!validateForm('user-form-view')) return;
             document.getElementById('btnUserSave').innerText = "Saving...";
             const idx = document.getElementById('editUserIdx').value;
-            let rawPass = document.getElementById('uPass').value;
             
             let uUsername = document.getElementById('uUsername').value.trim();
 
@@ -3078,8 +2962,8 @@
                 route: document.getElementById('uRoute').value
             };
             
-            if(!data.name) return alert("Name is required!");
-            if(data.mobile && data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
+            if(!data.name || !data.mobile) return alert("Name and Mobile are required!");
+            if(data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
             if(idx === "" && !data.pass) return alert("Password is required for new Delivery Man!");
             if(!data.route) return alert("Route is mandatory! Please assign a Route.");
             
@@ -3097,14 +2981,7 @@
                     return;
                 }
 
-                if(idx === "") {
-                    users.push(savedData);
-                    openShareSuccessModal(savedData.name, 'Delivery Man', savedData.login_id, savedData.username, savedData.mobile, rawPass);
-                } else {
-                    users[idx] = savedData;
-                    alert("Delivery Man updated successfully!", "success");
-                }
-                populateMilkManDropdowns();
+                if(idx === "") users.push(savedData); else users[idx] = savedData;
                 resetForm('user'); populateRouteDropdown(); renderUsers();
                 closeUserForm();
             } catch (error) {
@@ -3120,14 +2997,18 @@
             showView('cust-form-view');
         }
 
-        function closeCustForm() { goBack(); }
+        function closeCustForm() {
+            showView('ledger-master');
+        }
 
         function openNewRouteForm() {
             resetForm('route');
             document.getElementById('routeFormTitle').innerText = "➕ New Route";
             showView('route-form-view');
         }
-        function closeRouteForm() { goBack(); }
+        function closeRouteForm() {
+            showView('route-master');
+        }
 
         // --- CUSTOMER ---
         async function saveCustomer() {
@@ -3135,7 +3016,6 @@
             document.getElementById('btnCustSave').innerText = "Saving...";
             const idx = document.getElementById('editCustIdx').value;
             if (idx === "" && !document.getElementById('cPass').value) return alert("Error: Please set a password for the new Customer!");
-            let rawPass = document.getElementById('cPass').value;
             if(!document.getElementById('cMilkMan').value) return alert("Error: Please assign a Delivery Man to this customer!");
             
             let cUsername = document.getElementById('cUsername').value.trim();
@@ -3232,13 +3112,7 @@
                     return;
                 }
 
-                if(idx === "") {
-                    customers.push(savedData);
-                    openShareSuccessModal(savedData.name, 'Customer', savedData.cid, savedData.username, savedData.mobile, rawPass);
-                } else {
-                    customers[idx] = savedData;
-                    alert("Customer updated successfully!", "success");
-                }
+                if(idx === "") customers.push(savedData); else customers[idx] = savedData;
                 resetForm('cust'); renderCustomers();
                 closeCustForm();
             } catch (error) {
@@ -3407,12 +3281,12 @@
             let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
             
             let gbDisplayList = [];
-            let currentGbCount = 0;
+            let gbCount = 0;
             let totalAmt = 0;
             transactions.forEach((t, i) => {
                 if (t.shift === 'General Bill') {
-                    currentGbCount++;
-                    gbDisplayList.push({ t, realIdx: i, serialNo: currentGbCount });
+                    gbCount++;
+                    gbDisplayList.push({ t, realIdx: i, serialNo: gbCount });
                 }
             });
             let filtered = [];
@@ -3487,13 +3361,10 @@
                 itemsArr = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
             }
             
-            let currentGbIdx = 0;
-            transactions.forEach((tr, i) => {
-                if (tr.shift === 'General Bill') {
-                    if (i <= idx) currentGbIdx++;
-                }
-            });
-            let serialNo = currentGbIdx;
+            let serialNo = 0;
+            for (let i = 0; i <= idx; i++) {
+                if (transactions[i].shift === 'General Bill') serialNo++;
+            }
             
             let mobileNum = ''; let address = '';
             let creatorDetails = null;
@@ -3873,7 +3744,6 @@
                 if(!displayRoute || displayRoute === 'undefined') displayRoute = 'Unnamed Route';
             html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s"><td><b>${srNo}</b></td><td>${u.name}</td><td>${u.login_id}</td><td>${displayRoute}</td><td>${u.mobile||'-'}</td><td style="display:flex; gap:4px; flex-wrap:nowrap;">
                     <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Milk Man')">Pass</button>
-                    <button class="badge" style="background:var(--success)" onclick="shareCredentials('${u.name.replace(/'/g, "\\'")}', 'Delivery Man', '${u.login_id}', '${(u.username||'').replace(/'/g, "\\'")}', '${u.mobile||''}')">Share</button>
                     <button class="badge" style="background:var(--warning); color:black" onclick="editUser(${realIdx})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'user')">Del</button>
                 </td></tr>`; 
@@ -3886,9 +3756,17 @@
             const tbody = document.getElementById('customerTableBody');
             const mmSelect = document.getElementById('cMilkMan');
             
+            let mmHtml = '<option value="">-- Assign Delivery Man --</option>';
+            
             let custFilterSel = document.getElementById('filterCustMilkManSelect');
             let selectedCustMM = (custFilterSel && !custFilterSel.classList.contains('hidden')) ? custFilterSel.value : null;
 
+            if (isMilkMan()) {
+                mmHtml = `<option value="${currentUser.login_id}">${currentUser.name} (${currentUser.login_id})</option>`;
+            } else {
+                users.forEach(u => { if(u.type === 'Milk Man') mmHtml += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; });
+            }
+            if(mmSelect) mmSelect.innerHTML = mmHtml;
             if (isMilkMan() && mmSelect) {
                 mmSelect.value = currentUser.login_id;
                 mmSelect.disabled = true; // Block reassignment to other milk men
@@ -3946,7 +3824,6 @@
                     <td>${c.mobile||'-'}<br><span style="font-size:11px; color:#94a3b8;">ID: ${c.cid}</span><br><span style="font-size:11px; color:var(--primary);">User: ${c.username||'-'}</span></td>
                         <td style="display:flex; gap:4px; flex-wrap:nowrap;">
                             ${!isMilkMan() ? `<button class="badge" style="background:var(--primary)" onclick="resetPassword('${c.cid}', 'Customer')">Pass</button>` : ''}
-                            <button class="badge" style="background:var(--success)" onclick="shareCredentials('${c.name.replace(/'/g, "\\'")}', 'Customer', '${c.cid}', '${(c.username||'').replace(/'/g, "\\'")}', '${c.mobile||''}')">Share</button>
                             <button class="badge" style="background:var(--warning); color:black" onclick="editCust(${realIdx})">Edit</button>
                             <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'cust')">Del</button>
                         </td>
@@ -4031,7 +3908,7 @@
             const payUl = document.getElementById('custPaymentList');
             if(!msgUl || !payUl) return; 
             let msgHtml = ''; let payHtml = '';
-            requests.slice().reverse().filter(r => String(r.cust_id) === String(currentUser.login_id)).forEach(r => {
+            requests.filter(r => String(r.cust_id) === String(currentUser.login_id)).forEach(r => {
                 let status = r.status || 'Pending';
                 let color = status === 'Pending' ? 'var(--warning)' : (status === 'Approved' ? 'var(--success)' : 'var(--danger)');
                 let li = `<li style="margin-bottom:5px;">On <b>${r.req_date}</b>: ${r.req_qty} <span style="color:${color}; border:1px solid ${color}; padding:2px 5px; border-radius:4px; font-size:10px; margin-left:5px;">${status}</span></li>`;
@@ -4151,7 +4028,9 @@
             showView('referral-form-view');
         }
 
-        function closeReferralForm() { goBack(); }
+        function closeReferralForm() {
+            showView('referral-master');
+        }
 
         async function saveReferral() {
             const name = document.getElementById('refName').value.trim();
@@ -4256,7 +4135,7 @@
         }
 
         function openLicenseForm() { document.getElementById('lPrefix').value = ''; showView('license-form-view'); }
-        function closeLicenseForm() { goBack(); }
+        function closeLicenseForm() { showView('license-master'); }
 
         async function saveNewLicense() {
             const duration = parseInt(document.getElementById('lDuration').value);
@@ -4272,9 +4151,9 @@
             try {
                 const res = await fetch(`${API_BASE}/licenses`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 const saved = await res.json();
-                if(saved.success === false) { alert(saved.message); } else { licenses.push(saved); renderLicenses(); closeLicenseForm(); alert(`Generated Key: ${keyCode}`, 'success'); }
+                if(saved.success === false) { alert(saved.message); } else { licenses.push(saved); renderLicenses(); showView('license-master'); alert(`Generated Key: ${keyCode}`, 'success'); }
             } catch(e) {
-                data.id = Math.floor(Math.random() * 10000); licenses.push(data); renderLicenses(); closeLicenseForm(); alert(`Generated Key: ${keyCode}\n(Saved Locally)`, 'success');
+                data.id = Math.floor(Math.random() * 10000); licenses.push(data); renderLicenses(); showView('license-master'); alert(`Generated Key: ${keyCode}\n(Saved Locally)`, 'success');
             }
             if(btn) { btn.innerText = originalText; btn.disabled = false; }
         }
@@ -5449,7 +5328,7 @@
             document.getElementById('mMobile').value = u.mobile || '';
             document.getElementById('mAddress').value = u.address || u.addr || '';
             document.getElementById('mLogoBase64').value = u.company_logo || '';
-            document.getElementById('mLogoPreview').src = u.company_logo || PL_LOGO;
+            document.getElementById('mLogoPreview').src = u.company_logo || 'https://via.placeholder.com/80?text=No+Logo';
             document.getElementById('editManagerIdx').value = i;
             document.getElementById('btnManagerSave').innerText = "Update Manager";
             document.getElementById('managerFormTitle').innerText = "✏️ Edit Manager";
@@ -5572,7 +5451,9 @@
             showView('trans-form-view');
         }
         
-        function closeEditTransModal() { goBack(); }
+        function closeEditTransModal() {
+            showView('ledger-master');
+        }
 
         async function deleteItem(idx, type) {
             if (type === 'product') {
@@ -5606,7 +5487,6 @@
                 if(type === 'user') {
                     await fetch(`${API_BASE}/users/${users[idx].id}`, { method: 'DELETE' });
                     users.splice(idx, 1);
-                    populateMilkManDropdowns();
                 }
                 if(type === 'route') {
                     await fetch(`${API_BASE}/routes/${routes[idx].id}`, { method: 'DELETE' });
@@ -5675,7 +5555,7 @@
                 ['mName','mPass','mMobile','mUsername','mAddress'].forEach(id=>{let el=document.getElementById(id); if(el) el.value="";}); 
                 document.getElementById('mId').value = ""; 
                 document.getElementById('mLogoBase64').value = "";
-                document.getElementById('mLogoPreview').src = PL_LOGO;
+                document.getElementById('mLogoPreview').src = "https://via.placeholder.com/80?text=No+Logo";
                 let minp = document.getElementById('mLogoInput'); if(minp) minp.value = "";
             }
             if(type==='product') { 
@@ -6228,12 +6108,14 @@
                 currentLedgerView = type;
             }
             
-            populateMilkManDropdowns();
-
             if(type === 'cust') {
                 let custFilterSel = document.getElementById('filterCustMilkManSelect');
                 if (currentUser && currentUser.type !== 'Milk Man' && currentUser.type !== 'Customer') {
                     custFilterSel.classList.remove('hidden');
+                    let oldVal = custFilterSel.value;
+                    custFilterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>';
+                    users.filter(u => u.type === 'Milk Man').forEach(u => { custFilterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; });
+                    custFilterSel.value = oldVal;
                 } else if(custFilterSel) {
                     custFilterSel.classList.add('hidden');
                 }
@@ -6241,6 +6123,10 @@
                 let filterSel = document.getElementById('filterMilkMan');
                 if (currentUser && currentUser.type !== 'Milk Man' && currentUser.type !== 'Customer') {
                     filterSel.classList.remove('hidden');
+                    let oldVal = filterSel.value;
+                    filterSel.innerHTML = '<option value="">-- All Delivery Men / View All --</option>';
+                    users.filter(u => u.type === 'Milk Man').forEach(u => { filterSel.innerHTML += `<option value="${u.login_id}">${u.name} (${u.login_id})</option>`; });
+                    filterSel.value = oldVal;
                 } else if(filterSel) {
                     filterSel.classList.add('hidden');
                 }
@@ -6418,8 +6304,8 @@
                     try {
                         let parsed = JSON.parse(offlineData);
                         users = parsed.users || []; customers = parsed.customers || [];
-                        transactions = (parsed.transactions || []).reverse(); products = parsed.products || [];
-                        requests = (parsed.requests || []).reverse(); routes = parsed.routes || [];
+                        transactions = parsed.transactions || []; products = parsed.products || [];
+                        requests = parsed.requests || []; routes = parsed.routes || [];
                         licenses = parsed.licenses || [];
                     } catch(e){}
                 }
@@ -6481,10 +6367,6 @@
                 const response = await fetch(`${API_BASE}/reset_password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const result = await response.json();
                 alert(result.message, result.success ? 'success' : 'error');
-                if (result.success) {
-                    let u = users.find(x => x.login_id === targetId) || customers.find(x => x.cid === targetId);
-                    if(u) openShareSuccessModal(u.name, targetType, targetId, u.username, u.mobile, newPassword, "Password Reset Successfully!");
-                }
             } catch(e) {
                 alert("Network Error: Failed to reset password.", "error");
             }
