@@ -114,11 +114,8 @@ def register():
         "ref_code": data.get('ref_code', '')
     }
     
-    try:
-        supabase.table('sys_users').insert(insert_data).execute()
-        return jsonify({"success": True, "login_id": new_owner_id})
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Database Error: {str(e)}"})
+    supabase.table('sys_users').insert(insert_data).execute()
+    return jsonify({"success": True, "login_id": new_owner_id})
 
 
 # Secure Login & Data Partitioning with Supabase
@@ -230,7 +227,6 @@ def sync_data():
             return jsonify({"success": False, "message": "Could not verify user."}), 403
         company = user_details_res.data[0].get('company')
     elif role == 'Customer':
-        
         cust_details_res = supabase.table('sys_customers').select('company').eq('cid', login_id).execute()
         if not cust_details_res.data:
             return jsonify({"success": False, "message": "Could not verify customer."}), 403
@@ -267,7 +263,7 @@ def sync_data():
     # ------------------------------------------
 
     # 🚀 SPEED FIX: Removed heavy 'qr_code' from background fetching to reduce megabytes of payload
-    u_cols = 'id, name, login_id, type, company, display_company, email, address, route, mobile, license_expiry, ref_code, company_logo'
+    u_cols = 'id, name, login_id, type, company, email, address, route, mobile, license_expiry, ref_code'
     c_cols = 'id, name, addr, cid, defItem, defQty, defRate, company, milkman_id, route, shift, mobile, seq_no, seq_no_eve'
 
     def safe_get(f):
@@ -477,25 +473,22 @@ def save_data(table_name):
     # 🛡️ BUG FIX: Add server-side check to prevent duplicate transaction entries
     if not data.get('id') and table_name == 'transactions':
         shift_val = data.get('shift')
+        q = supabase.table(db_table).select('id').eq('cust', data.get('cust')).eq('date', data.get('date')).eq('company', data.get('company'))
         
-        # DO NOT deduplicate General Bills automatically. They are discrete independent invoices.
-        if shift_val != 'General Bill':
-            q = supabase.table(db_table).select('id').eq('cust', data.get('cust')).eq('date', data.get('date')).eq('company', data.get('company'))
+        if shift_val:
+            q = q.or_(f"shift.eq.{shift_val},shift.is.null")
             
-            if shift_val:
-                q = q.or_(f'shift.eq."{shift_val}",shift.is.null')
-                
-            if data.get('item') == 'Payment':
-                q = q.eq('item', 'Payment')
-            else:
-                q = q.neq('item', 'Payment')
-                
-            existing_res = q.execute()
+        if data.get('item') == 'Payment':
+            q = q.eq('item', 'Payment')
+        else:
+            q = q.neq('item', 'Payment')
             
-            if existing_res.data:
-                item_id = existing_res.data[0]['id']
-                res = supabase.table(db_table).update(data).eq('id', item_id).execute()
-                return jsonify(res.data[0] if res.data else data)
+        existing_res = q.execute()
+        
+        if existing_res.data:
+            item_id = existing_res.data[0]['id']
+            res = supabase.table(db_table).update(data).eq('id', item_id).execute()
+            return jsonify(res.data[0] if res.data else data)
 
     # INSERT NEW RECORD
     if table_name == 'users':
@@ -548,11 +541,8 @@ def reset_password():
         table_to_update = 'sys_customers' if target_type == 'Customer' else 'sys_users'
         id_field = 'cid' if target_type == 'Customer' else 'login_id'
         pass_field = 'cpass' if target_type == 'Customer' else 'pass'
-        try:
-            supabase.table(table_to_update).update({pass_field: hashed_pass}).eq(id_field, target_id).execute()
-            return jsonify({"success": True, "message": "Password reset successfully."})
-        except Exception as e:
-            return jsonify({"success": False, "message": f"Database Error: {str(e)}"})
+        supabase.table(table_to_update).update({pass_field: hashed_pass}).eq(id_field, target_id).execute()
+        return jsonify({"success": True, "message": "Password reset successfully."})
         
     return jsonify({"success": False, "message": "Access Denied. You do not have permission to perform this action."}), 403
 
@@ -562,7 +552,6 @@ def delete_account():
     login_id = data.get('login_id')
     password = data.get('pass')
     admin_override = data.get('admin_override', False)
-    admin_pass = data.get('admin_pass')
     
     if not login_id:
         return jsonify({"success": False, "message": "Please provide Login ID!"})
@@ -587,13 +576,6 @@ def delete_account():
                 
             if not is_valid:
                 return jsonify({"success": False, "message": "Incorrect Password! Account deletion failed."})
-        else:
-            # CRITICAL SECURITY FIX: Verify Admin Password dynamically
-            if not admin_pass:
-                return jsonify({"success": False, "message": "Admin password required for override!"}), 403
-            admin_res = supabase.table('sys_users').select('pass').eq('login_id', 'ADMIN').execute()
-            if not admin_res.data or not check_password_hash(admin_res.data[0]['pass'], admin_pass):
-                return jsonify({"success": False, "message": "Admin authentication failed!"}), 403
             
         company = user.get('company')
         if company == 'SuperAdmin':
@@ -613,7 +595,7 @@ def delete_account():
         print("Delete Account Error:", e)
         return jsonify({"success": False, "message": f"An error occurred: {str(e)}"})
 
-@app.route('/api/<table_name>/<item_id>', methods=['DELETE'])
+@app.route('/api/<table_name>/<int:item_id>', methods=['DELETE'])
 def delete_data(table_name, item_id):
     if table_name not in ['users', 'customers', 'transactions', 'products', 'requests', 'routes', 'licenses']:
         return jsonify({"success": False, "message": "Invalid table"}), 400
@@ -665,12 +647,9 @@ def verify_key():
                 pass
 
         new_expiry_date = base_date + datetime.timedelta(days=duration_days)
-        try:
-            supabase.table('sys_licenses').update({'status': 'Used', 'used_by': owner_id, 'used_on': datetime.datetime.now(datetime.timezone.utc).isoformat()}).eq('id', license_data['id']).execute()
-            supabase.table('sys_users').update({'license_expiry': new_expiry_date.isoformat()}).eq('login_id', owner_id).execute()
-            return jsonify({'success': True, 'message': f'License extended! New expiry: {new_expiry_date.strftime("%d-%b-%Y")}', 'new_expiry': new_expiry_date.isoformat()})
-        except Exception as e:
-            return jsonify({'success': False, 'message': f'Database Error: {str(e)}'})
+        supabase.table('sys_licenses').update({'status': 'Used', 'used_by': owner_id, 'used_on': datetime.datetime.now(datetime.timezone.utc).isoformat()}).eq('id', license_data['id']).execute()
+        supabase.table('sys_users').update({'license_expiry': new_expiry_date.isoformat()}).eq('login_id', owner_id).execute()
+        return jsonify({'success': True, 'message': f'License extended! New expiry: {new_expiry_date.strftime("%d-%b-%Y")}', 'new_expiry': new_expiry_date.isoformat()})
 
     return jsonify({'success': False, 'message': 'Invalid or Expired Key'})
 
@@ -696,16 +675,14 @@ def get_opening_balance():
         except Exception as e:
             print(f"Error fetching customer details for bill: {e}")
 
-    # Fetch all transactions (removed .neq('shift') because it incorrectly excludes old NULL shift records)
-    transactions_res = supabase.table('sys_trans').select('*').eq('cust', cust_name).eq('company', company).execute()
+    # Fetch all transactions to avoid string comparison issues with dates
+    transactions_res = supabase.table('sys_trans').select('*').eq('cust', cust_name).eq('company', company).neq('shift', 'General Bill').execute()
     transactions_all = transactions_res.data if transactions_res.data else []
 
     opening_balance = 0
     month_transactions = []
 
     for t in transactions_all:
-        if t.get('shift') == 'General Bill':
-            continue
         d_str = str(t.get('date', '')).strip()
         t_year, t_month = 0, 0
         try:
