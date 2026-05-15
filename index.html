@@ -2649,7 +2649,7 @@
                     if(document.getElementById('rememberMe') && document.getElementById('rememberMe').checked) {
                         localStorage.setItem('savedRole', currentLoginRole);
                         localStorage.setItem('savedId', document.getElementById('loginId').value.trim());
-                        localStorage.setItem('savedPass', btoa(document.getElementById('loginPass').value))
+                        localStorage.setItem('savedPass', btoa(document.getElementById('loginPass').value));
                     } else {
                         localStorage.removeItem('savedRole');
                         localStorage.removeItem('savedId');
