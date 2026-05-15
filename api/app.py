@@ -322,17 +322,17 @@ def sync_data():
             if role == 'Admin' or company == 'SuperAdmin':
                 f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols).execute().data)
                 f_c = executor.submit(lambda: supabase.table('sys_customers').select(c_cols).execute().data)
-                f_t = executor.submit(lambda: supabase.table('sys_trans').select('*').order('id', desc=True).limit(300).execute().data)
+                f_t = executor.submit(lambda: supabase.table('sys_trans').select('*').order('id', desc=True).limit(10000).execute().data)
                 f_p = executor.submit(lambda: supabase.table('sys_products').select('*').execute().data)
-                f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').order('id', desc=True).limit(20).execute().data)
+                f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').order('id', desc=True).limit(1000).execute().data)
                 f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').execute().data)
                 f_l = executor.submit(lambda: supabase.table('sys_licenses').select('*').execute().data)
             else:
                 f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols).eq('company', company).execute().data)
                 f_c = executor.submit(lambda: supabase.table('sys_customers').select(c_cols).eq('company', company).execute().data)
-                f_t = executor.submit(lambda: supabase.table('sys_trans').select('*').eq('company', company).order('id', desc=True).limit(300).execute().data)
+                f_t = executor.submit(lambda: supabase.table('sys_trans').select('*').eq('company', company).order('id', desc=True).limit(10000).execute().data)
                 f_p = executor.submit(lambda: supabase.table('sys_products').select('*').eq('company', company).execute().data)
-                f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('company', company).order('id', desc=True).limit(20).execute().data)
+                f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('company', company).order('id', desc=True).limit(1000).execute().data)
                 f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
                 f_l = executor.submit(lambda: supabase.table('sys_licenses').select('*').eq('used_by', login_id).execute().data)
         
@@ -387,8 +387,8 @@ def sync_data():
         def get_mm_trans():
             if not customer_names: return []
             lower_names = [n.strip().lower() for n in customer_names if n]
-            all_trans = supabase.table('sys_trans').select('*').eq('company', company).order('id', desc=True).limit(1000).execute().data
-            return [t for t in all_trans if (t.get('cust') or '').strip().lower() in lower_names][:150]
+            all_trans = supabase.table('sys_trans').select('*').eq('company', company).order('id', desc=True).limit(5000).execute().data
+            return [t for t in all_trans if (t.get('cust') or '').strip().lower() in lower_names][:2000]
 
         with ThreadPoolExecutor(max_workers=4) as executor:
             f_t = executor.submit(get_mm_trans)
@@ -846,11 +846,27 @@ def get_transactions_paginated():
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 25))
     company = request.args.get('company')
+    date_filter = request.args.get('date', '')
+    shift_filter = request.args.get('shift', '')
+    search_query = request.args.get('search', '').strip()
+    is_gb = request.args.get('is_gb', 'false') == 'true'
     
     offset = (page - 1) * per_page
     
     try:
-        res = supabase.table('sys_trans').select('*', count='exact').eq('company', company).order('id', desc=True).range(offset, offset + per_page - 1).execute()
+        query = supabase.table('sys_trans').select('*', count='exact').eq('company', company)
+        
+        if is_gb:
+            query = query.eq('shift', 'General Bill')
+            if date_filter: query = query.eq('date', date_filter)
+        else:
+            query = query.neq('shift', 'General Bill')
+            if date_filter: query = query.eq('date', date_filter)
+            if shift_filter: query = query.eq('shift', shift_filter)
+            
+        if search_query: query = query.ilike('cust', f'%{search_query}%')
+            
+        res = query.order('id', desc=True).range(offset, offset + per_page - 1).execute()
         return jsonify({
             "success": True,
             "data": res.data,
