@@ -154,6 +154,15 @@
         .profile-list-item:last-child { border-bottom: none; }
         :root.light-mode .profile-list-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
         #header-company-name::-webkit-scrollbar { display: none; }
+
+        /* BOTTOM NAVIGATION BAR (APP-LIKE FEEL) */
+        #bottom-nav { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(255,255,255,0.08); padding-bottom: env(safe-area-inset-bottom, 0px); }
+        :root.light-mode #bottom-nav { background: rgba(255, 255, 255, 0.95); border-top: 1px solid rgba(0,0,0,0.1); box-shadow: 0 -4px 15px rgba(0,0,0,0.05); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; text-decoration: none; cursor: pointer; flex: 1; transition: 0.2s; background: transparent; border: none; outline: none; padding: 10px 5px; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); border-radius: 12px; }
+        .nav-item.active { color: var(--primary); font-weight: bold; transform: translateY(-3px); }
+        .nav-item span { font-size: 22px; margin-bottom: 4px; filter: grayscale(1); transition: 0.3s; }
+        .nav-item.active span { filter: grayscale(0); transform: scale(1.15); drop-shadow: 0 4px 6px rgba(99, 102, 241, 0.4); }
     </style>
 </head>
 <body>
@@ -180,6 +189,11 @@
             </select>
             <span id="header-role" style="background:var(--warning); color:black; padding:4px 10px; border-radius:10px; font-size:12px; font-weight:bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px;"></span>
         </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <div id="bottom-nav" class="hidden" style="position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.3); z-index: 998; transition: transform 0.3s ease-in-out;">
+        <!-- Buttons will be injected here via JS -->
     </div>
 
     <!-- GLOBAL LICENSE BANNER -->
@@ -327,6 +341,9 @@
     <div id="main-menu" class="container hidden">
         <div id="guest-alert" class="guest-banner hidden">⚠️ DEMO MODE: Role Restrictions Active</div>
         
+        <!-- SMART SEARCH FOR MENU -->
+        <input type="text" id="searchMenu" placeholder="🔍 Search feature (e.g. Bill, Route, Ledger)..." onkeyup="filterMenu()" style="width:100%; padding:14px; border-radius:12px; margin-bottom:20px; background:rgba(0,0,0,0.25); border:1px solid #475569; color:white; font-size: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+
         <div class="menu-grid">
             <button id="btn-route" class="btn-save box-btn" style="background:#059669" onclick="showView('route-master')"><span style="font-size:28px; margin-bottom:8px;">🗺️</span>Manage Routes</button>
             <button id="btn-um" class="btn-save box-btn" style="background:#312e81" onclick="showView('user-master')"><span style="font-size:28px; margin-bottom:8px;">🛵</span>Manage Delivery Men</button>
@@ -1481,6 +1498,9 @@
         let products = []; let requests = []; let routes = [];
         let licenses = [];
         
+        let serverPaginatedTrans = [];
+        let serverPaginatedGb = [];
+
         let currentFeedDateStr = formatDate(new Date());
         let currentFeedShift = 'Morning';
         let currentFeedOffset = 0;
@@ -2891,6 +2911,12 @@
             if(currentUser) { if(currentUser.type === 'Milk Man') homeId = 'ledger-master'; else if(currentUser.type === 'Customer') homeId = 'customer-self-view'; }
             document.getElementById('global-back-btn').classList.toggle('hidden', id === homeId);
             
+            if (id === 'main-menu') {
+                let sm = document.getElementById('searchMenu');
+                if(sm) { sm.value = ''; filterMenu(); }
+            }
+            updateBottomNav(id);
+
             if(id === 'profile-view') {
                 document.getElementById('mainProfilePic').src = currentUser.profile_pic || PL_USER;
                 document.getElementById('mainProfileName').innerText = currentUser.name || '';
@@ -3154,7 +3180,7 @@
         async function saveUser() {
             if(isMilkMan()) { alert("Access Denied!"); return; }
             if (!validateForm('user-form-view')) return;
-            document.getElementById('btnUserSave').innerText = "Saving...";
+            const btn = document.getElementById('btnUserSave'); btn.innerText = "Saving..."; btn.disabled = true;
             const idx = document.getElementById('editUserIdx').value;
             let rawPass = document.getElementById('uPass').value;
             
@@ -3170,10 +3196,10 @@
                 route: document.getElementById('uRoute').value
             };
             
-            if(!data.name) return alert("Name is required!");
-            if(data.mobile && data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
-            if(idx === "" && !data.pass) return alert("Password is required for new Delivery Man!");
-            if(!data.route) return alert("Route is mandatory! Please assign a Route.");
+            if(!data.name) { btn.innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man"; btn.disabled = false; return alert("Name is required!"); }
+            if(data.mobile && data.mobile.length !== 10) { btn.innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man"; btn.disabled = false; return alert("Mobile Number must be exactly 10 digits!"); }
+            if(idx === "" && !data.pass) { btn.innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man"; btn.disabled = false; return alert("Password is required for new Delivery Man!"); }
+            if(!data.route) { btn.innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man"; btn.disabled = false; return alert("Route is mandatory! Please assign a Route."); }
             
             let uId = document.getElementById('uId').value.trim();
             if(uId && idx !== "") data.login_id = uId;
@@ -3185,7 +3211,7 @@
                 
                 if (savedData.success === false) {
                     alert(savedData.message);
-                    document.getElementById('btnUserSave').innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man";
+                    btn.innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man"; btn.disabled = false;
                     return;
                 }
 
@@ -3201,8 +3227,9 @@
                 closeUserForm();
             } catch (error) {
                 alert("Network Error: Could not save Delivery Man. Please try again.", "error");
-                document.getElementById('btnUserSave').innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man";
+                btn.innerText = idx === "" ? "Save Delivery Man" : "Update Delivery Man";
             }
+            btn.disabled = false;
         }
 
         function openNewCustForm() {
@@ -3224,11 +3251,11 @@
         // --- CUSTOMER ---
         async function saveCustomer() {
             if (!validateForm('cust-form-view')) return;
-            document.getElementById('btnCustSave').innerText = "Saving...";
+            const btn = document.getElementById('btnCustSave'); btn.innerText = "Saving..."; btn.disabled = true;
             const idx = document.getElementById('editCustIdx').value;
-            if (idx === "" && !document.getElementById('cPass').value) return alert("Error: Please set a password for the new Customer!");
+            if (idx === "" && !document.getElementById('cPass').value) { btn.innerText = "Save Customer"; btn.disabled = false; return alert("Error: Please set a password for the new Customer!"); }
             let rawPass = document.getElementById('cPass').value;
-            if(!document.getElementById('cMilkMan').value) return alert("Error: Please assign a Delivery Man to this customer!");
+            if(!document.getElementById('cMilkMan').value) { btn.innerText = "Save Customer"; btn.disabled = false; return alert("Error: Please assign a Delivery Man to this customer!"); }
             
             let cUsername = document.getElementById('cUsername').value.trim();
 
@@ -3247,8 +3274,8 @@
                 company: currentUser.company
             };
             
-            if(!data.name || !data.route || !data.shift) return alert("Name, Route and Shift are mandatory!");
-            if(data.mobile && data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
+            if(!data.name || !data.route || !data.shift) { btn.innerText = idx === "" ? "Save Customer" : "Update Customer"; btn.disabled = false; return alert("Name, Route and Shift are mandatory!"); }
+            if(data.mobile && data.mobile.length !== 10) { btn.innerText = idx === "" ? "Save Customer" : "Update Customer"; btn.disabled = false; return alert("Mobile Number must be exactly 10 digits!"); }
             
             let parsedSeq = parseInt(document.getElementById('cSeq').value);
             let parsedSeqEve = parseInt(document.getElementById('cSeqEve').value);
@@ -3306,7 +3333,7 @@
             }
             
             if (promises.length > 0) {
-                document.getElementById('btnCustSave').innerText = "Updating Sequences...";
+                btn.innerText = "Updating Sequences...";
                 await Promise.allSettled(promises);
             }
 
@@ -3320,7 +3347,7 @@
 
                 if (savedData.success === false) {
                     alert(savedData.message);
-                    document.getElementById('btnCustSave').innerText = idx === "" ? "Save Customer" : "Update Customer";
+                    btn.innerText = idx === "" ? "Save Customer" : "Update Customer"; btn.disabled = false;
                     return;
                 }
 
@@ -3335,8 +3362,9 @@
                 closeCustForm();
             } catch (error) {
                 alert("Network Error: Could not save customer. Please try again.");
-                document.getElementById('btnCustSave').innerText = idx === "" ? "Save Customer" : "Update Customer";
+                btn.innerText = idx === "" ? "Save Customer" : "Update Customer";
             }
+            btn.disabled = false;
         }
 
         // --- TRANSACTION ---
@@ -3388,7 +3416,10 @@
             if(!custName) { alert("Please select customer"); btn.innerText = idx !== "" ? "Update Entry" : "Save Entry"; return; }
             const shift = document.getElementById('tShiftText').value;
             
-            let data = idx !== "" ? { ...transactions[idx] } : { date: dateStr, cust: custName, shift: shift, company: currentUser.company };
+            let data = { date: dateStr, cust: custName, shift: shift, company: currentUser.company };
+            if (idx !== "") {
+                data.id = idx;
+            }
             
             if (currentEditTransType === 'Payment') {
                 let amt = parseFloat(document.getElementById('tPaymentAmt').value) || 0;
@@ -3411,7 +3442,9 @@
                 const res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 const savedData = await res.json();
                 if (savedData.success === false) { alert(savedData.message); btn.innerText = idx !== "" ? "Update Entry" : "Save Entry"; btn.disabled = false; return; }
-                if(idx !== "") transactions[idx] = savedData;
+                
+                let globIdx = transactions.findIndex(tr => String(tr.id) === String(savedData.id));
+                if(globIdx > -1) transactions[globIdx] = savedData;
                 else transactions.push(savedData);
                 renderTransFeed(); renderTrans();
                 closeEditTransModal();
@@ -3491,28 +3524,32 @@
             else document.getElementById('gbRateAdd').value = '';
         }
         
-        function renderGeneralBills() {
+        async function renderGeneralBills() {
             const tbody = document.getElementById('gbTableBody');
             const filterDateVal = document.getElementById('gbFilterDate').value;
             let filterDateStr = filterDateVal ? convertToDDMMYYYY(filterDateVal) : null;
             let filterMgr = document.getElementById('gbFilterManager') ? document.getElementById('gbFilterManager').value : 'ALL';
             let searchInput = document.getElementById('searchGb');
-            let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let searchQuery = searchInput ? searchInput.value.trim() : '';
             
-            let gbDisplayList = [];
-            let currentGbCount = 0;
-            let totalAmt = 0;
-            transactions.forEach((t, i) => {
-                if (t.shift === 'General Bill') {
-                    currentGbCount++;
-                    gbDisplayList.push({ t, realIdx: i, serialNo: currentGbCount });
-                }
-            });
-            let filtered = [];
-            gbDisplayList.reverse().forEach(({ t, realIdx, serialNo }) => {
-                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && t.company !== currentAdminCompanyFilter) return;
-                if (filterDateStr && t.date !== filterDateStr) return;
+            if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;margin-bottom:10px;"></div>Loading from Server...</td></tr>';
+            
+            try {
+                let url = `${API_BASE}/transactions/page?company=${encodeURIComponent(currentUser.company)}&page=${currentGbPage}&per_page=${gbItemsPerPage}&is_gb=true`;
+                if (filterDateStr) url += `&date=${filterDateStr}`;
+                if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
                 
+                const res = await fetch(url);
+                const result = await res.json();
+                if(!result.success) throw new Error();
+                
+                serverPaginatedGb = result.data;
+                let totalItems = result.total_count || 0;
+                let totalPages = Math.ceil(totalItems / gbItemsPerPage) || 1;
+                let totalAmt = 0; 
+                
+                let html = '';
+                serverPaginatedGb.forEach((t, displayIdx) => {
                 let createdBy = t.cust;
                 try {
                      if(t.qty && typeof t.qty === 'string' && t.qty.startsWith('{')) {
@@ -3522,56 +3559,41 @@
                 } catch(e) {}
                 
                 if (currentUser.type === 'Manager' && createdBy !== currentUser.login_id) return;
-                
                 if (currentUser.type === 'Owner') {
                     if (filterMgr === 'SELF' && createdBy !== currentUser.login_id) return;
                     if (filterMgr !== 'ALL' && filterMgr !== 'SELF' && createdBy !== filterMgr) return;
                 }
 
-                
+                    let serialNo = totalItems - ((currentGbPage - 1) * gbItemsPerPage) - displayIdx;
+                    let srNo = ((currentGbPage - 1) * gbItemsPerPage) + displayIdx + 1;
                 let displayItem = formatItemDisplay(t.item);
-                if (searchQuery) {
-                    let str = `GB-${serialNo} ${t.date} ${t.cust} ${displayItem}`.toLowerCase();
-                    if(!str.includes(searchQuery)) return;
-                }
                 
                 totalAmt += parseFloat(t.total || 0);
-                filtered.push({t, realIdx, serialNo, displayItem});
-            });
-            
-            let totalItems = filtered.length;
-            let totalPages = Math.ceil(totalItems / gbItemsPerPage) || 1;
-            if(currentGbPage > totalPages) currentGbPage = totalPages;
-            if(currentGbPage < 1) currentGbPage = 1;
-            let startIndex = (currentGbPage - 1) * gbItemsPerPage;
-            let endIndex = Math.min(startIndex + gbItemsPerPage, totalItems);
-            let paginated = filtered.slice(startIndex, endIndex);
-
-            let html = '';
-            paginated.forEach((item, displayIdx) => {
-                let {t, realIdx, serialNo, displayItem} = item;
-                let srNo = startIndex + displayIdx + 1;
-                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s">
+                    
+                    html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s">
                     <td><b>${srNo}</b></td>
                     <td>GB-${serialNo}<br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
                     <td>${t.cust}</td>
                     <td>${displayItem}</td>
                     <td style="color:var(--success); font-weight:bold;">₹${parseFloat(t.total||0).toFixed(2)}</td>
                     <td style="white-space:nowrap;">
-                        <button class="badge" style="background:var(--success)" onclick="reprintGb(${realIdx})">Print</button>
-                        <button class="badge" style="background:var(--warning); color:black" onclick="editGb(${realIdx})">Edit</button>
-                        <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
+                            <button class="badge" style="background:var(--success)" onclick="reprintGb(${displayIdx})">Print</button>
+                            <button class="badge" style="background:var(--warning); color:black" onclick="editGb(${displayIdx})">Edit</button>
+                            <button class="badge" style="background:var(--danger)" onclick="deleteItem(${displayIdx}, 'gb')">Del</button>
                     </td>
                 </tr>`;
-            });
-            
-            if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No bills found.</td></tr>';
-            document.getElementById('gbSummary').innerText = `Total Collection: ₹${totalAmt.toFixed(2)}`;
-            updatePaginationUI('Gb', totalItems, startIndex, endIndex, currentGbPage, totalPages);
+                });
+                
+                if(tbody) tbody.innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No bills found.</td></tr>';
+                document.getElementById('gbSummary').innerText = `Total Collection (This Page): ₹${totalAmt.toFixed(2)}`;
+                updatePaginationUI('Gb', totalItems, ((currentGbPage - 1) * gbItemsPerPage), Math.min(currentGbPage * gbItemsPerPage, totalItems), currentGbPage, totalPages);
+            } catch(e) {
+                if(tbody) tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger);">Error loading bills.</td></tr>`;
+            }
         }
         
         function reprintGb(idx) {
-            const t = transactions[idx];
+            const t = serverPaginatedGb[idx];
             let itemsArr = [];
             try {
                 itemsArr = JSON.parse(t.item);
@@ -3580,13 +3602,7 @@
                 itemsArr = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
             }
             
-            let currentGbIdx = 0;
-            transactions.forEach((tr, i) => {
-                if (tr.shift === 'General Bill') {
-                    if (i <= idx) currentGbIdx++;
-                }
-            });
-            let serialNo = currentGbIdx;
+            let serialNo = t.id; // Fallback serial no
             
             let mobileNum = ''; let address = '';
             let creatorDetails = null;
@@ -3600,8 +3616,8 @@
         }
 
         function editGb(idx) {
-            const t = transactions[idx];
-            document.getElementById('editGbIdx').value = idx;
+            const t = serverPaginatedGb[idx];
+            document.getElementById('editGbIdx').value = t.id;
             
             let dObj = new Date(t.date);
             if (isNaN(dObj) && (t.date.includes('/') || t.date.includes('-'))) {
@@ -3654,9 +3670,7 @@
             
             let grandTotal = currentGbItems.reduce((sum, i) => sum + i.total, 0);
             
-            let creatorInfo = { 
-                mobile: mobileNum, 
-                address: address, 
+            let creatorInfo = { mobile: mobileNum, address: address, 
                 created_by: currentUser.login_id,
                 creator_name: currentUser.name,
                 creator_mobile: currentUser.mobile,
@@ -3667,41 +3681,45 @@
             
             if (editIdx !== "") {
                 try {
-                    let existingQty = JSON.parse(transactions[editIdx].qty);
-                    if (existingQty.created_by) {
+                    let existingTr = transactions.find(tr => String(tr.id) === String(editIdx)) || serverPaginatedGb.find(tr => String(tr.id) === String(editIdx));
+                    if (existingTr && existingTr.qty) {
+                        let existingQty = JSON.parse(existingTr.qty);
+                        if (existingQty.created_by) {
                         creatorInfo.created_by = existingQty.created_by;
                         creatorInfo.creator_name = existingQty.creator_name;
                         creatorInfo.creator_mobile = existingQty.creator_mobile;
                         creatorInfo.creator_address = existingQty.creator_address;
                         creatorInfo.creator_company = existingQty.creator_company;
                         creatorInfo.creator_logo = existingQty.creator_logo;
+                        }
                     }
                 } catch(e) {}
             }
 
             let qtyField = JSON.stringify(creatorInfo);
             let data = { date: dateStr, cust: custName, item: JSON.stringify(currentGbItems), qty: qtyField, rate: grandTotal, total: grandTotal, company: currentUser.company, shift: shift };
-            if(editIdx !== "") data.id = transactions[editIdx].id;
+            if(editIdx !== "") data.id = editIdx;
 
-            const btn = document.getElementById('btnSaveGbMain'); btn.innerText = "Saving...";
+            const btn = document.getElementById('btnSaveGbMain'); btn.innerText = "Saving..."; btn.disabled = true;
             try {
                 const res = await fetch(`${API_BASE}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
                 const savedData = await res.json();
-                 if (savedData.success === false) { alert(savedData.message); btn.innerText = editIdx !== "" ? "Update & Print Bill" : "Generate & Print Bill"; return; }
-                if(editIdx !== "") { transactions[editIdx] = savedData; } else { transactions.push(savedData); }
+                if (savedData.success === false) { alert(savedData.message); btn.innerText = editIdx !== "" ? "Update & Print Bill" : "Generate & Print Bill"; btn.disabled = false; return; }
+                
+                let globIdx = transactions.findIndex(tr => String(tr.id) === String(savedData.id));
+                if(globIdx > -1) transactions[globIdx] = savedData;
+                else transactions.push(savedData);
+                
                 renderGeneralBills(); 
                 alert(editIdx !== "" ? "General Bill Updated Successfully!" : "General Bill Created Successfully!");
                 
-                
-                let serialNo = 0;
-                transactions.forEach(t => { if(t.shift === 'General Bill') serialNo++; });
-
+                let serialNo = savedData.id || 1;
                 printBillHTML(serialNo, dateStr, custName, mobileNum, address, currentGbItems, grandTotal, creatorInfo);
                 clearGbForm();
                 
                 switchGbTab('old'); // Switch to old bills tab automatically
             } catch(e) { alert("Network Error!"); }
-            btn.innerText = editIdx !== "" ? "Update & Print Bill" : "Generate & Print Bill";
+            btn.innerText = editIdx !== "" ? "Update & Print Bill" : "Generate & Print Bill"; btn.disabled = false;
         }
         
         function printBillHTML(serialNo, dateStr, custName, mobileNum, address, itemsArr, total, creatorDetails = null) {
@@ -4413,12 +4431,11 @@
             select.innerHTML = html;
         }
 
-        function renderTrans() {
+        async function renderTrans() {
             const tbody = document.getElementById('transTableBody');
             if (!tbody) return; 
             
             const filterDate = currentFeedDateStr;
-
             let searchInput = document.getElementById('searchTrans');
             let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
             
@@ -4432,53 +4449,43 @@
             let filterSel = document.getElementById('filterMilkMan');
             let selectedMM = (filterSel && !filterSel.classList.contains('hidden')) ? filterSel.value : null;
 
-            let filtered = [];
-            transactions.slice().reverse().forEach((t, i) => { 
-                if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && t.company !== currentAdminCompanyFilter) return;
-                const realIdx = transactions.length - 1 - i;
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;"><div class="spinner" style="width:20px;height:20px;border-width:2px;margin-bottom:10px;"></div>Loading from Server...</td></tr>';
+            
+            try {
+                let url = `${API_BASE}/transactions/page?company=${encodeURIComponent(currentUser.company)}&page=${currentTransPage}&per_page=${transItemsPerPage}&date=${filterDate}&shift=${currentFeedShift}&is_gb=false`;
+                if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
                 
-                // Filter by the new date picker
-                if (convertToDDMMYYYY(t.date) !== filterDate) return;
+                const res = await fetch(url);
+                const result = await res.json();
+                if (!result.success) throw new Error(result.message);
                 
-                if (t.shift === 'General Bill') return; // Hide General Bills from main ledger
+                serverPaginatedTrans = result.data;
+                let totalItems = result.total_count || 0;
+                let totalPages = Math.ceil(totalItems / transItemsPerPage) || 1;
                 
-                let tShift = (t.shift || '').trim().toLowerCase();
-                let targetShift = currentFeedShift.toLowerCase();
-                if (tShift !== '' && tShift !== targetShift) return; // Apply unified shift filter
+                let html = '';
+                serverPaginatedTrans.forEach((t, displayIdx) => { 
                 if (selectedMM) {
                     let cObj = customers.find(c => (c.name || '').trim() === (t.cust || '').trim());
-                    if (cObj && cObj.milkman_id !== selectedMM) return;
+                        if (cObj && cObj.milkman_id !== selectedMM) return;
                 }
                 const displayItem = formatItemDisplay(t.item);
-                if (searchQuery) {
-                    let str = `${t.date} ${t.cust} ${displayItem}`.toLowerCase();
-                    if(!str.includes(searchQuery)) return;
-                }
                 
                 let hideClass = ''; 
                 if(isMilkMan() && !allowedDates.includes(convertToDDMMYYYY(t.date))) hideClass = 'hidden'; 
                 const totalDisplay = t.item === 'Payment' ? `<span style="color:var(--success)">-₹${Math.abs(parseFloat(t.total)).toFixed(2)}</span>` : `₹${parseFloat(t.total).toFixed(2)}`;
-                filtered.push({t, realIdx, hideClass, totalDisplay, displayItem});
+                    let srNo = ((currentTransPage - 1) * transItemsPerPage) + displayIdx + 1;
+                    html += `<tr style="animation-delay:${Math.min(displayIdx * 0.02, 0.5)}s"><td><b>${srNo}</b></td><td>${t.date}</td><td>${t.cust}</td><td>${displayItem}</td><td>${totalDisplay}</td><td style="white-space:nowrap;">
+                        <button class="badge ${hideClass}" style="background:var(--warning); color:black" onclick="editTrans(${displayIdx})">Edit</button>
+                        <button class="badge ${hideClass}" style="background:var(--danger)" onclick="deleteItem(${displayIdx}, 'trans')">Del</button>
+                    </td></tr>`; 
             });
-            
-            let totalItems = filtered.length;
-            let totalPages = Math.ceil(totalItems / transItemsPerPage) || 1;
-            if(currentTransPage > totalPages) currentTransPage = totalPages;
-            if(currentTransPage < 1) currentTransPage = 1;
-            let startIndex = (currentTransPage - 1) * transItemsPerPage;
-            let endIndex = Math.min(startIndex + transItemsPerPage, totalItems);
-            let paginated = filtered.slice(startIndex, endIndex);
-            let html = '';
-            paginated.forEach((item, displayIdx) => { 
-                let {t, realIdx, hideClass, totalDisplay, displayItem} = item; let srNo = startIndex + displayIdx + 1;
-                html += `<tr style="animation-delay:${Math.min(displayIdx * 0.02, 0.5)}s"><td><b>${srNo}</b></td><td>${t.date}</td><td>${t.cust}</td><td>${displayItem}</td><td>${totalDisplay}</td><td style="white-space:nowrap;">
-                    <button class="badge ${hideClass}" style="background:var(--warning); color:black" onclick="editTrans(${realIdx})">Edit</button>
-                    <button class="badge ${hideClass}" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'trans')">Del</button>
-                </td></tr>`; 
-            });
-            if (filtered.length === 0) { html = `<tr><td colspan="6" style="text-align:center; padding: 20px;">No entries found.</td></tr>`; }
-            tbody.innerHTML = html;
-            updatePaginationUI('Trans', totalItems, startIndex, endIndex, currentTransPage, totalPages);
+                if (html === '') { html = `<tr><td colspan="6" style="text-align:center; padding: 20px;">No entries found.</td></tr>`; }
+                tbody.innerHTML = html;
+                updatePaginationUI('Trans', totalItems, ((currentTransPage - 1) * transItemsPerPage), Math.min(currentTransPage * transItemsPerPage, totalItems), currentTransPage, totalPages);
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--danger);">Error loading data.</td></tr>`;
+            }
         }
 
         // --- CUSTOMER MULTI-ITEMS LOGIC ---
@@ -5629,8 +5636,8 @@
         }
         
         function editTrans(i) { 
-            const t = transactions[i]; 
-            document.getElementById('editTransIdx').value = i; 
+            const t = serverPaginatedTrans[i]; 
+            document.getElementById('editTransIdx').value = t.id; 
             document.getElementById('transModalTitle').innerText = "✏️ Edit Entry";
             
             let formattedDate = "";
@@ -5702,14 +5709,21 @@
                     customers.splice(idx, 1);
                 }
                 if(type === 'trans') {
-                    await fetch(`${API_BASE}/transactions/${transactions[idx].id}`, { method: 'DELETE' });
-                    transactions.splice(idx, 1);
-                    renderTrans(); // Refresh the "All Trans" list
-                    renderTransFeed(); // Refresh the "Daily Feed" to show the entry as pending again
+                    let targetId = serverPaginatedTrans[idx].id;
+                    await fetch(`${API_BASE}/transactions/${targetId}`, { method: 'DELETE' });
+                    transactions = transactions.filter(t => String(t.id) !== String(targetId));
+                    renderTrans(); renderTransFeed();
                     if (document.getElementById('general-bill-view') && !document.getElementById('general-bill-view').classList.contains('hidden')) {
                         renderGeneralBills();
                     }
-                    return; // Prevent full view reload
+                    return;
+                }
+                if(type === 'gb') {
+                    let targetId = serverPaginatedGb[idx].id;
+                    await fetch(`${API_BASE}/transactions/${targetId}`, { method: 'DELETE' });
+                    transactions = transactions.filter(t => String(t.id) !== String(targetId));
+                    renderGeneralBills();
+                    return;
                 }
                 if(type === 'user') {
                     await fetch(`${API_BASE}/users/${users[idx].id}`, { method: 'DELETE' });
