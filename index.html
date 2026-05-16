@@ -154,6 +154,15 @@
         .profile-list-item:last-child { border-bottom: none; }
         :root.light-mode .profile-list-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
         #header-company-name::-webkit-scrollbar { display: none; }
+        
+        /* BOTTOM NAVIGATION BAR (APP-LIKE FEEL) */
+        #bottom-nav { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(255,255,255,0.08); padding-bottom: env(safe-area-inset-bottom, 0px); }
+        :root.light-mode #bottom-nav { background: rgba(255, 255, 255, 0.95); border-top: 1px solid rgba(0,0,0,0.1); box-shadow: 0 -4px 15px rgba(0,0,0,0.05); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; font-size: 11px; text-decoration: none; cursor: pointer; flex: 1; transition: 0.2s; background: transparent; border: none; outline: none; padding: 10px 5px; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); border-radius: 12px; }
+        .nav-item.active { color: var(--primary); font-weight: bold; transform: translateY(-3px); }
+        .nav-item span { font-size: 22px; margin-bottom: 4px; filter: grayscale(1); transition: 0.3s; }
+        .nav-item.active span { filter: grayscale(0); transform: scale(1.15); drop-shadow: 0 4px 6px rgba(99, 102, 241, 0.4); }
     </style>
 </head>
 <body>
@@ -180,6 +189,10 @@
             </select>
             <span id="header-role" style="background:var(--warning); color:black; padding:4px 10px; border-radius:10px; font-size:12px; font-weight:bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px;"></span>
         </div>
+    </div>
+     <!-- BOTTOM NAVIGATION BAR -->
+    <div id="bottom-nav" class="hidden" style="position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0,0,0,0.3); z-index: 998; transition: transform 0.3s ease-in-out;">
+        <!-- Buttons will be injected here via JS -->
     </div>
 
     <!-- GLOBAL LICENSE BANNER -->
@@ -224,7 +237,7 @@
         <p style="color: #94a3b8; margin-bottom: 30px;">Select your Role to continue</p>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
             <div class="role-card" onclick="showLogin('Owner')"><h3>👑</h3><h4>Owner</h4></div>
-            <div class="role-card" onclick="showLogin('Manager')"><h3>💼</h3><h4>Manager</h4></div>
+            <div class="role-card" onclick="showLogin('Operator')"><h3>💼</h3><h4>Operator</h4></div>
             <div class="role-card" onclick="showLogin('Milk Man')"><h3>🛵</h3><h4>Delivery Man</h4></div>
             <div class="role-card" onclick="showLogin('Customer')"><h3>🙍‍♂️</h3><h4>Customer</h4></div>
         </div>
@@ -336,7 +349,7 @@
             <button id="btn-acc" class="btn-save box-btn" style="background:#1e40af" onclick="showView('accounts-user')"><span style="font-size:28px; margin-bottom:8px;">💰</span>Accounts Summary</button>
             <button id="btn-owner-master" class="btn-save box-btn" style="background:#6d28d9" onclick="showView('owner-master')"><span style="font-size:28px; margin-bottom:8px;">👑</span>Manage Owners</button>
             <button id="btn-referral-master" class="btn-save box-btn hidden" style="background:#0ea5e9" onclick="showView('referral-master')"><span style="font-size:28px; margin-bottom:8px;">🤝</span>Manage Referrals</button>
-            <button id="btn-manager-master" class="btn-save box-btn hidden" style="background:#059669" onclick="showView('manager-master')"><span style="font-size:28px; margin-bottom:8px;">💼</span>Manage Managers</button>
+            <button id="btn-manager-master" class="btn-save box-btn hidden" style="background:#059669" onclick="showView('manager-master')"><span style="font-size:28px; margin-bottom:8px;">💼</span>Manage Operators</button>
             <button id="btn-license-master" class="btn-save box-btn hidden" style="background:#b91c1c" onclick="showView('license-master')"><span style="font-size:28px; margin-bottom:8px;">🔑</span>Manage Licenses</button>
             <button id="btn-manual-bill" class="btn-save box-btn hidden" style="background:#0284c7" onclick="showView('general-bill-view')"><span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill</button>
             
@@ -431,8 +444,7 @@
             </div>
         </div>
         <div style="overflow-x: auto; margin-top: 20px;">
-            <table><thead><tr><th>Sr.</th><th>Name</th><th>ID</th><th>Route</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="userTableBody"></tbody></table>
-            <div id="UserPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+            <div id="UserPagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <div style="font-size:13px; color:#94a3b8;" id="UserPageInfo">Showing 0 entries</div>
                 <div style="display:flex; gap:5px; align-items:center;">
                     <select id="UserPerPage" onchange="currentUserPage=1; userItemsPerPage=parseInt(this.value); renderUsers()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -444,6 +456,7 @@
                     <button id="btnUserNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeUserPage(1)">Next ➡️</button>
                 </div>
             </div>
+            <table><thead><tr><th>Sr.</th><th>Name</th><th>ID</th><th>Route</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="userTableBody"></tbody></table>
         </div>
     </div>
 
@@ -510,9 +523,7 @@
                 </div>
             </div>
             <div style="overflow-x: auto; margin-top: 20px;">
-                <table style="min-width: 600px;"><thead><tr><th>Sr.</th><th>Name</th><th>Route & Shift</th><th>Delivery Man</th><th>Mobile & ID</th><th>Actions</th></tr></thead><tbody id="customerTableBody"></tbody></table>
-                
-                <div id="CustPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                <div id="CustPagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                     <div style="font-size:13px; color:#94a3b8;" id="CustPageInfo">Showing 0 customers</div>
                     <div style="display:flex; gap:5px; align-items:center;">
                         <select id="CustPerPage" onchange="currentCustPage=1; custItemsPerPage=parseInt(this.value); renderCustomers()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -524,6 +535,7 @@
                         <button id="btnCustNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeCustPage(1)">Next ➡️</button>
                     </div>
                 </div>
+                <table style="min-width: 600px;"><thead><tr><th>Sr.</th><th>Name</th><th>Route & Shift</th><th>Delivery Man</th><th>Mobile & ID</th><th>Actions</th></tr></thead><tbody id="customerTableBody"></tbody></table>
             </div>
         </div>
 
@@ -567,8 +579,7 @@
             <div id="trans-tab-all" class="hidden">
                 <input type="text" id="searchTrans" placeholder="🔍 Search Entry..." onkeyup="currentTransPage=1; renderTrans()" style="flex:1; width:100%; padding:10px; border-radius:8px; margin-bottom:15px; background:rgba(0,0,0,0.2); color:white; border:1px solid #475569; box-sizing:border-box;">
                 <div style="overflow-x:auto;">
-                    <table><thead><tr><th>Sr.</th><th>Date</th><th>Customer</th><th>Item</th><th>Total</th><th>Actions</th></tr></thead><tbody id="transTableBody"></tbody></table>
-                    <div id="TransPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                    <div id="TransPagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                         <div style="font-size:13px; color:#94a3b8;" id="TransPageInfo">Showing 0 entries</div>
                         <div style="display:flex; gap:5px; align-items:center;">
                             <select id="TransPerPage" onchange="currentTransPage=1; transItemsPerPage=parseInt(this.value); renderTrans()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -578,6 +589,7 @@
                             <button id="btnTransNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeTransPage(1)">Next ➡️</button>
                         </div>
                     </div>
+                    <table><thead><tr><th>Sr.</th><th>Date</th><th>Customer</th><th>Item</th><th>Total</th><th>Actions</th></tr></thead><tbody id="transTableBody"></tbody></table>
                 </div>
             </div>
         </div>
@@ -634,8 +646,7 @@
             </div>
             <div id="gbSummary" style="margin-bottom:15px; font-size:18px; font-weight:bold; color:var(--success); text-align:right;"></div>
             <div style="overflow-x:auto;">
-                <table><thead><tr><th>Sr.</th><th>Bill No & Date</th><th>Customer</th><th>Item</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="gbTableBody"></tbody></table>
-                <div id="GbPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+                <div id="GbPagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                     <div style="font-size:13px; color:#94a3b8;" id="GbPageInfo">Showing 0 entries</div>
                     <div style="display:flex; gap:5px; align-items:center;">
                         <select id="GbPerPage" onchange="currentGbPage=1; gbItemsPerPage=parseInt(this.value); renderGeneralBills()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -645,6 +656,7 @@
                         <button id="btnGbNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeGbPage(1)">Next ➡️</button>
                     </div>
                 </div>
+                <table><thead><tr><th>Sr.</th><th>Bill No & Date</th><th>Customer</th><th>Item</th><th>Amount</th><th>Actions</th></tr></thead><tbody id="gbTableBody"></tbody></table>
             </div>
         </div>
     </div>
@@ -680,8 +692,7 @@
             </div>
         </div>
         <div style="overflow-x: auto; margin-top: 20px;">
-            <table><thead><tr><th>Sr.</th><th>Item Name</th><th>Rate (₹)</th><th>Actions</th></tr></thead><tbody id="productTableBody"></tbody></table>
-            <div id="ProductPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+            <div id="ProductPagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <div style="font-size:13px; color:#94a3b8;" id="ProductPageInfo">Showing 0 entries</div>
                 <div style="display:flex; gap:5px; align-items:center;">
                     <select id="ProductPerPage" onchange="currentProductPage=1; productItemsPerPage=parseInt(this.value); renderProducts()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -691,6 +702,7 @@
                     <button id="btnProductNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeProductPage(1)">Next ➡️</button>
                 </div>
             </div>
+            <table><thead><tr><th>Sr.</th><th>Item Name</th><th>Rate (₹)</th><th>Actions</th></tr></thead><tbody id="productTableBody"></tbody></table>
         </div>
     </div>
     <!-- REQUEST MASTER -->
@@ -700,8 +712,7 @@
             <input type="text" id="searchReq" placeholder="🔍 Search Request..." onkeyup="currentReqPage=1; renderOwnerRequests()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
         </div>
         <div style="overflow-x:auto;">
-            <table><thead><tr><th>Sr.</th><th>Date</th><th>Customer</th><th>Details</th><th>Status</th><th>Actions</th></tr></thead><tbody id="requestTableBody"></tbody></table>
-            <div id="ReqPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+            <div id="ReqPagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <div style="font-size:13px; color:#94a3b8;" id="ReqPageInfo">Showing 0 entries</div>
                 <div style="display:flex; gap:5px; align-items:center;">
                     <select id="ReqPerPage" onchange="currentReqPage=1; reqItemsPerPage=parseInt(this.value); renderOwnerRequests()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -711,6 +722,7 @@
                     <button id="btnReqNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeReqPage(1)">Next ➡️</button>
                 </div>
             </div>
+            <table><thead><tr><th>Sr.</th><th>Date</th><th>Customer</th><th>Details</th><th>Status</th><th>Actions</th></tr></thead><tbody id="requestTableBody"></tbody></table>
         </div>
     </div>
 
@@ -738,8 +750,7 @@
             </div>
         </div>
         <div style="overflow-x:auto;">
-            <table><thead><tr><th>Sr.</th><th>Route Name</th><th>Actions</th></tr></thead><tbody id="routeTableBody"></tbody></table>
-            <div id="RoutePagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+            <div id="RoutePagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <div style="font-size:13px; color:#94a3b8;" id="RoutePageInfo">Showing 0 entries</div>
                 <div style="display:flex; gap:5px; align-items:center;">
                     <select id="RoutePerPage" onchange="currentRoutePage=1; routeItemsPerPage=parseInt(this.value); renderRoutes()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -749,6 +760,7 @@
                     <button id="btnRouteNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeRoutePage(1)">Next ➡️</button>
                 </div>
             </div>
+            <table><thead><tr><th>Sr.</th><th>Route Name</th><th>Actions</th></tr></thead><tbody id="routeTableBody"></tbody></table>
         </div>
     </div>
 
@@ -760,8 +772,7 @@
         </div>
         <p style="color: #94a3b8; margin-bottom: 20px;">Manage registered dairy owners and reset their passwords.</p>
         <div style="overflow-x:auto;">
-            <table><thead><tr><th>Sr.</th><th>Name</th><th>Company</th><th>Login ID</th><th>Email</th><th>Actions</th></tr></thead><tbody id="ownerTableBody"></tbody></table>
-            <div id="OwnerPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+            <div id="OwnerPagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <div style="font-size:13px; color:#94a3b8;" id="OwnerPageInfo">Showing 0 entries</div>
                 <div style="display:flex; gap:5px; align-items:center;">
                     <select id="OwnerPerPage" onchange="currentOwnerPage=1; ownerItemsPerPage=parseInt(this.value); renderOwners()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -771,6 +782,7 @@
                     <button id="btnOwnerNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeOwnerPage(1)">Next ➡️</button>
                 </div>
             </div>
+            <table><thead><tr><th>Sr.</th><th>Name</th><th>Company</th><th>Login ID</th><th>Email</th><th>Actions</th></tr></thead><tbody id="ownerTableBody"></tbody></table>
         </div>
         <button class="btn-back" onclick="showView('main-menu')">Back</button>
     </div>
@@ -823,21 +835,21 @@
     <!-- MANAGER MASTER -->
     <div id="manager-master" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
-            <h2 style="margin:0;">💼 Manager Master</h2>
-            <input type="text" id="searchManager" placeholder="🔍 Search Manager..." onkeyup="currentManagerPage=1; renderManagers()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
-            <button class="btn-save" id="btnShowNewManager" style="width:auto; padding:10px 15px;" onclick="openNewManagerForm()">➕ New Manager</button>
+            <h2 style="margin:0;">💼 Operator Master</h2>
+            <input type="text" id="searchManager" placeholder="🔍 Search Operator..." onkeyup="currentManagerPage=1; renderManagers()" style="flex:1; min-width:150px; max-width:300px; padding:8px; margin:0; border-radius:8px;">
+            <button class="btn-save" id="btnShowNewManager" style="width:auto; padding:10px 15px;" onclick="openNewManagerForm()">➕ New Operator</button>
         </div>
         <div id="manager-form-section" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:10005; display:flex; justify-content:center; align-items:flex-start; padding:80px 20px 20px 20px; backdrop-filter: blur(5px); overflow-y:auto;">
             <div class="modal-box" style="background:var(--card); width:100%; max-width:500px; padding:20px; border-radius:12px; border:1px solid #475569; max-height:calc(100vh - 100px); overflow-y:auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 id="managerFormTitle" style="margin:0; color:var(--primary);">➕ New Manager</h3>
+                    <h3 id="managerFormTitle" style="margin:0; color:var(--primary);">➕ New Operator</h3>
                     <button type="button" onclick="closeManagerForm()" style="background:transparent; color:var(--danger); border:none; font-size:24px; cursor:pointer;">&times;</button>
                 </div>
                 <div class="grid-form" style="margin-bottom:0;">
             <input type="hidden" id="editManagerIdx">
-            <input type="text" id="mId" placeholder="Manager ID (Auto 6-Digit)" readonly style="opacity:0.7">
+            <input type="text" id="mId" placeholder="Operator ID (Auto 6-Digit)" readonly style="opacity:0.7">
             <input type="text" id="mUsername" placeholder="Create Login Username">
-            <input type="text" id="mName" placeholder="Manager Name" required>
+            <input type="text" id="mName" placeholder="Operator Name" required>
             <input type="text" id="mMobile" placeholder="Mobile Number (Optional)" maxlength="10" minlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
             <input type="text" id="mPass" placeholder="Set Password">
             <input type="text" id="mAddress" placeholder="Address (For Bill Print)">
@@ -845,22 +857,21 @@
             <div style="grid-column: 1 / -1; display:flex; align-items:center; gap:10px; margin-top: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
                 <img id="mLogoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23cbd5e1'/%3E%3Ctext x='50' y='54' fill='%23475569' font-size='16' font-family='sans-serif' font-weight='bold' text-anchor='middle'%3ELOGO%3C/text%3E%3C/svg%3E" style="width:80px; height:50px; object-fit:contain; border:1px solid #475569; background:white;">
                 <div style="flex:1;">
-                    <label style="font-size:12px; color:var(--primary); font-weight:bold;">Manager's Bill Logo (Optional)</label>
+                    <label style="font-size:12px; color:var(--primary); font-weight:bold;">Operator's Bill Logo (Optional)</label>
                     <input type="file" id="mLogoInput" accept="image/*" style="padding: 5px; font-size: 12px; width: 100%; margin-top: 5px;" onchange="handleManagerLogoUpload(event)">
                     <input type="hidden" id="mLogoBase64">
                 </div>
             </div>
 
             <div style="display:flex; gap:10px; grid-column: 1 / -1; margin-top: 10px;">
-                <button id="btnManagerSave" class="btn-save" style="flex:1;" onclick="saveManager()">Save Manager</button>
+                <button id="btnManagerSave" class="btn-save" style="flex:1;" onclick="saveManager()">Save Operator</button>
                 <button class="btn-back" style="flex:1; margin:0;" onclick="closeManagerForm()">Cancel</button>
             </div>
                 </div>
             </div>
         </div>
         <div style="overflow-x:auto;">
-            <table><thead><tr><th>Sr.</th><th>Name</th><th>Manager ID</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="managerTableBody"></tbody></table>
-            <div id="ManagerPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+            <div id="ManagerPagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <div style="font-size:13px; color:#94a3b8;" id="ManagerPageInfo">Showing 0 entries</div>
                 <div style="display:flex; gap:5px; align-items:center;">
                     <select id="ManagerPerPage" onchange="currentManagerPage=1; managerItemsPerPage=parseInt(this.value); renderManagers()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -870,18 +881,36 @@
                     <button id="btnManagerNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeManagerPage(1)">Next ➡️</button>
                 </div>
             </div>
+            <table><thead><tr><th>Sr.</th><th>Name</th><th>Operator ID</th><th>Mobile</th><th>Actions</th></tr></thead><tbody id="managerTableBody"></tbody></table>
         </div>
     </div>
 
-    <!-- NEW: SHARE SUCCESS MODAL (Fixes auto-share block) -->
-    <div id="shareSuccessModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px;">
-        <div class="modal-box" style="background:var(--card); width:100%; max-width:400px; padding:25px; border-radius:16px; border:1px solid #475569; text-align:center;">
-            <div style="font-size: 50px; margin-bottom: 10px;">🎉</div>
-            <h3 id="shareSuccessTitle" style="margin-top:0; margin-bottom: 10px; color:var(--success); font-size: 22px;">Saved Successfully!</h3>
-            <p style="color:#94a3b8; font-size:14px; margin-top:0; margin-bottom:20px;">Do you want to send the ID & Password to <b id="shareSuccessName" style="color:var(--text)"></b> via WhatsApp/SMS?</p>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-save" id="btnShareNowAction" style="background:var(--success);">📤 Share Now</button>
-                <button class="btn-back" style="margin:0;" onclick="document.getElementById('shareSuccessModal').classList.add('hidden')">Close</button>
+    <!-- BEAUTIFUL SHARE SUCCESS MODAL -->
+    <div id="shareSuccessModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(15, 23, 42, 0.85); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(8px);">
+        <div class="modal-box" style="background: linear-gradient(145deg, var(--card), #0f172a); width:100%; max-width:400px; padding:30px 25px; border-radius:24px; border:1px solid rgba(16, 185, 129, 0.2); text-align:center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);">
+            <div style="font-size: 50px; margin-bottom: 15px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">🎉</div>
+            <h3 id="shareSuccessTitle" style="margin-top:0; margin-bottom: 10px; color:var(--success); font-size: 24px; letter-spacing: 0.5px;">Saved Successfully!</h3>
+            <p style="color:#94a3b8; font-size:14px; margin-top:0; margin-bottom:25px;">Do you want to send the ID & Password to <b id="shareSuccessName" style="color:var(--text)"></b>?</p>
+            <div style="display:flex; gap:12px;">
+                <button class="btn-save" id="btnShareNowAction" style="background: linear-gradient(135deg, #10b981, #059669); flex:1; padding: 12px; border-radius: 12px; font-size: 15px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">📤 Share Now</button>
+                <button class="btn-back" style="margin:0; flex:1; padding: 12px; border-radius: 12px; font-size: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);" onclick="document.getElementById('shareSuccessModal').classList.add('hidden')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BEAUTIFUL CUSTOM SHARE MODAL (Replaces prompt/alert) -->
+    <div id="customShareModal" class="hidden" style="position: fixed; top:0; left:0; right:0; bottom:0; background:rgba(15, 23, 42, 0.85); z-index:100000; display:flex; justify-content:center; align-items:center; padding:20px; backdrop-filter: blur(8px);">
+        <div class="modal-box" style="background: linear-gradient(145deg, var(--card), #0f172a); width:100%; max-width:400px; padding:30px 25px; border-radius:24px; border:1px solid rgba(99, 102, 241, 0.2); text-align:center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);">
+            <div style="font-size: 50px; margin-bottom: 15px; text-shadow: 0 10px 20px rgba(0,0,0,0.5);">📤</div>
+            <h3 style="margin-top:0; margin-bottom: 10px; color:var(--primary); font-size: 24px; letter-spacing: 0.5px;">Share Details</h3>
+            <p style="color:#94a3b8; font-size:14px; margin-top:0; margin-bottom:20px;">Send login details to <b id="shareModalName" style="color:var(--text)"></b></p>
+            <div id="shareModalPassContainer" style="margin-bottom:20px;">
+                <input type="text" id="shareModalPass" placeholder="Enter Password (Optional)" style="width:100%; padding:12px; text-align:center; border-radius:12px; background:rgba(0,0,0,0.2); border:1px solid #475569; color:white; font-size:15px; outline:none;">
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button class="btn-save" id="btnShareWhatsApp" style="background: linear-gradient(135deg, #25D366, #128C7E); font-size: 16px; padding: 12px; border-radius: 12px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);">📱 Send via WhatsApp</button>
+                <button class="btn-save" id="btnShareCopy" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.1); box-shadow: none; font-size: 16px; padding: 12px; border-radius: 12px;">📋 Copy to Clipboard</button>
+                <button class="btn-back" style="margin-top:5px; border:none; background:transparent; font-size: 15px;" onclick="document.getElementById('customShareModal').classList.add('hidden')">Cancel</button>
             </div>
         </div>
     </div>
@@ -916,8 +945,7 @@
             </div>
         </div>
         <div style="overflow-x:auto;">
-            <table><thead><tr><th>Sr.</th><th>License Key</th><th>Duration</th><th>Status</th><th>Used By</th><th>Used On</th><th>Actions</th></tr></thead><tbody id="licenseTableBody"></tbody></table>
-            <div id="LicensePagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+            <div id="LicensePagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
                 <div style="font-size:13px; color:#94a3b8;" id="LicensePageInfo">Showing 0 entries</div>
                 <div style="display:flex; gap:5px; align-items:center;">
                     <select id="LicensePerPage" onchange="currentLicensePage=1; licenseItemsPerPage=parseInt(this.value); renderLicenses()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -927,6 +955,7 @@
                     <button id="btnLicenseNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeLicensePage(1)">Next ➡️</button>
                 </div>
             </div>
+            <table><thead><tr><th>Sr.</th><th>License Key</th><th>Duration</th><th>Status</th><th>Used By</th><th>Used On</th><th>Actions</th></tr></thead><tbody id="licenseTableBody"></tbody></table>
         </div>
         <button class="btn-back" onclick="showView('main-menu')">Back</button>
     </div>
@@ -947,9 +976,7 @@
             </div>
             <input type="text" id="searchAccount" placeholder="🔍 Search Account..." onkeyup="currentAccPage=1; renderAccounts()" style="flex:1; min-width:150px; padding:0 8px; height:38px; box-sizing:border-box; margin:0; border-radius:8px;">
         </div>
-        <div id="monthlyReport"></div>
-        <button class="btn-back" onclick="showView('main-menu')">⬅️ Back to Menu</button>
-        <div id="AccPagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+        <div id="AccPagination" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <div style="font-size:13px; color:#94a3b8;" id="AccPageInfo">Showing 0 entries</div>
             <div style="display:flex; gap:5px; align-items:center;">
                 <select id="AccPerPage" onchange="currentAccPage=1; accItemsPerPage=parseInt(this.value); renderAccounts()" style="padding:6px; border-radius:6px; background:var(--input); color:white; border:1px solid #475569; width:auto; margin:0; outline:none; cursor:pointer;">
@@ -959,6 +986,8 @@
                 <button id="btnAccNext" class="badge" style="background:var(--primary); padding:6px 12px; font-size:13px;" onclick="changeAccPage(1)">Next ➡️</button>
             </div>
         </div>
+        <div id="monthlyReport"></div>
+        <button class="btn-back" onclick="showView('main-menu')">⬅️ Back to Menu</button>
     </div>
 
     <div id="customer-self-view" class="container hidden">
@@ -1777,30 +1806,20 @@
                 window.AndroidPrint.shareApp(shareData.title, shareData.text, shareData.url);
             } else if (navigator.share && window.isSecureContext) {
                 navigator.share(shareData).catch((err) => {
-                    if(err.name !== "AbortError") fallbackShare(shareData.text + " " + shareData.url);
+                    if(err.name !== "AbortError") copyAppText(shareData.text + "\n" + shareData.url);
                 });
             } else {
-                fallbackShare(shareData.text + " " + shareData.url);
+                copyAppText(shareData.text + "\n" + shareData.url);
             }
         }
 
-        // --- NEW WHATSAPP DIRECT SHARE FALLBACK ---
-        function fallbackShare(text, mobile = null) {
-            let waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-            if (mobile && String(mobile).length === 10) {
-                waUrl = `https://api.whatsapp.com/send?phone=91${mobile}&text=${encodeURIComponent(text)}`;
-            }
-
-            if (confirm("📱 Click OK to open WhatsApp directly.\n\nClick Cancel to just copy the text.")) {
-                window.open(waUrl, '_blank');
+        function copyAppText(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert("✅ App Link Copied! You can paste it anywhere.", "success");
+                }).catch(()=> { alert("Failed to copy link automatically.", "info"); });
             } else {
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        alert("✅ Copied to clipboard! You can paste it anywhere.", "success");
-                    }).catch(() => prompt("Copy the text below:", text));
-                } else {
-                    prompt("Copy the text below:", text);
-                }
+                alert("Please copy the link from the URL bar.", "info");
             }
         }
 
@@ -1820,28 +1839,42 @@
             if (username && String(username).trim() !== '') loginId = username;
             if (mobile && String(mobile).trim() !== '') loginId = mobile; // Highest priority to Mobile
 
-            let passText = password;
-            if (!passText) {
-                passText = prompt(`Enter Password for ${name} to share (Leave blank to hide):`);
-                if (passText === null) return; // Cancelled
-                if (passText.trim() === '') passText = "******** (Contact Owner)";
+            document.getElementById('shareModalName').innerText = name;
+            let passInput = document.getElementById('shareModalPass');
+            
+            if (password) {
+                passInput.value = password;
+                document.getElementById('shareModalPassContainer').classList.add('hidden');
+            } else {
+                passInput.value = '';
+                document.getElementById('shareModalPassContainer').classList.remove('hidden');
             }
+            
+            document.getElementById('customShareModal').classList.remove('hidden');
 
-            let webLink = window.location.origin + window.location.pathname;
-            let appLink = "https://my-vender-app.com"; // Yahan aap apna original App link daal sakte hain
-
-            let text = `Hello ${name},\nHere are your ${role} Login Details:\n\nID: ${loginId}\nPassword: ${passText}\n\nApp Link: ${appLink}\nWeb Link: ${webLink}`;
-            const shareData = { title: `${role} Login Details`, text: text };
-
-            if (window.AndroidPrint && window.AndroidPrint.shareApp) { 
-                window.AndroidPrint.shareApp(shareData.title, shareData.text, webLink); 
-            } else if (navigator.share && window.isSecureContext) { 
-                navigator.share(shareData).catch((err) => { 
-                    if(err.name !== "AbortError") fallbackShare(text, mobile); 
-                }); 
-            } else { 
-                fallbackShare(text, mobile); 
-            }
+            const generateText = () => {
+                let passText = passInput.value.trim();
+                if(!passText && password) passText = password;
+                if(!passText) passText = "******** (Contact Owner)";
+                let webLink = window.location.origin + window.location.pathname;
+                return `Hello ${name},\nHere are your ${role} Login Details:\n\nID: ${loginId}\nPassword: ${passText}\n\nWeb Link: ${webLink}`;
+            };
+            
+            document.getElementById('btnShareWhatsApp').onclick = () => {
+                let text = generateText();
+                let waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+                if (mobile && String(mobile).length === 10) { waUrl = `https://api.whatsapp.com/send?phone=91${mobile}&text=${encodeURIComponent(text)}`; }
+                window.open(waUrl, '_blank');
+                document.getElementById('customShareModal').classList.add('hidden');
+            };
+            
+            document.getElementById('btnShareCopy').onclick = () => {
+                let text = generateText();
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(text).then(() => { alert("✅ Copied to clipboard!", "success"); }).catch(() => { alert("Failed to copy. Try WhatsApp instead.", "error"); });
+                } else { alert("Copying not supported here. Try WhatsApp instead.", "error"); }
+                document.getElementById('customShareModal').classList.add('hidden');
+            };
         }
 
         // --- SUBSCRIPTION & LICENSE KEY LOGIC ---
@@ -2105,7 +2138,7 @@
                 'btn-acc': '<span style="font-size:28px; margin-bottom:8px;">💰</span>Accounts Summary',
                 'btn-owner-master': '<span style="font-size:28px; margin-bottom:8px;">👑</span>Manage Owners',
                 'btn-referral-master': '<span style="font-size:28px; margin-bottom:8px;">🤝</span>Manage Referrals',
-                'btn-manager-master': '<span style="font-size:28px; margin-bottom:8px;">💼</span>Manage Managers',
+                'btn-manager-master': '<span style="font-size:28px; margin-bottom:8px;">💼</span>Manage Operators',
                 'btn-license-master': '<span style="font-size:28px; margin-bottom:8px;">🔑</span>Manage Licenses',
                 'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>General Bill',
                 'btn-self': '<span style="font-size:24px; margin:0;">📈</span>View Detailed My Report',
@@ -2132,7 +2165,7 @@
                 'btn-acc': '<span style="font-size:28px; margin-bottom:8px;">💰</span>हिसाब और रिपोर्ट',
                 'btn-owner-master': '<span style="font-size:28px; margin-bottom:8px;">👑</span>ओनर मैनेज करें',
                 'btn-referral-master': '<span style="font-size:28px; margin-bottom:8px;">🤝</span>रेफरल पार्टनर',
-                'btn-manager-master': '<span style="font-size:28px; margin-bottom:8px;">💼</span>मैनेजर (Managers)',
+                'btn-manager-master': '<span style="font-size:28px; margin-bottom:8px;">💼</span>ऑपरेटर (Operators)',
                 'btn-license-master': '<span style="font-size:28px; margin-bottom:8px;">🔑</span>लाइसेंस (Licenses)',
                 'btn-manual-bill': '<span style="font-size:28px; margin-bottom:8px;">🧾</span>जनरल बिल',
                 'btn-self': '<span style="font-size:24px; margin:0;">📈</span>मेरी रिपोर्ट देखें',
@@ -2201,6 +2234,9 @@
 
             let langBtn = document.getElementById('lang-btn');
             if(langBtn) langBtn.innerHTML = dict['langBtn'];
+            if (typeof updateBottomNav === 'function' && sessionStorage.getItem('lastView')) {
+                updateBottomNav(sessionStorage.getItem('lastView'));
+            }
         }
 
         // Close dropdown when clicking outside
@@ -2304,7 +2340,7 @@
             currentProfilePicBase64 = currentUser.profile_pic || '';
             document.getElementById('mmProfilePic').src = currentProfilePicBase64 || PL_USER;
             
-            if (currentUser.type === 'Owner' || currentUser.type === 'Manager') {
+            if (currentUser.type === 'Owner' || currentUser.type === 'Operator') {
                 currentQrCodeBase64 = currentUser.qr_code || '';
                 currentCompanyLogoBase64 = currentUser.company_logo || '';
                 document.getElementById('mmQrPic').src = currentQrCodeBase64 || PL_QR;
@@ -2312,7 +2348,7 @@
                 document.getElementById('mmOwnerSection').classList.remove('hidden');
                 
                 let logoSec = document.getElementById('mmLogoPic').parentElement;
-                if (currentUser.type === 'Manager') {
+                if (currentUser.type === 'Operator') {
                     if(logoSec) logoSec.classList.add('hidden');
                 } else {
                     if(logoSec) logoSec.classList.remove('hidden');
@@ -2332,7 +2368,7 @@
             let data = { ...currentUser };
             data.profile_pic = currentProfilePicBase64;
             
-            if (currentUser.type === 'Owner' || currentUser.type === 'Manager') {
+            if (currentUser.type === 'Owner' || currentUser.type === 'Operator') {
                 data.qr_code = currentQrCodeBase64;
                 data.company_logo = currentCompanyLogoBase64;
             }
@@ -2841,14 +2877,14 @@
 
             const isCust = currentUser.type === 'Customer';
             const isMilkMan = currentUser.type === 'Milk Man';
-            const isManager = currentUser.type === 'Manager';
+            const isManager = currentUser.type === 'Operator';
             
             document.getElementById('btn-um').classList.toggle('hidden', isCust || isMilkMan || isManager);
             document.getElementById('btn-lm').classList.toggle('hidden', isCust || isManager);
             document.getElementById('btn-acc').classList.toggle('hidden', isCust || isMilkMan || isManager);
             document.getElementById('btn-self').classList.toggle('hidden', !isCust);
             
-            document.getElementById('btn-prod').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin' && currentUser.type !== 'Manager');
+            document.getElementById('btn-prod').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin' && currentUser.type !== 'Operator');
             
             document.getElementById('btn-req').classList.toggle('hidden', isCust || isManager);
             document.getElementById('btn-route').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
@@ -2856,7 +2892,7 @@
             if(document.getElementById('btn-referral-master')) document.getElementById('btn-referral-master').classList.toggle('hidden', currentUser.type !== 'Admin');
             if(document.getElementById('btn-license-master')) document.getElementById('btn-license-master').classList.toggle('hidden', currentUser.type !== 'Admin');
             
-            if(document.getElementById('btn-manual-bill')) document.getElementById('btn-manual-bill').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin' && currentUser.type !== 'Manager');
+            if(document.getElementById('btn-manual-bill')) document.getElementById('btn-manual-bill').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin' && currentUser.type !== 'Operator');
             document.getElementById('btn-dropdown-req').classList.toggle('hidden', !isMilkMan);
             
             let btnMgr = document.getElementById('btn-manager-master');
@@ -2865,6 +2901,41 @@
             applyTranslations();
             applyLicenseRestrictions();
         }
+          // --- DYNAMIC BOTTOM NAVIGATION LOGIC ---
+        function updateBottomNav(currentViewId) {
+            const nav = document.getElementById('bottom-nav');
+            if (!currentUser || ['landing-page', 'login-page', 'register-page', 'loading-screen'].includes(currentViewId)) {
+                nav.classList.add('hidden');
+                document.body.style.paddingBottom = '20px';
+                return;
+            }
+            nav.classList.remove('hidden');
+            document.body.style.paddingBottom = '80px'; // Prevent content hidden behind nav
+
+            let html = '';
+            const makeBtn = (id, icon, textEn, textHi, targetView) => {
+                const isActive = currentViewId === targetView ? 'active' : '';
+                const text = currentLang === 'hi' ? textHi : textEn;
+                return `<button class="nav-item ${isActive}" onclick="showView('${targetView}')"><span>${icon}</span>${text}</button>`;
+            };
+
+            if (currentUser.type === 'Owner' || currentUser.type === 'Admin' || currentUser.type === 'Operator') {
+                html += makeBtn('nav-home', '🏠', 'Home', 'होम', 'main-menu');
+                if(currentUser.type !== 'Operator') html += makeBtn('nav-ledger', '📖', 'Ledger', 'खाता', 'ledger-master');
+                if(currentUser.type !== 'Operator') html += makeBtn('nav-acc', '💰', 'Accounts', 'हिसाब', 'accounts-user');
+                html += makeBtn('nav-bill', '🧾', 'Bills', 'बिल', 'general-bill-view');
+            } else if (currentUser.type === 'Milk Man') {
+                html += makeBtn('nav-feed', '🗓️', 'Feed', 'एंट्री', 'ledger-master');
+                html += makeBtn('nav-req', '💬', 'Reqs', 'मैसेज', 'request-master');
+            } else if (currentUser.type === 'Customer') {
+                html += makeBtn('nav-dash', '📈', 'Home', 'होम', 'customer-self-view');
+            }
+            
+            html += makeBtn('nav-profile', '👤', 'Profile', 'प्रोफाइल', 'profile-view');
+            nav.innerHTML = html;
+        }
+
+     
 
         function showView(id, isBack = false) {
             let targetEl = document.getElementById(id);
@@ -2893,6 +2964,7 @@
             let homeId = 'main-menu';
             if(currentUser) { if(currentUser.type === 'Milk Man') homeId = 'ledger-master'; else if(currentUser.type === 'Customer') homeId = 'customer-self-view'; }
             document.getElementById('global-back-btn').classList.toggle('hidden', id === homeId);
+            updateBottomNav(id);
             
             if(id === 'profile-view') {
                 document.getElementById('mainProfilePic').src = currentUser.profile_pic || PL_USER;
@@ -2911,7 +2983,7 @@
                 }
                 
                 document.getElementById('row-email').classList.toggle('hidden', currentUser.type !== 'Owner' && currentUser.type !== 'Admin');
-                document.getElementById('row-addr').classList.toggle('hidden', currentUser.type === 'Milk Man' || currentUser.type === 'Manager');
+                document.getElementById('row-addr').classList.toggle('hidden', currentUser.type === 'Milk Man' || currentUser.type === 'Operator');
                 document.getElementById('row-pass').classList.toggle('hidden', currentUser.type === 'Customer');
                 
                 // Set up License Display Row for Owner
@@ -3007,7 +3079,7 @@
                         gbFilterMgr.classList.remove('hidden');
                         let oldVal = gbFilterMgr.value;
                         gbFilterMgr.innerHTML = '<option value="ALL">-- All Bills --</option><option value="SELF">My Bills (Owner)</option>';
-                        users.filter(u => u.type === 'Manager' && u.company === currentUser.company).forEach(m => {
+                        users.filter(u => u.type === 'Operator' && u.company === currentUser.company).forEach(m => {
                             gbFilterMgr.innerHTML += `<option value="${m.login_id}">${m.name}'s Bills</option>`;
                         });
                         gbFilterMgr.value = oldVal || 'ALL';
@@ -3033,14 +3105,14 @@
         }
         function closeUserForm() { goBack(); }
         
-        // --- MANAGER STAFF ---
+        // --- OPERATOR STAFF ---
         function openNewManagerForm() {
             resetForm('manager');
-            document.getElementById('managerFormTitle').innerText = "➕ New Manager";
+            document.getElementById('managerFormTitle').innerText = "➕ New Operator";
             showView('manager-form-view');
             
             let baseId = String(currentUser.login_id);
-            let ownerManagers = users.filter(u => u.type === 'Manager' && u.company === currentUser.company);
+            let ownerManagers = users.filter(u => u.type === 'Operator' && u.company === currentUser.company);
             let maxSuffix = 0;
             ownerManagers.forEach(m => {
                 let idStr = String(m.login_id);
@@ -3082,7 +3154,7 @@
                 name: document.getElementById('mName').value,
                 username: document.getElementById('mUsername').value.trim(),
                 pass: document.getElementById('mPass').value,
-                type: 'Manager',
+                type: 'Operator',
                 company: currentUser.company,
                 mobile: document.getElementById('mMobile').value,
                 address: document.getElementById('mAddress').value,
@@ -3092,19 +3164,19 @@
             
             if(!data.name) return alert("Name is required!");
             if(data.mobile && data.mobile.length !== 10) return alert("Mobile Number must be exactly 10 digits!");
-            if(idx === "" && !data.pass) return alert("Password is required for new Manager!");
+            if(idx === "" && !data.pass) return alert("Password is required for new Operator!");
             if(idx !== "") data.id = users[idx].id;
             
             const res = await fetch(`${API_BASE}/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             const savedData = await res.json();
-            if (savedData.success === false) { alert(savedData.message); document.getElementById('btnManagerSave').innerText = idx === "" ? "Save Manager" : "Update Manager"; return; }
+            if (savedData.success === false) { alert(savedData.message); document.getElementById('btnManagerSave').innerText = idx === "" ? "Save Operator" : "Update Operator"; return; }
             
             if(idx === "") {
                 users.push(savedData);
-                openShareSuccessModal(savedData.name, 'Manager', savedData.login_id, savedData.username, savedData.mobile, rawPass);
+                openShareSuccessModal(savedData.name, 'Operator', savedData.login_id, savedData.username, savedData.mobile, rawPass);
             } else {
                 users[idx] = savedData;
-                alert("Manager updated successfully!", "success");
+                alert("Operator updated successfully!", "success");
             }
             resetForm('manager'); renderManagers();
             closeManagerForm();
@@ -3116,7 +3188,7 @@
             let searchQuery = searchInput ? searchInput.value.toLowerCase().trim() : '';
             let filtered = [];
             users.forEach((u, i) => {
-                if(u.type !== 'Manager') return;
+                if(u.type !== 'Operator') return;
                 if (currentUser.type === 'Admin' && currentAdminCompanyFilter !== 'ALL' && u.company !== currentAdminCompanyFilter) return;
                 if(searchQuery) {
                     let str = `${u.name} ${u.login_id} ${u.mobile}`.toLowerCase();
@@ -3137,13 +3209,13 @@
                 let {u, realIdx} = item; let srNo = startIndex + displayIdx + 1;
                 html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s"><td><b>${srNo}</b></td><td>${u.name}</td><td>${u.login_id}</td><td>${u.mobile||'-'}</td>
                 <td style="display:flex; gap:4px; flex-wrap:nowrap;">
-                    <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Manager')">Pass</button>
-                    <button class="badge" style="background:var(--success)" onclick="shareCredentials('${u.name.replace(/'/g, "\\'")}', 'Manager', '${u.login_id}', '${(u.username||'').replace(/'/g, "\\'")}', '${u.mobile||''}')">Share</button>
+                    <button class="badge" style="background:var(--primary)" onclick="resetPassword('${u.login_id}', 'Operator')">Pass</button>
+                    <button class="badge" style="background:var(--success)" onclick="shareCredentials('${u.name.replace(/'/g, "\\'")}', 'Operator', '${u.login_id}', '${(u.username||'').replace(/'/g, "\\'")}', '${u.mobile||''}')">Share</button>
                     <button class="badge" style="background:var(--warning); color:black" onclick="editManager(${realIdx})">Edit</button>
                     <button class="badge" style="background:var(--danger)" onclick="deleteItem(${realIdx}, 'user')">Del</button>
                 </td></tr>`;
             });
-            if(tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">No managers found.</td></tr>';
+            if(tbody) tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;">No operators found.</td></tr>';
             updatePaginationUI('Manager', totalItems, startIndex, endIndex, currentManagerPage, totalPages);
         }
 
@@ -3535,7 +3607,7 @@
                     }
                 } catch(e) {}
                 
-                if (currentUser.type === 'Manager' && createdBy !== currentUser.login_id) return;
+                if (currentUser.type === 'Operator' && createdBy !== currentUser.login_id) return;
                 if (currentUser.type === 'Owner') {
                     if (filterMgr === 'SELF' && createdBy !== currentUser.login_id) return;
                     if (filterMgr !== 'ALL' && filterMgr !== 'SELF' && createdBy !== filterMgr) return;
@@ -5543,8 +5615,8 @@
             document.getElementById('mLogoBase64').value = u.company_logo || '';
             document.getElementById('mLogoPreview').src = u.company_logo || PL_LOGO;
             document.getElementById('editManagerIdx').value = i;
-            document.getElementById('btnManagerSave').innerText = "Update Manager";
-            document.getElementById('managerFormTitle').innerText = "✏️ Edit Manager";
+            document.getElementById('btnManagerSave').innerText = "Update Operator";
+            document.getElementById('managerFormTitle').innerText = "✏️ Edit Operator";
             showView('manager-form-view');
         }
 
@@ -5770,7 +5842,7 @@
             document.getElementById('uUsername').value = "";
             }
             if(type==='manager') { 
-                document.getElementById('editManagerIdx').value = ""; document.getElementById('btnManagerSave').innerText = "Save Manager"; 
+                document.getElementById('editManagerIdx').value = ""; document.getElementById('btnManagerSave').innerText = "Save Operator"; 
                 ['mName','mPass','mMobile','mUsername','mAddress'].forEach(id=>{let el=document.getElementById(id); if(el) el.value="";}); 
                 document.getElementById('mId').value = ""; 
                 document.getElementById('mLogoBase64').value = "";
@@ -6091,8 +6163,8 @@
             let ownerMobile = currentUser.mobile || '';
             let companyLogo = currentUser.company_logo || '';
             
-            if (!companyLogo && (currentUser.type === 'Customer' || currentUser.type === 'Milk Man' || currentUser.type === 'Manager')) {
-                let owner = users.find(u => (u.type === 'Owner' || u.type === 'Manager') && u.company === currentUser.company);
+            if (!companyLogo && (currentUser.type === 'Customer' || currentUser.type === 'Milk Man' || currentUser.type === 'Operator')) {
+                let owner = users.find(u => (u.type === 'Owner' || u.type === 'Operator') && u.company === currentUser.company);
                 if (owner && owner.company_logo) companyLogo = owner.company_logo;
                 else if (currentUser.owner_logo) companyLogo = currentUser.owner_logo;
             }
