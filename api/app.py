@@ -208,7 +208,7 @@ def login():
             return jsonify({"success": False, "message": f"Account exists, but you are not registered as an {role}. Please select the correct portal!"})
         if role == 'Milk Man' and db_role != 'Milk Man':
             return jsonify({"success": False, "message": f"Account exists, but you are not registered as a {role}. Please select the correct portal!"})
-        if role == 'Manager' and db_role != 'Manager':
+        if role == 'Operator' and db_role != 'Operator':
             return jsonify({"success": False, "message": f"Account exists, but you are not registered as a {role}. Please select the correct portal!"})
 
     company = user.get('company', '')
@@ -317,7 +317,7 @@ def sync_data():
             print("Sync Error:", e)
             return []
 
-    if role in ['Owner', 'Admin', 'Manager']:
+    if role in ['Owner', 'Admin', 'Operator']:
         with ThreadPoolExecutor(max_workers=7) as executor:
             if role == 'Admin' or company == 'SuperAdmin':
                 f_u = executor.submit(lambda: supabase.table('sys_users').select(u_cols).execute().data)
@@ -344,7 +344,7 @@ def sync_data():
         routes = safe_get(f_ro)
         licenses = safe_get(f_l)
         
-        if role == 'Manager':
+        if role == 'Operator':
             filtered_t = []
             for t in transactions:
                 if t.get('shift') == 'General Bill':
@@ -414,7 +414,7 @@ def sync_data():
             f_p = executor.submit(lambda: supabase.table('sys_products').select('*').eq('company', company).execute().data)
             f_r = executor.submit(lambda: supabase.table('sys_requests').select('*').eq('cust_id', login_id).eq('company', company).order('id', desc=True).limit(15).execute().data)
             f_ro = executor.submit(lambda: supabase.table('sys_routes').select('*').eq('company', company).execute().data)
-            f_u = executor.submit(lambda: supabase.table('sys_users').select('*').in_('type', ['Owner', 'Milk Man', 'Manager']).eq('company', company).execute().data)
+            f_u = executor.submit(lambda: supabase.table('sys_users').select('*').in_('type', ['Owner', 'Milk Man', 'Operator']).eq('company', company).execute().data)
         
         owner_users = safe_get(f_u)
         if owner_users:
@@ -638,7 +638,7 @@ def reset_password():
     
     requester_role = requester_res.data[0]['type']
 
-    if requester_role == 'Admin' or (requester_role == 'Owner' and target_type in ['Milk Man', 'Customer', 'Manager']):
+    if requester_role == 'Admin' or (requester_role == 'Owner' and target_type in ['Milk Man', 'Customer', 'Operator']):
         hashed_pass = generate_password_hash(new_password)
         table_to_update = 'sys_customers' if target_type == 'Customer' else 'sys_users'
         id_field = 'cid' if target_type == 'Customer' else 'login_id'
