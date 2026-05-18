@@ -3613,8 +3613,8 @@
                     if (filterMgr !== 'ALL' && filterMgr !== 'SELF' && createdBy !== filterMgr) return;
                 }
 
-                    let serialNo = totalItems - ((currentGbPage - 1) * gbItemsPerPage) - displayIdx;
-                    let srNo = ((currentGbPage - 1) * gbItemsPerPage) + displayIdx + 1;
+                let serialNo = t.bill_no || (totalItems - ((currentGbPage - 1) * gbItemsPerPage) - displayIdx);
+                let srNo = ((currentGbPage - 1) * gbItemsPerPage) + displayIdx + 1;
                 let displayItem = formatItemDisplay(t.item);
                 
                 totalAmt += parseFloat(t.total || 0);
@@ -3651,7 +3651,7 @@
                 itemsArr = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
             }
             
-            let serialNo = t.id; // Fallback serial no
+             let serialNo = t.bill_no || t.id; // Fallback serial no
             
             let mobileNum = ''; let address = '';
             let creatorDetails = null;
@@ -3762,7 +3762,7 @@
                 renderGeneralBills(); 
                 alert(editIdx !== "" ? "General Bill Updated Successfully!" : "General Bill Created Successfully!");
                 
-                let serialNo = savedData.id || 1;
+                 let serialNo = savedData.bill_no || savedData.id || 1;
                 printBillHTML(serialNo, dateStr, custName, mobileNum, address, currentGbItems, grandTotal, creatorInfo);
                 clearGbForm();
                 
