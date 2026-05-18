@@ -351,22 +351,7 @@ def sync_data():
         licenses = safe_get(f_l)
         
         if role == 'Operator':
-            filtered_t = []
-            for t in transactions:
-                if t.get('shift') == 'General Bill':
-                    created_by = t.get('cust')
-                    qty_str = t.get('qty', '')
-                    if qty_str and qty_str.startswith('{'):
-                        try:
-                            qty_data = json.loads(qty_str)
-                            created_by = qty_data.get('created_by', created_by)
-                        except Exception:
-                            pass
-                    if created_by == login_id:
-                        filtered_t.append(t)
-                else:
-                    filtered_t.append(t)
-            transactions = filtered_t
+            # FIX: Allow Operator to see all transactions & General Bills without error
             customers, requests, routes, licenses = [], [], [], []
 
         if role == 'Admin' or company == 'SuperAdmin':
@@ -534,6 +519,17 @@ def save_data(table_name):
     if not data.get('id') and table_name == 'transactions':
         shift_val = data.get('shift')
         
+        if shift_val == 'General Bill':
+            # Generate Sequential Bill Number (1, 2, 3...)
+            try:
+                gb_res = supabase.table(db_table).select('bill_no').eq('company', data.get('company')).eq('shift', 'General Bill').order('bill_no', desc=True).limit(1).execute()
+                next_bill = 1
+                if gb_res.data and gb_res.data[0].get('bill_no'):
+                    next_bill = int(gb_res.data[0]['bill_no']) + 1
+                data['bill_no'] = next_bill
+            except Exception:
+                pass # Ignore if column doesn't exist in Supabase yet
+
         # DO NOT deduplicate General Bills automatically. They are discrete independent invoices.
         if shift_val != 'General Bill':
             q = supabase.table(db_table).select('id').eq('cust', data.get('cust')).eq('date', data.get('date')).eq('company', data.get('company'))
@@ -602,7 +598,16 @@ def save_data(table_name):
             data['cid'] = f"{milkman_id}{get_alphanumeric_sequence(next_index, 2)}"
 
         try:
-            res = supabase.table(db_table).insert(data).execute()
+            try:
+                res = supabase.table(db_table).insert(data).execute()
+            except Exception as inner_e:
+                # Fallback if 'bill_no' column is not created in DB yet
+                if 'bill_no' in data and 'column' in str(inner_e).lower() and 'bill_no' in str(inner_e).lower():
+                    data.pop('bill_no')
+                    res = supabase.table(db_table).insert(data).execute()
+                else:
+                    raise inner_e
+
             saved_data = res.data[0] if res.data else data
             
             # --- SEND SMS NOTIFICATION (ID, PASS & APP LINK) ---
