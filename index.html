@@ -3608,22 +3608,17 @@
                 let html = '';
                 serverPaginatedGb.forEach((t, displayIdx) => {
                 let createdBy = t.cust;
-                 if (t.qty) {
-                    if (typeof t.qty === 'string' && t.qty.startsWith('{')) {
-                        try { let info = JSON.parse(t.qty); createdBy = info.created_by || createdBy; } catch(e){}
-                    } else if (typeof t.qty === 'object') {
-                        createdBy = t.qty.created_by || createdBy;
+                try {
+                     if(t.qty && typeof t.qty === 'string' && t.qty.startsWith('{')) {
+                        let info = JSON.parse(t.qty);
+                        createdBy = info.created_by || createdBy;
                     }
-                }
+                } catch(e) {}
                 
-                let createdByStr = String(createdBy).toLowerCase();
-                let currentLoginStr = String(currentUser.login_id).toLowerCase();
-                
-                if (currentUser.type === 'Operator' && createdByStr !== currentLoginStr) return;
+                 if (currentUser.type === 'Operator' && String(createdBy) !== String(currentUser.login_id)) return;
                 if (currentUser.type === 'Owner') {
-                    let filterMgrStr = String(filterMgr).toLowerCase();
-                    if (filterMgr === 'SELF' && createdByStr !== currentLoginStr) return;
-                    if (filterMgr !== 'ALL' && filterMgr !== 'SELF' && createdByStr !== filterMgrStr) return;
+                    if (filterMgr === 'SELF' && String(createdBy) !== String(currentUser.login_id)) return;
+                    if (filterMgr !== 'ALL' && filterMgr !== 'SELF' && String(createdBy) !== String(filterMgr)) return;
                 }
 
                 let serialNo = t.bill_no || (totalItems - ((currentGbPage - 1) * gbItemsPerPage) - displayIdx);
@@ -3668,14 +3663,10 @@
             
             let mobileNum = ''; let address = '';
             let creatorDetails = null;
-              if (t.qty) {
-                if (typeof t.qty === 'string' && t.qty.startsWith('{')) {
-                    try { let info = JSON.parse(t.qty); mobileNum = info.mobile || ''; address = info.address || ''; creatorDetails = info; } catch(e){}
-                } else if (typeof t.qty === 'object') {
-                    mobileNum = t.qty.mobile || ''; address = t.qty.address || ''; creatorDetails = t.qty;
-                } else {
-                    mobileNum = (t.qty !== '-') ? t.qty : '';
-                }
+             if (t.qty && typeof t.qty === 'string' && t.qty.startsWith('{')) {
+                try { let info = JSON.parse(t.qty); mobileNum = info.mobile || ''; address = info.address || ''; creatorDetails = info; } catch(e){}
+            } else {
+                mobileNum = (t.qty !== '-' && t.qty) ? t.qty : '';
             }
 
             printBillHTML(serialNo, t.date, t.cust, mobileNum, address, itemsArr, parseFloat(t.total), creatorDetails);
@@ -3699,15 +3690,9 @@
             
             document.getElementById('gbCustName').value = t.cust;
             let mobileNum = ''; let address = '';
-             if (t.qty) {
-                if (typeof t.qty === 'string' && t.qty.startsWith('{')) {
-                    try { let info = JSON.parse(t.qty); mobileNum = info.mobile || ''; address = info.address || ''; } catch(e){}
-                } else if (typeof t.qty === 'object') {
-                    mobileNum = t.qty.mobile || ''; address = t.qty.address || '';
-                } else {
-                    mobileNum = (t.qty !== '-') ? t.qty : '';
-                }
-            }
+             if (t.qty && typeof t.qty === 'string' && t.qty.startsWith('{')) {
+                try { let info = JSON.parse(t.qty); mobileNum = info.mobile || ''; address = info.address || ''; } catch(e){}
+            } else { mobileNum = (t.qty !== '-' && t.qty) ? t.qty : ''; }
             
             document.getElementById('gbMobile').value = mobileNum;
             if(document.getElementById('gbAddress')) document.getElementById('gbAddress').value = address;
