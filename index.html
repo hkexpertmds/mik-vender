@@ -2818,6 +2818,7 @@
             if(id === 'owner-master') { renderOwners(); }
             if(id === 'referral-master') { renderReferrals(); }
             if(id === 'license-master') { renderLicenses(); }
+            if(id === 'general-bill-view') { renderGeneralBills(); }
             if(id === 'profile-view') { showView('profile-view'); }
         }
 
@@ -2837,6 +2838,26 @@
                     currentAdminCompanyFilter = 'ALL';
                 }
                 adminFilter.value = oldVal;
+            }
+        }
+
+        function populateGbFilter() {
+            let gbFilterMgr = document.getElementById('gbFilterManager');
+            if (gbFilterMgr) {
+                if (currentUser && currentUser.type === 'Owner') {
+                    gbFilterMgr.classList.remove('hidden');
+                    let oldVal = gbFilterMgr.value;
+                    let html = '<option value="ALL">-- All Bills --</option><option value="SELF">My Bills (Owner)</option>';
+                    users.filter(u => u.type === 'Operator' && u.company === currentUser.company).forEach(m => {
+                        html += `<option value="${m.login_id}">${m.name}'s Bills</option>`;
+                    });
+                    gbFilterMgr.innerHTML = html;
+                    
+                    let optionExists = Array.from(gbFilterMgr.options).some(opt => opt.value === oldVal);
+                    gbFilterMgr.value = optionExists ? oldVal : 'ALL';
+                } else {
+                    gbFilterMgr.classList.add('hidden');
+                }
             }
         }
 
@@ -3068,26 +3089,8 @@
             if(id === 'general-bill-view') {
                 clearGbForm();
                 switchGbTab('new');
-                
-                let itemSelect = document.getElementById('gbItemAdd');
-                itemSelect.innerHTML = '<option value="">-- Select Product --</option>';
-                products.forEach(p => { itemSelect.innerHTML += `<option value="${p.item_name}" data-rate="${p.rate}">${p.item_name} (${p.unit || '-'})</option>`; });
-                
-                let gbFilterMgr = document.getElementById('gbFilterManager');
-                if (gbFilterMgr) {
-                    if (currentUser.type === 'Owner') {
-                        gbFilterMgr.classList.remove('hidden');
-                        let oldVal = gbFilterMgr.value;
-                        gbFilterMgr.innerHTML = '<option value="ALL">-- All Bills --</option><option value="SELF">My Bills (Owner)</option>';
-                        users.filter(u => u.type === 'Operator' && u.company === currentUser.company).forEach(m => {
-                            gbFilterMgr.innerHTML += `<option value="${m.login_id}">${m.name}'s Bills</option>`;
-                        });
-                        gbFilterMgr.value = oldVal || 'ALL';
-                    } else {
-                        gbFilterMgr.classList.add('hidden');
-                    }
-                }
-
+                populateProductDropdowns();
+                populateGbFilter();
                 renderGeneralBills();
             }
         }
@@ -3725,7 +3728,7 @@
             let grandTotal = currentGbItems.reduce((sum, i) => sum + i.total, 0);
             
             let creatorInfo = { mobile: mobileNum, address: address, 
-                created_by: currentUser.login_id,
+                created_by: String(currentUser.login_id),
                 creator_name: currentUser.name,
                 creator_mobile: currentUser.mobile,
                 creator_address: currentUser.address || currentUser.addr,
@@ -3739,7 +3742,7 @@
                     if (existingTr && existingTr.qty) {
                         let existingQty = JSON.parse(existingTr.qty);
                         if (existingQty.created_by) {
-                        creatorInfo.created_by = existingQty.created_by;
+                    creatorInfo.created_by = String(existingQty.created_by);
                         creatorInfo.creator_name = existingQty.creator_name;
                         creatorInfo.creator_mobile = existingQty.creator_mobile;
                         creatorInfo.creator_address = existingQty.creator_address;
@@ -4544,12 +4547,23 @@
 
         // --- CUSTOMER MULTI-ITEMS LOGIC ---
         function populateProductDropdowns() {
-            const cItemAdd = document.getElementById('cItemAdd');
-            if(cItemAdd) {
+            const buildOptions = () => {
                 let html = '<option value="">-- Select Product --</option>';
                 products.forEach(p => html += `<option value="${p.item_name}" data-rate="${p.rate}">${p.item_name} (${p.unit || '-'})</option>`);
-                cItemAdd.innerHTML = html;
-            }
+                return html;
+            };
+            
+            const cItemAdd = document.getElementById('cItemAdd');
+            if(cItemAdd) cItemAdd.innerHTML = buildOptions();
+            
+            const gbItemAdd = document.getElementById('gbItemAdd');
+            if(gbItemAdd) gbItemAdd.innerHTML = buildOptions();
+            
+            const selfItemAdd = document.getElementById('selfItemAdd');
+            if(selfItemAdd) selfItemAdd.innerHTML = buildOptions();
+            
+            const tItemAdd = document.getElementById('tItemAdd');
+            if(tItemAdd) tItemAdd.innerHTML = buildOptions();
         }
         function autoFillProductRate() {
             const cItemAdd = document.getElementById('cItemAdd'); const opt = cItemAdd.options[cItemAdd.selectedIndex];
