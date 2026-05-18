@@ -599,15 +599,24 @@ def save_data(table_name):
                 if not creator_id:
                     creator_id = getattr(request, 'user_data', {}).get('login_id', '')
 
-                gb_query = supabase.table(db_table).select('bill_no').eq('company', data.get('company')).eq('shift', 'General Bill')
+                gb_query = supabase.table(db_table).select('bill_no', 'qty').eq('company', data.get('company')).eq('shift', 'General Bill')
                 if creator_id:
-                    gb_query = gb_query.ilike('qty', f'%"created_by":"{creator_id}"%')
+                    gb_query = gb_query.ilike('qty', f'%created_by%{creator_id}%')
                     
                 # FIX: gt('bill_no', 0) prevents NULLs from being picked as the highest value
-                gb_res = gb_query.gt('bill_no', 0).order('bill_no', desc=True).limit(1).execute()
+                gb_res = gb_query.gt('bill_no', 0).order('bill_no', desc=True).execute()
                 next_bill = 1
-                if gb_res.data and gb_res.data[0].get('bill_no'):
-                    next_bill = int(gb_res.data[0]['bill_no']) + 1
+                if gb_res.data:
+                    for row in gb_res.data:
+                        qty_str = row.get('qty', '')
+                        row_creator_id = ""
+                        if isinstance(qty_str, str) and 'created_by' in qty_str:
+                            try:
+                                row_creator_id = str(json.loads(qty_str).get('created_by', ''))
+                            except Exception: pass
+                        if not creator_id or row_creator_id == creator_id:
+                            next_bill = int(row['bill_no']) + 1
+                            break
                 data['bill_no'] = next_bill
             except Exception:
                 pass
@@ -901,10 +910,10 @@ def get_transactions_paginated():
             
             # Apply backend filtering for Operator visibility to fix empty pagination pages
             if role == 'Operator':
-                query = query.ilike('qty', f'%"created_by":"{login_id}"%')
+                query = query.ilike('qty', f'%created_by%{login_id}%')
             elif role == 'Owner' and filter_mgr != 'ALL':
-                if filter_mgr == 'SELF': query = query.ilike('qty', f'%"created_by":"{login_id}"%')
-                else: query = query.ilike('qty', f'%"created_by":"{filter_mgr}"%')
+                if filter_mgr == 'SELF': query = query.ilike('qty', f'%created_by%{login_id}%')
+                else: query = query.ilike('qty', f'%created_by%{filter_mgr}%')
         else:
             query = query.neq('shift', 'General Bill')
             if date_filter: query = query.eq('date', date_filter)
