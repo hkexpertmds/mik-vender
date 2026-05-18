@@ -519,16 +519,7 @@ def save_data(table_name):
     if not data.get('id') and table_name == 'transactions':
         shift_val = data.get('shift')
         
-        if shift_val == 'General Bill':
-            # Generate Sequential Bill Number (1, 2, 3...)
-            try:
-                gb_res = supabase.table(db_table).select('bill_no').eq('company', data.get('company')).eq('shift', 'General Bill').order('bill_no', desc=True).limit(1).execute()
-                next_bill = 1
-                if gb_res.data and gb_res.data[0].get('bill_no'):
-                    next_bill = int(gb_res.data[0]['bill_no']) + 1
-                data['bill_no'] = next_bill
-            except Exception:
-                pass # Ignore if column doesn't exist in Supabase yet
+        
 
         # DO NOT deduplicate General Bills automatically. They are discrete independent invoices.
         if shift_val != 'General Bill':
@@ -596,6 +587,16 @@ def save_data(table_name):
                 except ValueError:
                     pass
             data['cid'] = f"{milkman_id}{get_alphanumeric_sequence(next_index, 2)}"
+               
+        elif not data.get('id') and table_name == 'transactions' and data.get('shift') == 'General Bill':
+            try:
+                gb_res = supabase.table(db_table).select('bill_no').eq('company', data.get('company')).eq('shift', 'General Bill').order('bill_no', desc=True).limit(1).execute()
+                next_bill = 1
+                if gb_res.data and gb_res.data[0].get('bill_no'):
+                    next_bill = int(gb_res.data[0]['bill_no']) + 1
+                data['bill_no'] = next_bill
+            except Exception:
+                pass
 
         try:
             try:
