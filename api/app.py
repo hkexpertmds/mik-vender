@@ -519,8 +519,6 @@ def save_data(table_name):
     if not data.get('id') and table_name == 'transactions':
         shift_val = data.get('shift')
         
-        
-
         # DO NOT deduplicate General Bills automatically. They are discrete independent invoices.
         if shift_val != 'General Bill':
             q = supabase.table(db_table).select('id').eq('cust', data.get('cust')).eq('date', data.get('date')).eq('company', data.get('company'))
@@ -587,7 +585,7 @@ def save_data(table_name):
                 except ValueError:
                     pass
             data['cid'] = f"{milkman_id}{get_alphanumeric_sequence(next_index, 2)}"
-               
+            
         elif not data.get('id') and table_name == 'transactions' and data.get('shift') == 'General Bill':
             try:
                 # FIX: gt('bill_no', 0) prevents NULLs from being picked as the highest value
@@ -885,13 +883,13 @@ def get_transactions_paginated():
         if is_gb:
             query = query.eq('shift', 'General Bill')
             if date_filter: query = query.eq('date', date_filter)
-               
+            
             # Apply backend filtering for Operator visibility to fix empty pagination pages
             if role == 'Operator':
-                query = query.ilike('qty', f'%"created_by":"{login_id}"%')
+                query = query.ilike('qty', f'%created_by%{login_id}%')
             elif role == 'Owner' and filter_mgr != 'ALL':
-                if filter_mgr == 'SELF': query = query.ilike('qty', f'%"created_by":"{login_id}"%')
-                else: query = query.ilike('qty', f'%"created_by":"{filter_mgr}"%')   
+                if filter_mgr == 'SELF': query = query.ilike('qty', f'%created_by%{login_id}%')
+                else: query = query.ilike('qty', f'%created_by%{filter_mgr}%')
         else:
             query = query.neq('shift', 'General Bill')
             if date_filter: query = query.eq('date', date_filter)
