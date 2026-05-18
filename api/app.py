@@ -590,7 +590,8 @@ def save_data(table_name):
                
         elif not data.get('id') and table_name == 'transactions' and data.get('shift') == 'General Bill':
             try:
-                gb_res = supabase.table(db_table).select('bill_no').eq('company', data.get('company')).eq('shift', 'General Bill').order('bill_no', desc=True).limit(1).execute()
+                # FIX: gt('bill_no', 0) prevents NULLs from being picked as the highest value
+                gb_res = supabase.table(db_table).select('bill_no').eq('company', data.get('company')).eq('shift', 'General Bill').gt('bill_no', 0).order('bill_no', desc=True).limit(1).execute()
                 next_bill = 1
                 if gb_res.data and gb_res.data[0].get('bill_no'):
                     next_bill = int(gb_res.data[0]['bill_no']) + 1
@@ -863,6 +864,10 @@ def get_opening_balance():
 @app.route('/api/transactions/page', methods=['GET'])
 @token_required
 def get_transactions_paginated():
+    user_data = getattr(request, 'user_data', {})
+    role = user_data.get('role')
+    login_id = user_data.get('login_id')
+    
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 25))
     company = request.args.get('company')
@@ -870,6 +875,7 @@ def get_transactions_paginated():
     shift_filter = request.args.get('shift', '')
     search_query = request.args.get('search', '').strip()
     is_gb = request.args.get('is_gb', 'false') == 'true'
+    filter_mgr = request.args.get('filter_mgr', 'ALL')
     
     offset = (page - 1) * per_page
     
@@ -879,6 +885,13 @@ def get_transactions_paginated():
         if is_gb:
             query = query.eq('shift', 'General Bill')
             if date_filter: query = query.eq('date', date_filter)
+               
+            # Apply backend filtering for Operator visibility to fix empty pagination pages
+            if role == 'Operator':
+                query = query.ilike('qty', f'%"created_by":"{login_id}"%')
+            elif role == 'Owner' and filter_mgr != 'ALL':
+                if filter_mgr == 'SELF': query = query.ilike('qty', f'%"created_by":"{login_id}"%')
+                else: query = query.ilike('qty', f'%"created_by":"{filter_mgr}"%')   
         else:
             query = query.neq('shift', 'General Bill')
             if date_filter: query = query.eq('date', date_filter)
