@@ -588,8 +588,23 @@ def save_data(table_name):
             
         elif not data.get('id') and table_name == 'transactions' and data.get('shift') == 'General Bill':
             try:
+                creator_id = ""
+                qty_str = data.get('qty', '')
+                if isinstance(qty_str, str) and 'created_by' in qty_str:
+                    try:
+                        c_info = json.loads(qty_str)
+                        creator_id = str(c_info.get('created_by', ''))
+                    except Exception:
+                        pass
+                if not creator_id:
+                    creator_id = getattr(request, 'user_data', {}).get('login_id', '')
+
+                gb_query = supabase.table(db_table).select('bill_no').eq('company', data.get('company')).eq('shift', 'General Bill')
+                if creator_id:
+                    gb_query = gb_query.ilike('qty', f'%created_by%{creator_id}%')
+                    
                 # FIX: gt('bill_no', 0) prevents NULLs from being picked as the highest value
-                gb_res = supabase.table(db_table).select('bill_no').eq('company', data.get('company')).eq('shift', 'General Bill').gt('bill_no', 0).order('bill_no', desc=True).limit(1).execute()
+                gb_res = gb_query.gt('bill_no', 0).order('bill_no', desc=True).limit(1).execute()
                 next_bill = 1
                 if gb_res.data and gb_res.data[0].get('bill_no'):
                     next_bill = int(gb_res.data[0]['bill_no']) + 1
