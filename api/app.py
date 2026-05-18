@@ -119,7 +119,7 @@ def register():
         return jsonify({"success": False, "message": "This Username is already taken! Please try another."})
 
     # Auto Generate Owner ID
-    res = supabase.table('sys_users').select('login_id').eq('type', 'Owner').ilike('login_id', f'{district_code}%').order('id', desc=True).limit(1).execute()
+    res = supabase.table('sys_users').select('login_id').eq('type', 'Owner').ilike('login_id', f'{district_code}%').order('login_id', desc=True).limit(1).execute()
     next_index = 0
     if res.data and res.data[0].get('login_id'):
         last_id = res.data[0]['login_id']
@@ -555,7 +555,7 @@ def save_data(table_name):
             owner_res = supabase.table('sys_users').select('login_id').eq('type', 'Owner').eq('company', data.get('company')).execute()
             owner_id = owner_res.data[0]['login_id'] if owner_res.data else "XX"
             
-            res = supabase.table('sys_users').select('login_id').eq('type', 'Milk Man').ilike('login_id', f'{owner_id}%').order('id', desc=True).limit(1).execute()
+            res = supabase.table('sys_users').select('login_id').eq('type', 'Milk Man').ilike('login_id', f'{owner_id}%').order('login_id', desc=True).limit(1).execute()
             next_index = 0
             if res.data and res.data[0].get('login_id'):
                 last_id = res.data[0]['login_id']
@@ -576,7 +576,7 @@ def save_data(table_name):
         if not milkman_id:
             return jsonify({"success": False, "message": "Milkman ID is required"}), 400
         
-        res = supabase.table('sys_customers').select('cid').eq('milkman_id', milkman_id).order('id', desc=True).limit(1).execute()
+        res = supabase.table('sys_customers').select('cid').eq('milkman_id', milkman_id).order('cid', desc=True).limit(1).execute()
         next_index = 0
         if res.data and res.data[0].get('cid'):
             last_id = res.data[0]['cid']
