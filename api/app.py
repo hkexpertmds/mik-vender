@@ -118,18 +118,6 @@ def register():
     if supabase.table('sys_users').select('id').ilike('username', username).execute().data or supabase.table('sys_customers').select('id').ilike('username', username).execute().data:
         return jsonify({"success": False, "message": "This Username is already taken! Please try another."})
 
-    # Auto Generate Owner ID
-    res = supabase.table('sys_users').select('login_id').eq('type', 'Owner').ilike('login_id', f'{district_code}%').order('login_id', desc=True).limit(1).execute()
-    next_index = 0
-    if res.data and res.data[0].get('login_id'):
-        last_id = res.data[0]['login_id']
-        seq_str = last_id[len(district_code):]
-        try:
-            next_index = int(seq_str, 36) + 1
-        except ValueError:
-            pass
-    new_owner_id = f"{district_code}{get_alphanumeric_sequence(next_index, 3)}"
-
     raw_pass = data.get('pass')
     if not raw_pass:
         return jsonify({"success": False, "message": "Password is required!"})
@@ -138,7 +126,6 @@ def register():
     
     insert_data = {
         "name": data['name'],
-        "login_id": new_owner_id,
         "username": username,
         "pass": hashed_pass,
         "type": "Owner",
@@ -150,11 +137,30 @@ def register():
         "ref_code": data.get('ref_code', '')
     }
     
-    try:
-        supabase.table('sys_users').insert(insert_data).execute()
-        return jsonify({"success": True, "login_id": new_owner_id})
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Database Error: {str(e)}"})
+    max_retries = 3
+    for attempt in range(max_retries):
+        # Auto Generate Owner ID
+        res = supabase.table('sys_users').select('login_id').eq('type', 'Owner').ilike('login_id', f'{district_code}%').order('login_id', desc=True).limit(1).execute()
+        next_index = 0
+        if res.data and res.data[0].get('login_id'):
+            last_id = res.data[0]['login_id']
+            seq_str = last_id[len(district_code):]
+            try:
+                next_index = int(seq_str, 36) + 1
+            except ValueError:
+                pass
+        new_owner_id = f"{district_code}{get_alphanumeric_sequence(next_index, 3)}"
+        insert_data["login_id"] = new_owner_id
+        
+        try:
+            supabase.table('sys_users').insert(insert_data).execute()
+            return jsonify({"success": True, "login_id": new_owner_id})
+        except Exception as e:
+            if "duplicate key" in str(e).lower() and attempt < max_retries - 1:
+                continue
+            return jsonify({"success": False, "message": f"Database Error: {str(e)}"})
+            
+    return jsonify({"success": False, "message": "Failed to generate unique ID after multiple attempts. Please try again."})
 
 
 # Secure Login & Data Partitioning with Supabase
@@ -550,8 +556,21 @@ def save_data(table_name):
 
     # INSERT NEW RECORD
     raw_pass = None
-    if table_name == 'users':
-        if data.get('type') == 'Milk Man':
+    if table_name == 'users' and data.get('pass'): 
+        raw_pass = data['pass']
+        data['pass'] = generate_password_hash(data['pass'])
+    elif table_name == 'users':
+        data['pass'] = None
+
+    if table_name == 'customers' and data.get('cpass'): 
+        raw_pass = data['cpass']
+        data['cpass'] = generate_password_hash(data['cpass'])
+    elif table_name == 'customers':
+        data['cpass'] = None
+
+    max_retries = 3
+    for attempt in range(max_retries):
+        if table_name == 'users' and data.get('type') == 'Milk Man':
             owner_res = supabase.table('sys_users').select('login_id').eq('type', 'Owner').eq('company', data.get('company')).execute()
             owner_id = owner_res.data[0]['login_id'] if owner_res.data else "XX"
             
@@ -566,55 +585,50 @@ def save_data(table_name):
                     pass
             data['login_id'] = f"{owner_id}{get_alphanumeric_sequence(next_index, 2)}"
             
-        if data.get('pass'): 
-            raw_pass = data['pass']
-            data['pass'] = generate_password_hash(data['pass'])
-        else: data['pass'] = None
-
-    elif table_name == 'customers':
-        milkman_id = data.get('milkman_id')
-        if not milkman_id:
-            return jsonify({"success": False, "message": "Milkman ID is required"}), 400
-        
-        res = supabase.table('sys_customers').select('cid').eq('milkman_id', milkman_id).order('cid', desc=True).limit(1).execute()
-        next_index = 0
-        if res.data and res.data[0].get('cid'):
-            last_id = res.data[0]['cid']
-            seq_str = last_id[len(milkman_id):]
-            try:
-                next_index = int(seq_str, 36) + 1
-            except ValueError:
-                pass
-        data['cid'] = f"{milkman_id}{get_alphanumeric_sequence(next_index, 2)}"
-        if data.get('cpass'): 
-            raw_pass = data['cpass']
-            data['cpass'] = generate_password_hash(data['cpass'])
-        else: data['cpass'] = None
-
-    try:
-        res = supabase.table(db_table).insert(data).execute()
-        saved_data = res.data[0] if res.data else data
-        
-        # --- SEND SMS NOTIFICATION (ID, PASS & APP LINK) ---
-        if table_name in ['users', 'customers']:
-            mobile = saved_data.get('mobile', '')
-            login_id = saved_data.get('login_id') or saved_data.get('cid')
-            role_name = saved_data.get('type', 'Customer')
+        elif table_name == 'customers':
+            milkman_id = data.get('milkman_id')
+            if not milkman_id:
+                return jsonify({"success": False, "message": "Milkman ID is required"}), 400
             
-            if mobile and len(str(mobile)) == 10:
-                app_link = "https://my-vender-app.com" # Apni website/app ka link yahan daalein
-                sms_message = f"Welcome! Your {role_name} ID: {login_id}, Pass: {raw_pass or 'Not Set'}. Login App: {app_link}"
+            res = supabase.table('sys_customers').select('cid').eq('milkman_id', milkman_id).order('cid', desc=True).limit(1).execute()
+            next_index = 0
+            if res.data and res.data[0].get('cid'):
+                last_id = res.data[0]['cid']
+                seq_str = last_id[len(milkman_id):]
+                try:
+                    next_index = int(seq_str, 36) + 1
+                except ValueError:
+                    pass
+            data['cid'] = f"{milkman_id}{get_alphanumeric_sequence(next_index, 2)}"
+
+        try:
+            res = supabase.table(db_table).insert(data).execute()
+            saved_data = res.data[0] if res.data else data
+            
+            # --- SEND SMS NOTIFICATION (ID, PASS & APP LINK) ---
+            if table_name in ['users', 'customers']:
+                mobile = saved_data.get('mobile', '')
+                login_id = saved_data.get('login_id') or saved_data.get('cid')
+                role_name = saved_data.get('type', 'Customer')
                 
-                # NOTE: Asli SMS bhejne ke liye (Fast2SMS/Twilio) yahan unka API integration likhein.
-                print(f"🔔 MOCK SMS SENT TO {mobile}: {sms_message}")
-                saved_data['sms_status'] = 'sent'
-            else:
-                saved_data['sms_status'] = 'no_number'
-        # ---------------------------------------------------
-        
-        return jsonify(saved_data)
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)})
+                if mobile and len(str(mobile)) == 10:
+                    app_link = "https://my-vender-app.com" # Apni website/app ka link yahan daalein
+                    sms_message = f"Welcome! Your {role_name} ID: {login_id}, Pass: {raw_pass or 'Not Set'}. Login App: {app_link}"
+                    
+                    # NOTE: Asli SMS bhejne ke liye (Fast2SMS/Twilio) yahan unka API integration likhein.
+                    print(f"🔔 MOCK SMS SENT TO {mobile}: {sms_message}")
+                    saved_data['sms_status'] = 'sent'
+                else:
+                    saved_data['sms_status'] = 'no_number'
+            # ---------------------------------------------------
+            
+            return jsonify(saved_data)
+        except Exception as e:
+            if "duplicate key" in str(e).lower() and attempt < max_retries - 1:
+                continue # Retry on conflict
+            return jsonify({"success": False, "message": str(e)})
+            
+    return jsonify({"success": False, "message": "Failed to create record due to ID generation conflict. Please try again."})
 
 @app.route('/api/reset_password', methods=['POST'])
 @token_required
