@@ -3588,6 +3588,11 @@
                 if (filterDateStr) url += `&date=${filterDateStr}`;
                 if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
                 
+                let filterMgr = document.getElementById('gbFilterManager') ? document.getElementById('gbFilterManager').value : 'ALL';
+                if (currentUser.type === 'Owner' && filterMgr !== 'ALL') {
+                    url += `&filter_mgr=${encodeURIComponent(filterMgr)}`;
+                }
+                
                 const res = await fetch(url);
                 const result = await res.json();
                 if(!result.success) throw new Error();
@@ -3607,10 +3612,10 @@
                     }
                 } catch(e) {}
                 
-                if (currentUser.type === 'Operator' && createdBy !== currentUser.login_id) return;
+                 if (currentUser.type === 'Operator' && String(createdBy) !== String(currentUser.login_id)) return;
                 if (currentUser.type === 'Owner') {
-                    if (filterMgr === 'SELF' && createdBy !== currentUser.login_id) return;
-                    if (filterMgr !== 'ALL' && filterMgr !== 'SELF' && createdBy !== filterMgr) return;
+                    if (filterMgr === 'SELF' && String(createdBy) !== String(currentUser.login_id)) return;
+                    if (filterMgr !== 'ALL' && filterMgr !== 'SELF' && String(createdBy) !== String(filterMgr)) return;
                 }
 
                 let serialNo = t.bill_no || (totalItems - ((currentGbPage - 1) * gbItemsPerPage) - displayIdx);
