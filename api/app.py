@@ -601,7 +601,7 @@ def save_data(table_name):
 
                 gb_query = supabase.table(db_table).select('bill_no', 'qty').eq('company', data.get('company')).eq('shift', 'General Bill')
                 if creator_id:
-                    gb_query = gb_query.ilike('qty', f'%created_by%{creator_id}%')
+                    gb_query = gb_query.ilike('qty', f'%created_by%"{creator_id}"%')
                     
                 # FIX: gt('bill_no', 0) prevents NULLs from being picked as the highest value
                 gb_res = gb_query.gt('bill_no', 0).order('bill_no', desc=True).execute()
@@ -758,8 +758,11 @@ def delete_data(table_name, item_id):
     if table_name not in ['users', 'customers', 'transactions', 'products', 'requests', 'routes', 'licenses']:
         return jsonify({"success": False, "message": "Invalid table"}), 400
     db_table = 'sys_' + (table_name if table_name != 'transactions' else 'trans')
-    supabase.table(db_table).delete().eq('id', item_id).execute()
-    return jsonify({"success": True})
+    try:
+        supabase.table(db_table).delete().eq('id', item_id).execute()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/api/verify_key', methods=['POST'])
 def verify_key():
@@ -869,7 +872,7 @@ def get_opening_balance():
                 except (ValueError, TypeError):
                     total_val = 0.0
 
-                if t['item'] == 'Payment':
+                if t.get('item') == 'Payment':
                     opening_balance -= abs(total_val)
                 else:
                     opening_balance += total_val
@@ -910,10 +913,10 @@ def get_transactions_paginated():
             
             # Apply backend filtering for Operator visibility to fix empty pagination pages
             if role == 'Operator':
-                query = query.ilike('qty', f'%created_by%{login_id}%')
+                query = query.ilike('qty', f'%created_by%"{login_id}"%')
             elif role == 'Owner' and filter_mgr != 'ALL':
-                if filter_mgr == 'SELF': query = query.ilike('qty', f'%created_by%{login_id}%')
-                else: query = query.ilike('qty', f'%created_by%{filter_mgr}%')
+                if filter_mgr == 'SELF': query = query.ilike('qty', f'%created_by%"{login_id}"%')
+                else: query = query.ilike('qty', f'%created_by%"{filter_mgr}"%')
         else:
             query = query.neq('shift', 'General Bill')
             if date_filter: query = query.eq('date', date_filter)
