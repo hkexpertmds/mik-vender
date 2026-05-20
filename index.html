@@ -638,11 +638,11 @@
                 <label style="font-size:14px; font-weight:bold; color:var(--primary);">📅 Filter by Date:</label>
                 <input type="date" id="gbFilterDate" onchange="renderGeneralBills()" style="width:auto; padding:8px; margin:0;">
                 <select id="gbFilterManager" onchange="renderGeneralBills()" class="hidden" style="width:auto; padding:8px; margin:0; border-radius:8px; background:var(--input); color:white; border:1px solid #475569;">
-                    <option value="ALL">-- All Bills --</option>
                     <option value="SELF">My Bills (Owner)</option>
+                    <option value="ALL">-- All Bills --</option>
                 </select>
                 <input type="text" id="searchGb" placeholder="🔍 Search Bill..." onkeyup="currentGbPage=1; renderGeneralBills()" style="flex:1; min-width:120px; max-width:200px; padding:8px; margin:0; border-radius:8px;">
-                <button class="btn-save" style="width:auto; padding:8px 15px; background:var(--warning); color:black;" onclick="document.getElementById('gbFilterDate').value=''; document.getElementById('searchGb').value=''; renderGeneralBills();">Clear Filter</button>
+                <button class="btn-save" style="width:auto; padding:8px 15px; background:var(--warning); color:black;" onclick="document.getElementById('gbFilterDate').value=''; document.getElementById('searchGb').value=''; if(document.getElementById('gbFilterManager')) document.getElementById('gbFilterManager').value='SELF'; renderGeneralBills();">Clear Filter</button>
             </div>
             <div id="gbSummary" style="margin-bottom:15px; font-size:18px; font-weight:bold; color:var(--success); text-align:right;"></div>
             <div style="overflow-x:auto;">
@@ -2454,9 +2454,9 @@
             
             let fileName = window.currentPrintFileName || "Receipt";
             
-            if (window.AndroidPrint && window.AndroidPrint.performPrint) { 
+            if (window.Android && window.Android.printReceipt) { 
                 // Android App ke liye
-                window.AndroidPrint.performPrint(htmlToPrint, fileName); 
+                window.Android.printReceipt(htmlToPrint); 
             } else { 
                 // Normal Browser ke liye
                 let originalTitle = document.title;
@@ -2847,14 +2847,14 @@
                 if (currentUser && currentUser.type === 'Owner') {
                     gbFilterMgr.classList.remove('hidden');
                     let oldVal = gbFilterMgr.value;
-                    let html = '<option value="ALL">-- All Bills --</option><option value="SELF">My Bills (Owner)</option>';
+                    let html = '<option value="SELF">My Bills (Owner)</option><option value="ALL">-- All Bills --</option>';
                     users.filter(u => u.type === 'Operator' && u.company === currentUser.company).forEach(m => {
                         html += `<option value="${m.login_id}">${m.name}'s Bills</option>`;
                     });
                     gbFilterMgr.innerHTML = html;
                     
                     let optionExists = Array.from(gbFilterMgr.options).some(opt => opt.value === oldVal);
-                    gbFilterMgr.value = optionExists ? oldVal : 'ALL';
+                    gbFilterMgr.value = optionExists ? oldVal : 'SELF';
                 } else {
                     gbFilterMgr.classList.add('hidden');
                 }
@@ -3337,7 +3337,7 @@
             if (!isNaN(parsedSeq)) {
                 data.seq_no = parsedSeq;
                 if (data.shift === 'Morning' || data.shift === 'Both') {
-                    let excludeId = idx !== "" ? customers[idx].id : null;
+                    let excludeId = idx !== "" ? customers[parseInt(idx)].id : null;
                     let customersInRoute = customers.filter(c => c.milkman_id === data.milkman_id && (c.shift === 'Morning' || c.shift === 'Both') && c.id !== excludeId);
                     customersInRoute.sort((a,b) => (a.seq_no||999) - (b.seq_no||999));
                     
@@ -3362,7 +3362,7 @@
             if (!isNaN(parsedSeqEve)) {
                 data.seq_no_eve = parsedSeqEve;
                 if (data.shift === 'Evening' || data.shift === 'Both') {
-                    let excludeId = idx !== "" ? customers[idx].id : null;
+                    let excludeId = idx !== "" ? customers[parseInt(idx)].id : null;
                     let customersInRoute = customers.filter(c => c.milkman_id === data.milkman_id && (c.shift === 'Evening' || c.shift === 'Both') && c.id !== excludeId);
                     customersInRoute.sort((a,b) => (a.seq_no_eve||999) - (b.seq_no_eve||999));
                     
@@ -3580,7 +3580,7 @@
             const tbody = document.getElementById('gbTableBody');
             const filterDateVal = document.getElementById('gbFilterDate').value;
             let filterDateStr = filterDateVal ? convertToDDMMYYYY(filterDateVal) : null;
-            let filterMgr = document.getElementById('gbFilterManager') ? document.getElementById('gbFilterManager').value : 'ALL';
+            let filterMgr = document.getElementById('gbFilterManager') ? document.getElementById('gbFilterManager').value : (currentUser && currentUser.type === 'Owner' ? 'SELF' : 'ALL');
             let searchInput = document.getElementById('searchGb');
             let searchQuery = searchInput ? searchInput.value.trim() : '';
             
@@ -3591,7 +3591,7 @@
                 if (filterDateStr) url += `&date=${filterDateStr}`;
                 if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
                 
-                let filterMgr = document.getElementById('gbFilterManager') ? document.getElementById('gbFilterManager').value : 'ALL';
+                let filterMgr = document.getElementById('gbFilterManager') ? document.getElementById('gbFilterManager').value : (currentUser && currentUser.type === 'Owner' ? 'SELF' : 'ALL');
                  if (currentUser.type === 'Operator') {
                     url += `&filter_mgr=${encodeURIComponent(currentUser.login_id)}`;
                 } else if (currentUser.type === 'Owner' && filterMgr !== 'ALL') {
@@ -3631,11 +3631,19 @@
                 let srNo = ((currentGbPage - 1) * gbItemsPerPage) + displayIdx + 1;
                 let displayItem = formatItemDisplay(t.item);
                 
+                let creatorNameDisplay = '';
+                try {
+                    let info = typeof t.qty === 'string' && t.qty.trim().startsWith('{') ? JSON.parse(t.qty) : t.qty;
+                    if (info && typeof info === 'object' && info.creator_name) {
+                        creatorNameDisplay = info.creator_name;
+                    }
+                } catch(e) {}
+
                 totalAmt += parseFloat(t.total || 0);
                     
                     html += `<tr style="animation-delay:${Math.min(displayIdx * 0.03, 0.5)}s">
                     <td><b>${srNo}</b></td>
-                    <td>GB-${serialNo}<br><span style="font-size:11px; color:#94a3b8;">${t.date}</span></td>
+                    <td>GB-${serialNo}<br><span style="font-size:11px; color:#94a3b8;">${t.date}</span>${creatorNameDisplay ? `<br><span style="font-size:10px; color:var(--primary);">By: ${creatorNameDisplay}</span>` : ''}</td>
                     <td>${t.cust}</td>
                     <td>${displayItem}</td>
                     <td style="color:var(--success); font-weight:bold;">₹${parseFloat(t.total||0).toFixed(2)}</td>
@@ -4760,7 +4768,9 @@
             const newShift = document.getElementById('selfDailyShiftSelect').value;
             custObj.shift = newShift;
             try {
-                await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+                const res = await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+                const saved = await res.json();
+                if (saved.success === false) throw new Error(saved.message || "Failed to update shift.");
                 alert("Shift updated successfully!", "success");
                 document.getElementById('my-current-shift').innerText = `(${newShift})`;
                 renderSelfCustItems();
@@ -4795,7 +4805,9 @@
             custObj.defItem = JSON.stringify(items);
             const btn = window.event ? window.event.target : null; if(btn) btn.innerText = "...";
             try {
-                await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+                const res = await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+                const saved = await res.json();
+                if (saved.success === false) throw new Error(saved.message || "Failed to add item.");
                 document.getElementById('selfQtyAdd').value = ''; document.getElementById('selfItemAdd').value = ''; document.getElementById('selfRateAdd').value = '';
                 renderSelfCustItems();
                 renderTempChangeItems();
@@ -4813,7 +4825,9 @@
             items.splice(idx, 1);
             custObj.defItem = JSON.stringify(items);
             try {
-                await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+                const res = await fetch(`${API_BASE}/customers`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(custObj) });
+                const saved = await res.json();
+                if (saved.success === false) throw new Error(saved.message || "Failed to remove item.");
                 renderSelfCustItems();
                 renderTempChangeItems();
             } catch(e) {
@@ -5802,13 +5816,27 @@
 
             if(!confirm("Are you sure?")) return;
             try {
+                // Centralized Secure Delete Fetch
+                let targetId = '';
+                let routePrefix = type;
+                if(type === 'cust') { targetId = customers[idx].id; routePrefix = 'customers'; }
+                else if(type === 'trans') { targetId = serverPaginatedTrans[idx].id; routePrefix = 'transactions'; }
+                else if(type === 'gb') { targetId = serverPaginatedGb[idx].id; routePrefix = 'transactions'; }
+                else if(type === 'user') { targetId = users[idx].id; routePrefix = 'users'; }
+                else if(type === 'route') { targetId = routes[idx].id; routePrefix = 'routes'; }
+                else if(type === 'product') { targetId = products[idx].id; routePrefix = 'products'; }
+                else if(type === 'request') { targetId = requests[idx].id; routePrefix = 'requests'; }
+                else if(type === 'license') { targetId = licenses[idx].id; routePrefix = 'licenses'; }
+
+                const res = await fetch(`${API_BASE}/${routePrefix}/${targetId}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (!res.ok || result.success === false) throw new Error(result.message || "Failed to delete from database");
+
+                // Update Local UI Only After DB Success
                 if(type === 'cust') {
-                    await fetch(`${API_BASE}/customers/${customers[idx].id}`, { method: 'DELETE' });
                     customers.splice(idx, 1);
                 }
                 if(type === 'trans') {
-                    let targetId = serverPaginatedTrans[idx].id;
-                    await fetch(`${API_BASE}/transactions/${targetId}`, { method: 'DELETE' });
                     transactions = transactions.filter(t => String(t.id) !== String(targetId));
                     renderTrans(); renderTransFeed();
                     if (document.getElementById('general-bill-view') && !document.getElementById('general-bill-view').classList.contains('hidden')) {
@@ -5817,35 +5845,28 @@
                     return;
                 }
                 if(type === 'gb') {
-                    let targetId = serverPaginatedGb[idx].id;
-                    await fetch(`${API_BASE}/transactions/${targetId}`, { method: 'DELETE' });
                     transactions = transactions.filter(t => String(t.id) !== String(targetId));
                     renderGeneralBills();
                     return;
                 }
                 if(type === 'user') {
-                    await fetch(`${API_BASE}/users/${users[idx].id}`, { method: 'DELETE' });
                     users.splice(idx, 1);
                     populateMilkManDropdowns();
                 }
                 if(type === 'route') {
-                    await fetch(`${API_BASE}/routes/${routes[idx].id}`, { method: 'DELETE' });
                     routes.splice(idx, 1);
                 }
                 if(type === 'product') {
-                    await fetch(`${API_BASE}/products/${products[idx].id}`, { method: 'DELETE' });
                     products.splice(idx, 1);
                 }
                 if(type === 'request') {
-                    await fetch(`${API_BASE}/requests/${requests[idx].id}`, { method: 'DELETE' });
                     requests.splice(idx, 1);
                 }
                 if(type === 'license') {
-                    await fetch(`${API_BASE}/licenses/${licenses[idx].id}`, { method: 'DELETE' });
                     licenses.splice(idx, 1);
                 }
             } catch(e) {
-                alert("Network error, please try again.");
+                alert("Delete Failed: " + (e.message || "Network error, please try again."), "error");
                 return;
             }
             
