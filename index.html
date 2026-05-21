@@ -1493,7 +1493,7 @@
             const response = await originalFetch(resource, config);
             if (response.status === 401 && currentUser) {
                 alert("Security Alert: Session expired or invalid token. Logging out.", "error");
-                logout();
+                setTimeout(() => logout(), 2500); // 2.5 sec delay so user can read the message
             }
             return response;
         };
@@ -3882,7 +3882,7 @@
             const pRate = parseFloat(document.getElementById('pRate').value) || 0;
             const pUnit = document.getElementById('pUnit').value;
             
-            if(!pName || !pRate) return alert("Enter Product Name and Rate!");
+             if(!pName || pRate <= 0) return alert("Enter valid Product Name and Rate (must be greater than 0)!");
             
             const isDuplicate = products.some((p, i) => i !== parseInt(idx) && p.item_name.trim().toLowerCase() === pName.toLowerCase());
             if(isDuplicate) return alert("Error: Product already exists!");
@@ -4693,7 +4693,7 @@
                 shift = shiftEl.value;
             }
             
-            if(!rate) { alert("Please enter a Rate!"); return; }
+             if(!rate || parseFloat(rate) < 0) { alert("Please enter a valid positive Rate!"); return; }
             if(!item) { alert("Please select an item!"); return; }
             
             let qtyNum = parseFloat(qtyInput);
