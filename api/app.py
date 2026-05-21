@@ -427,6 +427,15 @@ def save_data(table_name):
         
     db_table = 'sys_' + (table_name if table_name != 'transactions' else 'trans')
 
+    # --- FIX: Clean virtual fields injected by the backend (Login) so Supabase schema doesn't crash ---
+    data.pop('sms_status', None)
+    if table_name == 'customers':
+        data.pop('license_expiry', None)
+        data.pop('owner_qr', None)
+        data.pop('owner_logo', None)
+        data.pop('type', None)
+        data.pop('login_id', None)
+
     # --- UNIQUE VALIDATION FOR MOBILE & EMAIL ---
     item_id_val = data.get('id')
     mobile = (data.get('mobile') or '').strip() if data.get('mobile') else None
