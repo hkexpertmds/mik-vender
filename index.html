@@ -3554,6 +3554,7 @@
             const rate = parseFloat(document.getElementById('gbRateAdd').value) || 0;
             if(!item) return alert("Select an item!");
             if(qty <= 0) return alert("Enter valid quantity!");
+            if(rate < 0) return alert("Enter a valid positive rate!");
             
             currentGbItems = currentGbItems.filter(i => i.item !== item);
             currentGbItems.push({ item: item, qty: qty, rate: rate, total: qty * rate });
@@ -4795,6 +4796,7 @@
             if(!item) return alert("Please select an item!");
             let qtyNum = parseFloat(qtyInput);
             if(isNaN(qtyNum) || qtyNum <= 0) return alert("Enter valid quantity!");
+            if(!rate || parseFloat(rate) < 0) return alert("Enter a valid positive rate!");
             const qty = qtyNum.toFixed(1);
             
             let items = getCustItems(custObj);
@@ -5044,6 +5046,7 @@
             const rateInput = document.getElementById('tRateAdd').value;
             if(!item) return alert("Select an item!");
             if(!qtyInput || qtyInput <= 0) return alert("Enter valid quantity!");
+            if(!rateInput || parseFloat(rateInput) < 0) return alert("Enter a valid positive rate!");
             
             currentEditTransItems = currentEditTransItems.filter(i => i.item !== item);
             currentEditTransItems.push({ item: item, qty: parseFloat(qtyInput), rate: parseFloat(rateInput), total: parseFloat(qtyInput) * parseFloat(rateInput) });
