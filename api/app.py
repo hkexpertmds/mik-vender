@@ -902,8 +902,12 @@ def get_transactions_paginated():
     role = user_data.get('role')
     login_id = user_data.get('login_id')
     
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 25))
+    try:
+        page = max(1, int(request.args.get('page', 1)))
+        per_page = max(1, int(request.args.get('per_page', 25)))
+    except ValueError:
+        page = 1
+        per_page = 25
     company = request.args.get('company')
     date_filter = request.args.get('date', '')
     shift_filter = request.args.get('shift', '')
