@@ -227,8 +227,9 @@
         <button id="lang-btn" onclick="changeLanguage(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🌐 2. Language (हिंदी)</button>
         <button id="btn-help-dropdown" onclick="openHelpModal(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🆘 3. Need Help?</button>
         <button id="btn-share-app" onclick="shareApp(); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">📤 4. Share App</button>
+        <button id="btn-sync-data" onclick="manualSyncData(); closeProfileDropdown()" style="background: transparent; color: var(--success); font-weight:bold; padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">🔄 5. Sync Data Now</button>
         <button id="btn-dropdown-req" class="hidden" onclick="showView('request-master'); closeProfileDropdown()" style="background: transparent; color: var(--text); padding: 12px 20px; text-align: left; border-radius: 0; border-bottom: 1px solid #334155; width: 100%; border-top: none; border-left: none; border-right: none;">📝 Customer Requests</button>
-        <button onclick="logout()" style="background: transparent; color: var(--danger); padding: 12px 20px; text-align: left; border-radius: 0; width: 100%; border: none;">🚪 5. Logout</button>
+        <button onclick="logout()" style="background: transparent; color: var(--danger); padding: 12px 20px; text-align: left; border-radius: 0; width: 100%; border: none;">🚪 6. Logout</button>
     </div>
 
     <!-- LANDING PAGE -->
@@ -963,7 +964,10 @@
     <div id="accounts-user" class="container hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
             <h2 style="margin:0;">💰 Accounts Summary</h2>
-            <button class="btn-save" style="background:var(--warning); color:black; padding: 8px 15px; width:auto; margin-left:auto;" onclick="downloadAccountSummary()">🖨️ Download List</button>
+            <div style="display:flex; gap:10px; margin-left:auto;">
+                <button class="btn-save" style="background:#10b981; color:white; padding: 8px 15px; width:auto;" onclick="exportAccountsToCSV()">📊 Export CSV</button>
+                <button class="btn-save" style="background:var(--warning); color:black; padding: 8px 15px; width:auto;" onclick="downloadAccountSummary()">🖨️ Download List</button>
+            </div>
         </div>
         <div style="display:flex; gap:10px; margin-bottom: 15px; align-items:center; flex-wrap: wrap; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; border:1px solid #475569;">
             <select id="accFilterMilkMan" onchange="renderAccounts()" style="flex:1; min-width: 150px; padding:0 8px; height:38px; box-sizing:border-box; background:var(--input); color:white; border:1px solid #475569; border-radius:8px; margin:0;">
@@ -2150,6 +2154,7 @@
                 'btn-share-app': '📤 4. Share App',
                 'btn-help-landing': '🆘 Need Help?',
                 'btn-dropdown-req': '📝 Customer Requests',
+                'btn-sync-data': '🔄 5. Sync Data Now',
                 'help-modal-title': '🆘 Help & Support',
                 'help-modal-intro': 'Solutions to common problems are given below. Click on any question to expand:',
                 'help-faq-container': enFaqs,
@@ -2177,6 +2182,7 @@
                 'btn-share-app': '📤 4. ऐप शेयर करें (Share App)',
                 'btn-help-landing': '🆘 मदद चाहिए?',
                 'btn-dropdown-req': '📝 कस्टमर रिक्वेस्ट',
+                'btn-sync-data': '🔄 5. डेटा सिंक करें (Sync)',
                 'help-modal-title': '🆘 मदद और सपोर्ट',
                 'help-modal-intro': 'आम तौर पर आने वाली समस्याओं के समाधान नीचे दिए गए हैं। किसी भी प्रश्न पर क्लिक करें:',
                 'help-faq-container': hiFaqs,
@@ -2228,6 +2234,7 @@
             setHtml('btn-share-app', dict['btn-share-app']);
             setHtml('btn-help-landing', dict['btn-help-landing']);
             setHtml('btn-dropdown-req', dict['btn-dropdown-req']);
+            setHtml('btn-sync-data', dict['btn-sync-data']);
             setHtml('help-modal-title', dict['help-modal-title']);
             setHtml('help-modal-intro', dict['help-modal-intro']);
             setHtml('help-faq-container', dict['help-faq-container']);
@@ -2803,6 +2810,20 @@
             }
         }
         
+        function manualSyncData() {
+            if (!navigator.onLine) {
+                alert("You are offline! Please connect to the internet to sync.", "error");
+                return;
+            }
+            let syncToast = document.createElement('div');
+            syncToast.id = 'sync-toast';
+            syncToast.className = 'toast info';
+            syncToast.innerHTML = '<span>🔄 Manual Sync Started...</span>';
+            document.getElementById('toast-container').appendChild(syncToast);
+            showGlobalLoading("Syncing Data...", "Fetching latest records from server...");
+            fetchBackgroundData(false);
+        }
+
         function refreshCurrentView() {
             populateMilkManDropdowns();
             const id = sessionStorage.getItem('lastView');
@@ -6323,6 +6344,32 @@
             let printContent = `<div style="text-align:center; margin-bottom:10px;"><h3 style="margin-bottom:0;">Account Summary List</h3><p style="margin-top:2px;">Delivery Man: ${mmName}</p></div>` + tableHtml;
             
             triggerPrint(printContent, monthVal, "Summary");
+        }
+            
+         function exportAccountsToCSV() {
+            const table = document.querySelector('#monthlyReport table');
+            if (!table) return alert('No data to export!', 'error');
+            let csv = [];
+            const rows = table.querySelectorAll('tr');
+            for (let i = 0; i < rows.length; i++) {
+                let row = [], cols = rows[i].querySelectorAll('td:not(.no-print), th:not(.no-print)');
+                for (let j = 0; j < cols.length; j++) {
+                    let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ');
+                    data = data.replace(/"/g, '""'); // Escape double quotes for CSV
+                    row.push('"' + data + '"');
+                }
+                csv.push(row.join(','));
+            }
+            const csvFile = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const downloadLink = document.createElement('a');
+            let monthVal = document.getElementById('accMonthYear').value || 'Report';
+            downloadLink.download = `Account_Summary_${monthVal}.csv`;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            alert("CSV File Exported Successfully!", "success");
         }
 
         function changeAccMonth(offset) {
