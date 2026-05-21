@@ -4,3 +4,4 @@ supabase
 python-dotenv
 Werkzeug
 gunicorn
+PyJWT
