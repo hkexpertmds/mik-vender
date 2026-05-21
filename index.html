@@ -3591,7 +3591,6 @@
                 if (filterDateStr) url += `&date=${filterDateStr}`;
                 if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
                 
-                let filterMgr = document.getElementById('gbFilterManager') ? document.getElementById('gbFilterManager').value : (currentUser && currentUser.type === 'Owner' ? 'SELF' : 'ALL');
                  if (currentUser.type === 'Operator') {
                     url += `&filter_mgr=${encodeURIComponent(currentUser.login_id)}`;
                 } else if (currentUser.type === 'Owner' && filterMgr !== 'ALL') {
