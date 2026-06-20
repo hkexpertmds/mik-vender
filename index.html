@@ -2457,18 +2457,21 @@
             let frame = document.getElementById('printPreviewFrame');
             let htmlToPrint = frame.contentDocument.documentElement.outerHTML;
             //if (window.AndroidPrint && window.print) { window.Android.printReceipt(frame.contentDocument.documentElement.outerHTML); } else { frame.contentWindow.print(); }
-            if (window.AndroidPrint && window.print) { AndroidPrint.performPrint(frame.contentDocument.documentElement.outerHTML); } else { frame.contentWindow.print(); }
-            
+            // 1. Pehle file/customer ka naam nikalien (agar nahi hai toh "Receipt" rakhlein)
             let fileName = window.currentPrintFileName || "Receipt";
+            let htmlToPrint = frame.contentDocument.documentElement.outerHTML;
             
-            if (window.Android && window.Android.printReceipt) { 
-                // Android App ke liye
-                window.Android.printReceipt(htmlToPrint); 
+            // 2. Sirf ek hi, saaf-suthra condition check karein
+            if (window.AndroidPrint && typeof window.AndroidPrint.performPrint === "function") { 
+                // --- Android App Ke Liye ---
+                // Yahan hum html aur fileName (customerName) dono bhej rahe hain jaisa Kotlin ko chahiye
+                window.AndroidPrint.performPrint(htmlToPrint, fileName); 
             } else { 
-                // Normal Browser ke liye
+                // --- Normal Web Browser Ke Liye ---
                 let originalTitle = document.title;
                 document.title = fileName;
                 frame.contentDocument.title = fileName;
+                
                 setTimeout(() => {
                     frame.contentWindow.print(); 
                     setTimeout(() => { document.title = originalTitle; }, 2000);
