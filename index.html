@@ -2484,26 +2484,18 @@
             }
         } // Function ka bracket yahan sahi se band hai
 
+        let currentBillAsPlainText = ""; // Global variable to hold the plain text bill
+                
         // Function 2: Sirf Bluetooth Thermal Printer ke liye
         function sendBillToBluetooth() {
-            // Thermal printer ke hisaab se plain text format (32 characters per line)
-            let plainBill = 
-                "        MY VENDER SHOP        \n" +
-                "     Mandsaur, MP, India      \n" +
-                "--------------------------------\n" +
-                "Item Name              Price    \n" +
-                "--------------------------------\n" +
-                "Tomato 1Kg             Rs. 40.00\n" +
-                "Potato 2Kg             Rs. 30.00\n" +
-                "--------------------------------\n" +
-                "TOTAL                  Rs. 70.00\n" +
-                "--------------------------------\n" +
-                "    Thank you for shopping!     \n" +
-                "     Powered by My Vender       \n\n\n\n"; // Paper roll theek se cut hone ke liye extra space
 
             // Android ke naye Bluetooth function ko call karna
             if (window.AndroidPrint && typeof window.AndroidPrint.printViaBluetooth === "function") {
-                window.AndroidPrint.printViaBluetooth(plainBill);
+                if (currentBillAsPlainText) {
+                    window.AndroidPrint.printViaBluetooth(currentBillAsPlainText);
+                } else {
+                    alert("प्रिंट करने के लिए कोई बिल डेटा नहीं मिला। पहले बिल का प्रीव्यू देखें।", "error");
+                }
             } else {
                 alert("Bluetooth printing is only available inside the Android App.");
             }
@@ -3876,7 +3868,51 @@
             let ownerAddress = (creatorDetails && creatorDetails.creator_address !== undefined) ? creatorDetails.creator_address : (currentUser.address || currentUser.addr || '');
             let ownerMobile = (creatorDetails && creatorDetails.creator_mobile !== undefined) ? creatorDetails.creator_mobile : (currentUser.mobile || '');
             let ownerLogo = (creatorDetails && creatorDetails.creator_logo !== undefined) ? creatorDetails.creator_logo : (currentUser.company_logo || '');
-            
+
+            // --- Plain Text Bill Generation for Thermal Printer ---
+            const center = (text, width = 32) => {
+                const spaces = Math.max(0, Math.floor((width - text.length) / 2));
+                return ' '.repeat(spaces) + text;
+            };
+            const line = (char = '-', width = 32) => char.repeat(width) + '\n';
+            const twoCols = (left, right, width = 32) => {
+                const rightLen = right.length;
+                const leftLen = left.length;
+                const spaces = Math.max(1, width - leftLen - rightLen);
+                return left + ' '.repeat(spaces) + right + '\n';
+            };
+
+            let plainBill = '';
+            plainBill += center(companyName.toUpperCase()) + '\n';
+            if (ownerAddress) plainBill += center(ownerAddress) + '\n';
+            if (ownerMobile) plainBill += center('Mob: ' + ownerMobile) + '\n';
+            plainBill += line();
+            plainBill += twoCols(`Bill: GB-${serialNo}`, `Date: ${dateStr}`);
+            plainBill += `Customer: ${custName}\n`;
+            if (mobileNum) plainBill += `Mobile: ${mobileNum}\n`;
+            if (address) plainBill += `Address: ${address}\n`;
+            plainBill += line();
+            plainBill += twoCols('Item(Qty)', 'Amount');
+            plainBill += line();
+
+            itemsArr.forEach(it => {
+                let rowAmt = parseFloat(it.total);
+                if (isNaN(rowAmt)) rowAmt = (parseFloat(it.qty)||0) * (parseFloat(it.rate)||0);
+                let itemName = `${it.item} (${it.qty})`;
+                if (itemName.length > 20) itemName = itemName.substring(0, 19) + '.';
+                plainBill += twoCols(itemName, `Rs ${rowAmt.toFixed(2)}`);
+            });
+
+            plainBill += line();
+            plainBill += twoCols('GRAND TOTAL', `Rs ${total.toFixed(2)}`);
+            plainBill += line();
+            plainBill += center('Thank you for your visit!') + '\n';
+            plainBill += center('Powered by My Vender') + '\n\n\n';
+
+            currentBillAsPlainText = plainBill; // Store in global variable
+            // --- End of Plain Text Generation ---
+
+
             let contactParts = [];
             if (ownerAddress) contactParts.push(ownerAddress);
             if (ownerMobile) contactParts.push(`<b>Mob:</b> ${ownerMobile}`);
