@@ -215,7 +215,9 @@
             </div>
             <iframe id="printPreviewFrame" style="flex:1; width:100%; border:none; background: white;"></iframe>
             <div style="padding: 15px; background: rgba(0,0,0,0.2); border-top: 1px solid #475569; display:flex; gap:10px; justify-content:flex-end;">
+                
                 <button class="btn-save" style="width:auto; margin:0;" id="modalPrintBtn" onclick="executePrintFrame()">🖨️ Print / Save PDF</button>
+                <button class="btn-primary" style="width:auto; margin:0; background-color: #2563eb; color: white;" id="thermalPrintBtn" onclick="sendBillToBluetooth()">🧾 Thermal Print</button>
                 <button class="btn-back" style="width:auto; margin:0;" onclick="closePrintPreview()">Close</button>
             </div>
         </div>
@@ -2482,8 +2484,9 @@
             }
         } // Function ka bracket yahan sahi se band hai
 
+        // Function 2: Sirf Bluetooth Thermal Printer ke liye
         function sendBillToBluetooth() {
-            // 32 characters per line ke hisaab se plain text plain spacing ke sath
+            // Thermal printer ke hisaab se plain text format (32 characters per line)
             let plainBill = 
                 "        MY VENDER SHOP        \n" +
                 "     Mandsaur, MP, India      \n" +
@@ -2496,8 +2499,9 @@
                 "TOTAL                  Rs. 70.00\n" +
                 "--------------------------------\n" +
                 "    Thank you for shopping!     \n" +
-                "     Powered by My Vender       \n"\n\n\n"; // Yeh khali lines paper roll feed karne ke liye hain
-        
+                "     Powered by My Vender       \n\n\n\n"; // Paper roll theek se cut hone ke liye extra space
+
+            // Android ke naye Bluetooth function ko call karna
             if (window.AndroidPrint && typeof window.AndroidPrint.printViaBluetooth === "function") {
                 window.AndroidPrint.printViaBluetooth(plainBill);
             } else {
