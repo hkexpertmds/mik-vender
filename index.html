@@ -2482,6 +2482,29 @@
             }
         } // Function ka bracket yahan sahi se band hai
 
+        function sendBillToBluetooth() {
+            // 32 characters per line ke hisaab se plain text plain spacing ke sath
+            let plainBill = 
+                "        MY VENDER SHOP        \n" +
+                "     Mandsaur, MP, India      \n" +
+                "--------------------------------\n" +
+                "Item Name              Price    \n" +
+                "--------------------------------\n" +
+                "Tomato 1Kg             Rs. 40.00\n" +
+                "Potato 2Kg             Rs. 30.00\n" +
+                "--------------------------------\n" +
+                "TOTAL                  Rs. 70.00\n" +
+                "--------------------------------\n" +
+                "    Thank you for shopping!     \n" +
+                "     Powered by My Vender       \n"\n\n\n"; // Yeh khali lines paper roll feed karne ke liye hain
+        
+            if (window.AndroidPrint && typeof window.AndroidPrint.printViaBluetooth === "function") {
+                window.AndroidPrint.printViaBluetooth(plainBill);
+            } else {
+                alert("Bluetooth printing is only available inside the Android App.");
+            }
+        }
+
         function openEditField(key, title, type) {
             document.getElementById('editFieldTitle').innerText = 'Edit ' + title;
             document.getElementById('editFieldKey').value = key;
