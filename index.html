@@ -3960,10 +3960,7 @@
                     return;
                 }
 
-                 // Prepare data for thermal printer
-                if (window.currentThermalPrintData) {
-                    currentBillAsPlainText = generatePlainTextBill(window.currentThermalPrintData.customer_name, window.currentThermalPrintData.month_name, window.currentThermalPrintData);
-                }
+                 
 
                 
                 window.currentPrintFileName = docTitle;
@@ -6417,6 +6414,11 @@
                 window.Android.printReceipt(printHtml);
                 fetch(`${API_BASE}/print_command`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'Monthly Ledger Direct Print'})}).catch(e=>{});
                 return;
+            }
+
+            // Prepare data for thermal printer
+            if (window.currentThermalPrintData) {
+                 currentBillAsPlainText = generatePlainTextBill(window.currentThermalPrintData.customer_name, window.currentThermalPrintData.month_name, window.currentThermalPrintData);
             }
             
             window.currentPrintFileName = docTitle;
