@@ -3959,6 +3959,12 @@
                     fetch(`${API_BASE}/print_command`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'General Bill Direct Print'})}).catch(e=>{});
                     return;
                 }
+
+                 // Prepare data for thermal printer
+                if (window.currentThermalPrintData) {
+                    currentBillAsPlainText = generatePlainTextBill(window.currentThermalPrintData.customer_name, window.currentThermalPrintData.month_name, window.currentThermalPrintData);
+                }
+
                 
                 window.currentPrintFileName = docTitle;
                 document.getElementById('printPreviewFrame').srcdoc = printHtml;
@@ -6100,6 +6106,10 @@
                 if (data.error) {
                     return `<p>${data.error}</p>`;
                 }
+                // Store data for thermal print
+                window.currentThermalPrintData = data;
+                window.currentThermalPrintData.customer_name = custName;
+                window.currentThermalPrintData.month_name = new Date(reportYear, reportMonth - 1).toLocaleString('default', { month: 'long' });
                 openingBalance = data.opening_balance || 0;
                 currentMonthTransactions = data.transactions || []; // Get transactions from the new API
                 currentReportCustomerDetails = data.customer_details || {};
@@ -6221,6 +6231,42 @@
 
             return html;
         }
+
+          function generatePlainTextBill(custName, monthName, reportData) {
+            const center = (str, len = 32) => {
+                const pad = Math.floor((len - str.length) / 2);
+                return ' '.repeat(pad) + str + ' '.repeat(len - str.length - pad);
+            };
+            const line = '-'.repeat(32) + '\n';
+            const right = (str, len = 32) => ' '.repeat(len - str.length) + str;
+
+            let companyName = (currentUser.display_company || currentUser.company || 'DAIRY LEDGER').substring(0, 32);
+
+            let text = center(companyName) + '\n';
+            text += center(`Bill for ${monthName}`) + '\n';
+            text += center(`Customer: ${custName}`) + '\n';
+            text += line;
+            text += 'Date      Item       Qty   Total\n';
+            text += line;
+
+            reportData.forEach(t => {
+                let date = t.date.substring(0, 5);
+                let item = t.item === 'Payment' ? 'Payment' : t.item.substring(0, 10);
+                let qty = t.item === 'Payment' ? '-' : String(t.qty);
+                let total = `Rs${t.item === 'Payment' ? '-' : ''}${Math.abs(t.total).toFixed(1)}`;
+                text += `${date.padEnd(9)}${item.padEnd(11)}${qty.padEnd(5)}${total.padStart(7)}\n`;
+            });
+
+            text += line;
+            text += right(`Prev Bal: Rs${reportData.opening_balance.toFixed(2)}`) + '\n';
+            text += right(`This Month: Rs${reportData.current_month_bill.toFixed(2)}`) + '\n';
+            text += right(`Paid: -Rs${reportData.total_paid.toFixed(2)}`) + '\n';
+            text += line;
+            text += right(`FINAL DUE: Rs${reportData.closing_balance.toFixed(2)}`) + '\n';
+            text += line + '\n\n\n';
+            return text;
+        }
+
 
         async function renderSelfLedger() {
             const div = document.getElementById('self-ledger-data');
