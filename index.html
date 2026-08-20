@@ -6433,10 +6433,12 @@
                     if (dayData.total > 0) {
                         plainBill += twoCols(`Date: ${shortDate}`, `Bill: Rs ${dayData.total.toFixed(2)}`);
                         dayData.items.forEach(it => {
-                            // Indent items for clarity
-                            let itemLine = `  ${it.item} (${it.qty} x ${it.rate})`.padEnd(22);
-                            let totalLine = `Rs ${(it.qty * it.rate).toFixed(2)}`;
-                            plainBill += twoCols(itemLine, totalLine);
+                            const itemAmount = (parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0);
+                            let itemName = `  ${it.item} (${it.qty})`;
+                            if (itemName.length > 21) { // 21 to leave space for ' ' and right part
+                                itemName = itemName.substring(0, 20) + '.';
+                            }
+                            plainBill += twoCols(itemName, `Rs ${itemAmount.toFixed(2)}`);
                         });
                     }
                     if (dayData.paid > 0) {
