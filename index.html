@@ -6416,17 +6416,21 @@
                     plainBill += `Mobile: ${currentReportCustomerDetails.mobile}\n`;
                 }
                 plainBill += line();
-                plainBill += twoCols('Date', 'ITEM', 'QTY', 'Amount');
+                plainBill += formatItemRow('DATE', 'ITEM', 'QTY', 'TOTAL') + '\n';
                 plainBill += line();
 
                 currentReportData.sortedDates.forEach(date => {
                     let dayData = currentReportData.dailyData[date];
                     let shortDate = date.substring(0, 5); // DD-MM
-                    if (dayData.total > 0) {
-                        plainBill += fourCols(shortDate, itemName, qty, total);
+                    
+                    if (dayData.items.length > 0) {
+                        dayData.items.forEach(item => {
+                            const itemTotal = (parseFloat(item.qty) || 0) * (parseFloat(item.rate) || 0);
+                            plainBill += formatItemRow(shortDate, item.item, item.qty.toFixed(1), itemTotal.toFixed(2)) + '\n';
+                        });
                     }
                     if (dayData.paid > 0) {
-                        plainBill += twoCols(`${shortDate}(Paid)`, `-Rs ${dayData.paid.toFixed(2)}`);
+                        plainBill += twoCols(`${shortDate} (Paid)`, `-Rs ${dayData.paid.toFixed(2)}`) + '\n';
                     }
                 });
 
@@ -6437,7 +6441,7 @@
                 plainBill += twoCols('Paid', `-Rs ${currentReportData.currentMonthPaid.toFixed(2)}`);
                 plainBill += line();
                 let cbText = `Rs ${currentReportData.closingBalance.toFixed(2)}`;
-                plainBill += twoCols('TOTAL DUE', cbText);
+                plainBill += twoCols('TOTAL DUE', cbText) + '\n';
                 plainBill += line();
                 plainBill += center('Thank you!') + '\n\n\n';
 
