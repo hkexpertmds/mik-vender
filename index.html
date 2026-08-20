@@ -6416,14 +6416,14 @@
                     plainBill += `Mobile: ${currentReportCustomerDetails.mobile}\n`;
                 }
                 plainBill += line();
-                plainBill += twoCols('Date', 'Amount');
+                plainBill += twoCols('Date', 'ITEM', 'QTY', 'Amount');
                 plainBill += line();
 
                 currentReportData.sortedDates.forEach(date => {
                     let dayData = currentReportData.dailyData[date];
                     let shortDate = date.substring(0, 5); // DD-MM
                     if (dayData.total > 0) {
-                        plainBill += twoCols(shortDate, `Rs ${dayData.total.toFixed(2)}`);
+                        plainBill += fourCols(shortDate, itemName, qty, total);
                     }
                     if (dayData.paid > 0) {
                         plainBill += twoCols(`${shortDate}(Paid)`, `-Rs ${dayData.paid.toFixed(2)}`);
