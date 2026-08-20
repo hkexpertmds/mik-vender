@@ -6394,16 +6394,29 @@
            
             // NEW: Generate Plain Text for Thermal Printer
             if (custName !== "Summary" && currentReportData) {
-                const center = (text, width = 32) => {
-                    const spaces = Math.max(0, Math.floor((width - text.length) / 2));
+                const LINE_WIDTH = 32; // Standard thermal printer width
+                const center = (text) => {
+                    const spaces = Math.max(0, Math.floor((LINE_WIDTH - text.length) / 2));
                     return ' '.repeat(spaces) + text;
                 };
-                const line = (char = '-', width = 32) => char.repeat(width) + '\n';
-                const twoCols = (left, right, width = 32) => {
+                const line = (char = '-') => char.repeat(LINE_WIDTH) + '\n';
+                const twoCols = (left, right) => {     
                     const rightLen = right.length;
                     const leftLen = left.length;
-                    const spaces = Math.max(1, width - leftLen - rightLen);
-                    return left + ' '.repeat(spaces) + right + '\n';
+                    const spaces = Math.max(1, LINE_WIDTH - leftLen - rightLen);
+                    return left + ' '.repeat(spaces) + right;
+                };
+                const formatItemRow = (date, item, qty, total) => {
+                    // DATE: 5 chars (DD-MM)
+                    // ITEM: 12 chars (truncated if longer)
+                    // QTY: 4 chars (e.g., 1.5)
+                    // TOTAL: 7 chars (e.g., 97.50)
+                    // Total = 5 + 1 + 12 + 1 + 4 + 1 + 7 = 31. One space left for padding.
+                    const dateStr = date.padEnd(5);
+                    const itemStr = item.substring(0, 12).padEnd(12);
+                    const qtyStr = String(qty).padEnd(4);
+                    const totalStr = String(total).padStart(7);
+                    return `${dateStr} ${itemStr} ${qtyStr} ${totalStr}`;
                 };
 
                 let plainBill = '';
