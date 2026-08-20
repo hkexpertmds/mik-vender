@@ -6227,8 +6227,7 @@
                 closingBalance,
                 dailyData,
                 monthName,
-                sortedDates,
-                currentMonthTransactions
+                sortedDates
             };
 
             return { html: html, data: reportData };
@@ -6406,19 +6405,6 @@
                     const spaces = Math.max(1, width - leftLen - rightLen);
                     return left + ' '.repeat(spaces) + right + '\n';
                 };
-                 // New fourCols function for the tabular format
-                const fourColsFormatted = (c1, c2, c3, c4) => {
-                    const w1 = 5;  // DATE (DD-MM)
-                    const w2 = 11; // ITEM
-                    const w3 = 5;  // QTY
-                    const w4 = 9;  // TOTAL
-
-                    let col1 = String(c1).substring(0, w1).padEnd(w1);
-                    let col2 = String(c2).substring(0, w2).padEnd(w2);
-                    let col3 = String(c3).substring(0, w3).padEnd(w3);
-                    let col4 = String(c4).padStart(w4);
-                    return col1 + col2 + col3 + col4 + '\n';
-                };
 
                 let plainBill = '';
                 plainBill += center(companyName.toUpperCase()) + '\n';
@@ -6426,55 +6412,24 @@
                 plainBill += line();
                 plainBill += center(`Bill for ${currentReportData.monthName}`) + '\n';
                 plainBill += `Customer: ${custName}\n`;
-                let mobileForPrint = (currentReportCustomerDetails && currentReportCustomerDetails.mobile) ? currentReportCustomerDetails.mobile : '';
-                if (!mobileForPrint) {
-                    let cObj = customers.find(c => c.name === custName);
-                    if (cObj && cObj.mobile) {
-                        mobileForPrint = cObj.mobile;
-                    }
-                }
-                if (mobileForPrint) {
-                    plainBill += `Mobile: ${mobileForPrint}\n`;
+                if (currentReportCustomerDetails && currentReportCustomerDetails.mobile) {
+                    plainBill += `Mobile: ${currentReportCustomerDetails.mobile}\n`;
                 }
                 plainBill += line();
-
-                // New header for the tabular format
-                plainBill += fourColsFormatted('DATE', 'ITEM', 'QTY', 'TOTAL');
+                plainBill += twoCols('Date', 'Amount');
                 plainBill += line();
 
-                currentMonthTransactions.forEach(t => {
-                    if (t.item === 'Payment') return; // Skip payments in this section
-
-                    let shortDate = convertToDDMMYYYY(t.date).substring(0, 5); // DD-MM
-
-                    let itemsToProcess = [];
-                    if (String(t.item || '').startsWith('[')) {
-                        try {
-                            let parsedItems = JSON.parse(t.item);
-                            if (Array.isArray(parsedItems)) itemsToProcess = parsedItems;
-                        } catch(e) {
-                             itemsToProcess = [{ item: 'Error', qty: 1, rate: 0, total: 0 }];
-                        }
-                    } else {
-                        itemsToProcess = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
+                currentReportData.sortedDates.forEach(date => {
+                    let dayData = currentReportData.dailyData[date];
+                    let shortDate = date.substring(0, 5); // DD-MM
+                    if (dayData.total > 0) {
+                        plainBill += twoCols(shortDate, `Rs ${dayData.total.toFixed(2)}`);
                     }
-
-                    itemsToProcess.forEach(it => {
-                        const itemAmount = parseFloat(it.total) || ((parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0));
-                        plainBill += fourColsFormatted(shortDate, it.item, String(it.qty), itemAmount.toFixed(2));
-                    });
+                    if (dayData.paid > 0) {
+                        plainBill += twoCols(`${shortDate}(Paid)`, `-Rs ${dayData.paid.toFixed(2)}`);
+                    }
                 });
 
-                // Show payments separately
-                let payments = currentMonthTransactions.filter(t => t.item === 'Payment');
-                if (payments.length > 0) {                    
-                    plainBill += line();
-                    plainBill += center('--- PAYMENTS RECEIVED ---') + '\n';
-                    payments.forEach(p => {
-                        let shortDate = convertToDDMMYYYY(p.date).substring(0, 5);
-                        plainBill += twoCols(`${shortDate} Payment`, `-Rs ${p.total.toFixed(2)}`);
-                    });
-                }
                 plainBill += line();
                 let obText = `Rs ${currentReportData.openingBalance.toFixed(2)}`;
                 plainBill += twoCols('Prev Balance', obText);
@@ -6490,7 +6445,6 @@
             } else {
                 currentBillAsPlainText = ""; // Clear it for other prints like summary
             } 
-            }
             if (window.Android && window.Android.printReceipt) {
                 window.Android.printReceipt(printHtml);
                 fetch(`${API_BASE}/print_command`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'Monthly Ledger Direct Print'})}).catch(e=>{});
