@@ -6412,21 +6412,35 @@
                 plainBill += line();
                 plainBill += center(`Bill for ${currentReportData.monthName}`) + '\n';
                 plainBill += `Customer: ${custName}\n`;
-                if (currentReportCustomerDetails && currentReportCustomerDetails.mobile) {
-                    plainBill += `Mobile: ${currentReportCustomerDetails.mobile}\n`;
+                // Robust mobile number fetching for thermal print
+                let mobileForPrint = (currentReportCustomerDetails && currentReportCustomerDetails.mobile) ? currentReportCustomerDetails.mobile : '';
+                if (!mobileForPrint) {
+                    let cObj = customers.find(c => c.name === custName);
+                    if (cObj && cObj.mobile) {
+                        mobileForPrint = cObj.mobile;
+                    }
+                }
+                if (mobileForPrint) {
+                    plainBill += `Mobile: ${mobileForPrint}\n`;
                 }
                 plainBill += line();
-                plainBill += twoCols('Date', 'Amount');
+                plainBill += center('--- DAILY SUMMARY ---') + '\n';
                 plainBill += line();
 
                 currentReportData.sortedDates.forEach(date => {
                     let dayData = currentReportData.dailyData[date];
                     let shortDate = date.substring(0, 5); // DD-MM
                     if (dayData.total > 0) {
-                        plainBill += twoCols(shortDate, `Rs ${dayData.total.toFixed(2)}`);
+                        plainBill += twoCols(`Date: ${shortDate}`, `Bill: Rs ${dayData.total.toFixed(2)}`);
+                        dayData.items.forEach(it => {
+                            // Indent items for clarity
+                            let itemLine = `  ${it.item} (${it.qty} x ${it.rate})`.padEnd(22);
+                            let totalLine = `Rs ${(it.qty * it.rate).toFixed(2)}`;
+                            plainBill += twoCols(itemLine, totalLine);
+                        });
                     }
                     if (dayData.paid > 0) {
-                        plainBill += twoCols(`${shortDate}(Paid)`, `-Rs ${dayData.paid.toFixed(2)}`);
+                        plainBill += twoCols(`Date: ${shortDate} (Paid)`, `-Rs ${dayData.paid.toFixed(2)}`);
                     }
                 });
 
