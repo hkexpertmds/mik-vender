@@ -6090,6 +6090,7 @@
         }
 
         let currentReportCustomerDetails = {};
+        let currentReportData = null;
 
         async function buildStatementHTML(custName, company, reportMonth, reportYear) {
             let openingBalance = 0;
@@ -6219,7 +6220,17 @@
                 </div>
             `;
 
-            return html;
+            const reportData = {
+                openingBalance,
+                currentMonthPurchases,
+                currentMonthPaid,
+                closingBalance,
+                dailyData,
+                monthName,
+                sortedDates
+            };
+
+            return { html: html, data: reportData };
         }
 
         async function renderSelfLedger() {
@@ -6245,7 +6256,14 @@
 
             const [reportYear, reportMonth] = selectedMonthYear.split('-').map(Number);
             div.innerHTML = "<p>Loading statement...</p>";
-            div.innerHTML = await buildStatementHTML(currentUser.name, currentUser.company, reportMonth, reportYear);
+            const statementData = await buildStatementHTML(currentUser.name, currentUser.company, reportMonth, reportYear);
+            if (statementData && statementData.html) {
+                div.innerHTML = statementData.html;
+                currentReportData = statementData.data;
+            } else {
+                div.innerHTML = statementData; // Fallback for error string
+                currentReportData = null;
+            }
         }
 
         function changeSelfMonth(offset) {
@@ -6282,7 +6300,14 @@
             const [reportYear, reportMonth] = monthVal.split('-').map(Number);
             
             div.innerHTML = "<p>Loading report...</p>";
-            div.innerHTML = await buildStatementHTML(currentReportCustName, currentUser.company, reportMonth, reportYear);
+            const statementData = await buildStatementHTML(currentReportCustName, currentUser.company, reportMonth, reportYear);
+            if (statementData && statementData.html) {
+                div.innerHTML = statementData.html;
+                currentReportData = statementData.data;
+            } else {
+                div.innerHTML = statementData; // Fallback for error string
+                currentReportData = null;
+            }
         }
         
         function changeOwnerMonth(offset) {
@@ -6366,7 +6391,60 @@
             printHtml += cleanContent;
             printHtml += `<div style="margin-top:20px; text-align:right; font-weight:bold; font-size: 12px;">Authorized Signature / Stamp<br><br><br>_________________________</div>`;
             printHtml += `</body></html>`;
-            
+           
+            // NEW: Generate Plain Text for Thermal Printer
+            if (custName !== "Summary" && currentReportData) {
+                const center = (text, width = 32) => {
+                    const spaces = Math.max(0, Math.floor((width - text.length) / 2));
+                    return ' '.repeat(spaces) + text;
+                };
+                const line = (char = '-', width = 32) => char.repeat(width) + '\n';
+                const twoCols = (left, right, width = 32) => {
+                    const rightLen = right.length;
+                    const leftLen = left.length;
+                    const spaces = Math.max(1, width - leftLen - rightLen);
+                    return left + ' '.repeat(spaces) + right + '\n';
+                };
+
+                let plainBill = '';
+                plainBill += center(companyName.toUpperCase()) + '\n';
+                if (ownerMobile) plainBill += center('Mob: ' + ownerMobile) + '\n';
+                plainBill += line();
+                plainBill += center(`Bill for ${currentReportData.monthName}`) + '\n';
+                plainBill += `Customer: ${custName}\n`;
+                if (currentReportCustomerDetails && currentReportCustomerDetails.mobile) {
+                    plainBill += `Mobile: ${currentReportCustomerDetails.mobile}\n`;
+                }
+                plainBill += line();
+                plainBill += twoCols('Date', 'Amount');
+                plainBill += line();
+
+                currentReportData.sortedDates.forEach(date => {
+                    let dayData = currentReportData.dailyData[date];
+                    let shortDate = date.substring(0, 5); // DD-MM
+                    if (dayData.total > 0) {
+                        plainBill += twoCols(shortDate, `Rs ${dayData.total.toFixed(2)}`);
+                    }
+                    if (dayData.paid > 0) {
+                        plainBill += twoCols(`${shortDate}(Paid)`, `-Rs ${dayData.paid.toFixed(2)}`);
+                    }
+                });
+
+                plainBill += line();
+                let obText = `Rs ${currentReportData.openingBalance.toFixed(2)}`;
+                plainBill += twoCols('Prev Balance', obText);
+                plainBill += twoCols('This Month', `Rs ${currentReportData.currentMonthPurchases.toFixed(2)}`);
+                plainBill += twoCols('Paid', `-Rs ${currentReportData.currentMonthPaid.toFixed(2)}`);
+                plainBill += line();
+                let cbText = `Rs ${currentReportData.closingBalance.toFixed(2)}`;
+                plainBill += twoCols('TOTAL DUE', cbText);
+                plainBill += line();
+                plainBill += center('Thank you!') + '\n\n\n';
+
+                currentBillAsPlainText = plainBill;
+            } else {
+                currentBillAsPlainText = ""; // Clear it for other prints like summary
+            } 
             if (window.Android && window.Android.printReceipt) {
                 window.Android.printReceipt(printHtml);
                 fetch(`${API_BASE}/print_command`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({info:'Monthly Ledger Direct Print'})}).catch(e=>{});
