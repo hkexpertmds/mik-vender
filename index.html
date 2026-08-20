@@ -6394,16 +6394,13 @@
            
             // NEW: Generate Plain Text for Thermal Printer
             if (custName !== "Summary" && currentReportData) {
-                const center = (text, width = 32) => {
-                    const spaces = Math.max(0, Math.floor((width - text.length) / 2));
-                    return ' '.repeat(spaces) + text;
-                };
+                const center = (text, width = 32) => ' '.repeat(Math.max(0, Math.floor((width - text.length) / 2))) + text;
                 const line = (char = '-', width = 32) => char.repeat(width) + '\n';
-                const twoCols = (left, right, width = 32) => {
-                    const rightLen = right.length;
-                    const leftLen = left.length;
-                    const spaces = Math.max(1, width - leftLen - rightLen);
-                    return left + ' '.repeat(spaces) + right + '\n';
+                const twoCols = (left, right, width = 32) => left + ' '.repeat(Math.max(1, width - left.length - right.length)) + right + '\n';
+                const fourCols = (c1, c2, c3, c4, widths = [6, 12, 5, 9]) => {
+                    const pad = (str, len) => (String(str).length > len ? String(str).substring(0, len) : String(str).padEnd(len));
+                    const padLeft = (str, len) => (String(str).length > len ? String(str).substring(0, len) : String(str).padStart(len));
+                    return pad(c1, widths[0]) + pad(c2, widths[1]) + padLeft(c3, widths[2]) + padLeft(c4, widths[3]) + '\n';
                 };
 
                 let plainBill = '';
@@ -6412,37 +6409,27 @@
                 plainBill += line();
                 plainBill += center(`Bill for ${currentReportData.monthName}`) + '\n';
                 plainBill += `Customer: ${custName}\n`;
-                // Robust mobile number fetching for thermal print
                 let mobileForPrint = (currentReportCustomerDetails && currentReportCustomerDetails.mobile) ? currentReportCustomerDetails.mobile : '';
                 if (!mobileForPrint) {
                     let cObj = customers.find(c => c.name === custName);
-                    if (cObj && cObj.mobile) {
-                        mobileForPrint = cObj.mobile;
-                    }
+                    if (cObj && cObj.mobile) mobileForPrint = cObj.mobile;
                 }
-                if (mobileForPrint) {
-                    plainBill += `Mobile: ${mobileForPrint}\n`;
-                }
+                if (mobileForPrint) plainBill += `Mobile: ${mobileForPrint}\n`;
                 plainBill += line();
-                plainBill += center('--- DAILY SUMMARY ---') + '\n';
+                plainBill += fourCols('DATE', 'ITEM', 'QTY', 'TOTAL');
                 plainBill += line();
 
                 currentReportData.sortedDates.forEach(date => {
                     let dayData = currentReportData.dailyData[date];
                     let shortDate = date.substring(0, 5); // DD-MM
-                    if (dayData.total > 0) {
-                        plainBill += twoCols(`Date: ${shortDate}`, `Bill: Rs ${dayData.total.toFixed(2)}`);
+                    if (dayData.items.length > 0) {
                         dayData.items.forEach(it => {
                             const itemAmount = (parseFloat(it.qty) || 0) * (parseFloat(it.rate) || 0);
-                            let itemName = `  ${it.item} (${it.qty})`;
-                            if (itemName.length > 21) { // 21 to leave space for ' ' and right part
-                                itemName = itemName.substring(0, 20) + '.';
-                            }
-                            plainBill += twoCols(itemName, `Rs ${itemAmount.toFixed(2)}`);
+                            plainBill += fourCols(shortDate, it.item, String(it.qty), itemAmount.toFixed(2));
                         });
                     }
                     if (dayData.paid > 0) {
-                        plainBill += twoCols(`Date: ${shortDate} (Paid)`, `-Rs ${dayData.paid.toFixed(2)}`);
+                        plainBill += fourCols(shortDate, 'Payment', '-', `-${dayData.paid.toFixed(2)}`);
                     }
                 });
 
