@@ -3564,6 +3564,8 @@
                 alert(idx !== "" ? "Entry Updated Successfully!" : "New Entry Saved Successfully!");
                 if (data.item === 'Payment' && idx === "") {
                     showPaymentSlipOption(parseFloat(data.total), 'Cash', { paid_to: currentUser.name }, savedData.id, custName);
+                } else if (idx === "") {
+                    showDeliverySlipOption(savedData.id, custName);    
                 }
             } catch(e) { alert("Network error!"); }
             btn.innerText = idx !== "" ? "Update Entry" : "Save Entry"; btn.disabled = false;
@@ -4147,11 +4149,182 @@
 
         function showPaymentSlipOption(amount, method, details, transactionId, targetCustName = null) {
             document.getElementById('paymentSlipModal').classList.remove('hidden');
+            document.getElementById('paymentSlipModal').querySelector('h3').innerText = "Payment Recorded!";
+            document.getElementById('paymentSlipModal').querySelector('p').innerText = "Do you want to print a payment slip?";
             document.getElementById('btnPrintPaymentSlip').onclick = function() {
                 document.getElementById('paymentSlipModal').classList.add('hidden');
                 printPaymentSlip(amount, method, details, transactionId, targetCustName);
             };
         }
+        function showDeliverySlipOption(tId, custName) {
+            document.getElementById('paymentSlipModal').classList.remove('hidden');
+            document.getElementById('paymentSlipModal').querySelector('h3').innerText = "Delivery Recorded!";
+            document.getElementById('paymentSlipModal').querySelector('p').innerText = "Do you want to print a delivery slip?";
+            document.getElementById('btnPrintPaymentSlip').onclick = function() {
+                document.getElementById('paymentSlipModal').classList.add('hidden');
+                printDeliverySlipById(tId);
+            };
+        }
+
+        function printDeliverySlipById(tId) {
+            let t = transactions.find(x => String(x.id) === String(tId)) || serverPaginatedTrans.find(x => String(x.id) === String(tId));
+            if (!t) return alert("Transaction not found!");
+            printDeliverySlip(t);
+        }
+
+        function printDeliveryOrPaymentSlip(custName, dateStr, shift) {
+            let targetShift = shift.toLowerCase();
+            let cNameLower = custName.trim().toLowerCase();
+            let tDateStr = convertToDDMMYYYY(dateStr);
+            
+            let matchingTrans = transactions.filter(t => {
+                let dStr = convertToDDMMYYYY((t.date || '').trim());
+                let tShift = (t.shift || '').trim().toLowerCase();
+                let tCust = (t.cust || '').trim().toLowerCase();
+                return dStr === tDateStr && tCust === cNameLower && (tShift === targetShift || tShift === '') && t.shift !== 'General Bill';
+            });
+            
+            if (matchingTrans.length === 0) {
+                return alert("No entry found to print!");
+            }
+            
+            let deliveryTrans = matchingTrans.find(t => t.item !== 'Payment');
+            let paymentTrans = matchingTrans.find(t => t.item === 'Payment');
+            
+            if (deliveryTrans) {
+                printDeliverySlip(deliveryTrans);
+            } else if (paymentTrans) {
+                printPaymentSlipById(paymentTrans.id);
+            }
+        }
+
+        function printDeliverySlip(t) {
+            const deliveryDate = convertToDDMMYYYY(t.date);
+            const custName = t.cust;
+            let custMobile = '';
+            let custAddress = '';
+
+            let cObj = customers.find(c => c.name === custName);
+            if (cObj) {
+                custMobile = cObj.mobile || '';
+                custAddress = cObj.addr || '';
+            }
+
+            let companyName = '';
+            let ownerAddress = '';
+            let ownerMobile = '';
+            let companyLogo = '';
+
+            let ownerObj = users.find(u => (u.type === 'Owner' || u.type === 'Operator') && u.company === currentUser.company);
+            if (ownerObj) {
+                companyName = ownerObj.display_company || ownerObj.company || 'Dairy Ledger';
+                ownerAddress = ownerObj.address || ownerObj.addr || '';
+                ownerMobile = ownerObj.mobile || '';
+                companyLogo = ownerObj.company_logo || '';
+            } else {
+                companyName = currentUser.display_company || (currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger');
+                ownerAddress = currentUser.address || currentUser.addr || '';
+                ownerMobile = currentUser.mobile || '';
+                companyLogo = currentUser.company_logo || '';
+            }
+
+            let contactParts = [];
+            if (ownerAddress) contactParts.push(ownerAddress);
+            if (ownerMobile) contactParts.push(`<b>Mob:</b> ${ownerMobile}`);
+            let contactHtml = contactParts.length > 0 ? `<p style="text-align:center; margin:2px 0 10px 0; font-size:12px;">${contactParts.join(' | ')}</p>` : '';
+
+            let itemsArr = [];
+            try {
+                itemsArr = JSON.parse(t.item);
+                if (!Array.isArray(itemsArr)) throw new Error();
+            } catch(e) {
+                itemsArr = [{ item: t.item, qty: t.qty, rate: t.rate, total: t.total }];
+            }
+
+            let total = parseFloat(t.total || 0);
+
+            // Plain text for thermal print
+            const center = (text, width = 32) => {
+                const spaces = Math.max(0, Math.floor((width - text.length) / 2));
+                return ' '.repeat(spaces) + text;
+            };
+            const line = (char = '-', width = 32) => char.repeat(width) + '\n';
+            const twoCols = (left, right, width = 32) => {
+                const rightLen = right.length;
+                const leftLen = left.length;
+                const spaces = Math.max(1, width - leftLen - rightLen);
+                return left + ' '.repeat(spaces) + right + '\n';
+            };
+
+            let plainBill = '';
+            plainBill += center(companyName.toUpperCase()) + '\n';
+            if (ownerAddress) plainBill += center(ownerAddress) + '\n';
+            if (ownerMobile) plainBill += center('Mob: ' + ownerMobile) + '\n';
+            plainBill += line();
+            plainBill += center('DELIVERY SLIP') + '\n';
+            plainBill += twoCols(`Date: ${deliveryDate}`, `Shift: ${t.shift || 'Morning'}`);
+            plainBill += `Customer: ${custName}\n`;
+            if (custMobile) plainBill += `Mobile: ${custMobile}\n`;
+            plainBill += line();
+            plainBill += twoCols('Item(Qty)', 'Amount');
+            plainBill += line();
+
+            itemsArr.forEach(it => {
+                let rowAmt = parseFloat(it.total || 0);
+                if (isNaN(rowAmt) || rowAmt === 0) rowAmt = (parseFloat(it.qty)||0) * (parseFloat(it.rate)||0);
+                let itemName = `${it.item} (${it.qty})`;
+                if (itemName.length > 20) itemName = itemName.substring(0, 19) + '.';
+                plainBill += twoCols(itemName, `Rs ${rowAmt.toFixed(2)}`);
+            });
+
+            plainBill += line();
+            plainBill += twoCols('TOTAL AMOUNT', `Rs ${total.toFixed(2)}`);
+            plainBill += line();
+            plainBill += center('Thank you!') + '\n\n\n';
+
+            currentBillAsPlainText = plainBill;
+
+            let docTitle = `Delivery_Slip_${custName.replace(/[^a-zA-Z0-9]/g, '_')}_${deliveryDate}`;
+            let printHtml = `<html><head><title>${docTitle}</title><style>
+                body { font-family: sans-serif; padding: 20px; color: black; max-width: 800px; margin: auto; }
+                h2, h4 { text-align: center; margin: 5px 0; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 15px; }
+                .total { text-align: right; font-size: 18px; margin-top: 15px; }
+                .info-table { width: 100%; margin: 10px 0; border: none; }
+                .info-table td { border: none; padding: 2px 0; font-size: 14px; }
+                @media print { .no-print { display: none; } @page { size: A4; margin: 15mm; } body { max-width: 100%; padding: 0; } }
+            </style></head><body>
+                <div style="position:relative; text-align:center; min-height:60px;">
+                    ${companyLogo ? `<img src="${companyLogo}" style="max-width:60px; max-height:50px; position:absolute; left:0; top:0; object-fit:contain;">` : ''}
+                    <h2 style="margin-top:0;">${companyName.toUpperCase()}</h2>
+                    ${contactHtml}
+                </div>
+                <h4>Delivery Receipt</h4>
+                <hr>
+                <table class="info-table">
+                    <tr><td><b>Date:</b> ${deliveryDate}</td><td style="text-align:right;"><b>Shift:</b> ${t.shift || 'Morning'}</td></tr>
+                    <tr><td><b>Customer:</b> ${custName}</td><td style="text-align:right;">${custMobile ? `<b>Mobile:</b> ${custMobile}` : ''}</td></tr>
+                    ${custAddress ? `<tr><td colspan="2"><b>Address:</b> ${custAddress}</td></tr>` : ''}
+                </table>
+                <table>
+                    <tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>
+                    ${itemsArr.map(it => {
+                        let rowAmt = parseFloat(it.total || 0);
+                        if (isNaN(rowAmt) || rowAmt === 0) rowAmt = (parseFloat(it.qty)||0) * (parseFloat(it.rate)||0);
+                        return `<tr><td>${it.item}</td><td>${it.qty}</td><td>₹${parseFloat(it.rate||0).toFixed(2)}</td><td>₹${rowAmt.toFixed(2)}</td></tr>`;
+                    }).join('')}
+                </table>
+                <div class="total"><b>Total: ₹${total.toFixed(2)}</b></div>
+                <hr style="margin-top:20px;">
+                <p style="text-align:center; font-size:12px;">Thank you!</p>
+            </body></html>`;
+
+            window.currentPrintFileName = docTitle;
+            document.getElementById('printPreviewFrame').srcdoc = printHtml;
+            document.getElementById('printPreviewModal').classList.remove('hidden');
+        }
+
 
         function printPaymentSlipById(tId) {
             let t = transactions.find(x => String(x.id) === String(tId)) || serverPaginatedTrans.find(x => String(x.id) === String(tId));
@@ -4780,6 +4953,8 @@
                 let printSlipBtn = '';
                 if (t.item === 'Payment') {
                     printSlipBtn = `<button class="badge" style="background:var(--success)" onclick="printPaymentSlipById('${t.id}')">🖨️ Receipt</button>`;
+                } else {
+                    printSlipBtn = `<button class="badge" style="background:var(--success)" onclick="printDeliverySlipById('${t.id}')">🖨️ Slip</button>`;    
                 }
                 
                     let srNo = ((currentTransPage - 1) * transItemsPerPage) + displayIdx + 1;
@@ -5785,6 +5960,14 @@
                 } else if (existingPayTrans) {
                     await fetch(`${API_BASE}/transactions/${existingPayTrans.id}`, { method: 'DELETE' });
                     transactions = transactions.filter(t => t.id !== existingPayTrans.id);
+                }
+
+                if (itemsToSave.length > 0 && !existingItemsTrans) {
+                    // Find the newly saved delivery transaction ID to show print prompt
+                    let newT = transactions.find(t => convertToDDMMYYYY(t.date) === currentFeedDateStr && t.cust === c.name && t.item !== 'Payment' && t.shift === currentFeedShift);
+                    if (newT) {
+                        showDeliverySlipOption(newT.id, c.name);
+                    }
                 }
             } catch(e) { alert("Network error!"); console.error(e); }
             renderTransFeed(); renderTrans();
