@@ -3562,6 +3562,9 @@
                 renderTransFeed(); renderTrans();
                 closeEditTransModal();
                 alert(idx !== "" ? "Entry Updated Successfully!" : "New Entry Saved Successfully!");
+                if (data.item === 'Payment' && idx === "") {
+                    showPaymentSlipOption(parseFloat(data.total), 'Cash', { paid_to: currentUser.name }, savedData.id, custName);
+                }
             } catch(e) { alert("Network error!"); }
             btn.innerText = idx !== "" ? "Update Entry" : "Save Entry"; btn.disabled = false;
         }
@@ -4142,24 +4145,55 @@
             if(btn) { btn.innerText = "Submit Payment"; btn.disabled = false; }
         }
 
-        function showPaymentSlipOption(amount, method, details, transactionId) {
+        function showPaymentSlipOption(amount, method, details, transactionId, targetCustName = null) {
             document.getElementById('paymentSlipModal').classList.remove('hidden');
             document.getElementById('btnPrintPaymentSlip').onclick = function() {
                 document.getElementById('paymentSlipModal').classList.add('hidden');
-                printPaymentSlip(amount, method, details, transactionId);
+                printPaymentSlip(amount, method, details, transactionId, targetCustName);
             };
         }
 
-        function printPaymentSlip(amount, method, details, transactionId) {
-            const paymentDate = formatDate(new Date());
-            const custName = currentUser.name;
-            const custMobile = currentUser.mobile || '';
-            const custAddress = currentUser.addr || '';
+        function printPaymentSlipById(tId) {
+            let t = transactions.find(x => String(x.id) === String(tId)) || serverPaginatedTrans.find(x => String(x.id) === String(tId));
+            if (!t) return alert("Transaction not found!");
+            let amount = Math.abs(parseFloat(t.total || t.rate || 0));
+            let method = 'Cash';
+            let details = {};
+            printPaymentSlip(amount, method, details, t.id, t.cust);
+        }
 
-            let companyName = currentUser.display_company || (currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger');
-            let ownerAddress = currentUser.address || currentUser.addr || '';
-            let ownerMobile = currentUser.mobile || '';
-            let companyLogo = currentUser.company_logo || '';
+        function printPaymentSlip(amount, method, details, transactionId, targetCustName = null) {
+            const paymentDate = formatDate(new Date());
+             let custName = targetCustName || currentUser.name;
+            let custMobile = '';
+            let custAddress = '';
+
+            let cObj = customers.find(c => c.name === custName);
+            if (cObj) {
+                custMobile = cObj.mobile || '';
+                custAddress = cObj.addr || '';
+            } else if (currentUser.type === 'Customer') {
+                custMobile = currentUser.mobile || '';
+                custAddress = currentUser.addr || '';
+            }
+
+            let companyName = '';
+            let ownerAddress = '';
+            let ownerMobile = '';
+            let companyLogo = '';
+
+            let ownerObj = users.find(u => (u.type === 'Owner' || u.type === 'Operator') && u.company === currentUser.company);
+            if (ownerObj) {
+                companyName = ownerObj.display_company || ownerObj.company || 'Dairy Ledger';
+                ownerAddress = ownerObj.address || ownerObj.addr || '';
+                ownerMobile = ownerObj.mobile || '';
+                companyLogo = ownerObj.company_logo || '';
+            } else {
+                companyName = currentUser.display_company || (currentUser.company && currentUser.company !== 'Default' ? currentUser.company : 'Dairy Ledger');
+                ownerAddress = currentUser.address || currentUser.addr || '';
+                ownerMobile = currentUser.mobile || '';
+                companyLogo = currentUser.company_logo || '';
+            }
 
             let contactParts = [];
             if (ownerAddress) contactParts.push(ownerAddress);
@@ -4742,8 +4776,15 @@
                 let hideClass = ''; 
                 if(isMilkMan() && !allowedDates.includes(convertToDDMMYYYY(t.date))) hideClass = 'hidden'; 
                 const totalDisplay = t.item === 'Payment' ? `<span style="color:var(--success)">-₹${Math.abs(parseFloat(t.total)).toFixed(2)}</span>` : `₹${parseFloat(t.total).toFixed(2)}`;
+                 
+                let printSlipBtn = '';
+                if (t.item === 'Payment') {
+                    printSlipBtn = `<button class="badge" style="background:var(--success)" onclick="printPaymentSlipById('${t.id}')">🖨️ Receipt</button>`;
+                }
+                
                     let srNo = ((currentTransPage - 1) * transItemsPerPage) + displayIdx + 1;
                     html += `<tr style="animation-delay:${Math.min(displayIdx * 0.02, 0.5)}s"><td><b>${srNo}</b></td><td>${t.date}</td><td>${t.cust}</td><td>${displayItem}</td><td>${totalDisplay}</td><td style="white-space:nowrap;">
+                         ${printSlipBtn}
                         <button class="badge ${hideClass}" style="background:var(--warning); color:black" onclick="editTrans(${displayIdx})">Edit</button>
                         <button class="badge ${hideClass}" style="background:var(--danger)" onclick="deleteItem(${displayIdx}, 'trans')">Del</button>
                     </td></tr>`; 
@@ -5737,6 +5778,10 @@
                     if(savedData.success === false) throw new Error(savedData.message);
                     if(existingPayTrans) { let tIdx = transactions.findIndex(t=>t.id===existingPayTrans.id); transactions[tIdx] = savedData; }
                     else transactions.push(savedData);
+                      
+                    if (!existingPayTrans) {
+                        showPaymentSlipOption(payAmt, 'Cash', { paid_to: currentUser.name }, savedData.id, c.name);
+                    }
                 } else if (existingPayTrans) {
                     await fetch(`${API_BASE}/transactions/${existingPayTrans.id}`, { method: 'DELETE' });
                     transactions = transactions.filter(t => t.id !== existingPayTrans.id);
@@ -6263,6 +6308,7 @@
             currentMonthTransactions.forEach(t => {
                 if (t.item === 'Payment') {
                     paymentRecords.push({
+                        id: t.id,
                         date: t.date,
                         amount: Math.abs(parseFloat(t.total || t.rate || 0))
                     });
@@ -6280,7 +6326,7 @@
                 <div style="margin-top: 15px; padding: 12px 10px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.2); background: rgba(16, 185, 129, 0.05); font-size: 13px; text-align: left;">
                     <h4 style="margin: 0 0 8px 0; color: var(--success); font-size: 14px; border-bottom: 1px dashed rgba(16, 185, 129, 0.3); padding-bottom: 4px;">💸 Payment History (इस महीने का भुगतान)</h4>
                     <ul style="margin: 0; padding-left: 20px; color: var(--text); line-height: 1.6;">
-                        ${paymentRecords.map(p => `<li>तारीख: <b>${p.date}</b> &nbsp;-&nbsp; राशि: <b style="color:var(--success)">₹${p.amount.toFixed(2)}</b></li>`).join('')}
+                        ${paymentRecords.map(p => `<li>तारीख: <b>${p.date}</b> &nbsp;-&nbsp; राशि: <b style="color:var(--success)">₹${p.amount.toFixed(2)}</b> &nbsp;<button class="badge" style="background:var(--success); padding: 2px 6px; font-size: 10px; line-height: 1;" onclick="printPaymentSlipById('${p.id}')">🖨️ Slip</button></li>`).join('')}
                     </ul>
                 </div>`;
             } else {
