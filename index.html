@@ -568,6 +568,7 @@
                 <div style="display:flex; gap:10px; align-items:center; flex: 1 1 200px;">
                     <select id="filterMilkMan" onchange="populateTransCustSelect(); renderTransFeed(); renderTrans();" class="hidden" style="flex:1; padding: 8px; background:var(--primary); color:white; border:none; border-radius: 6px; font-weight:bold; margin:0;"></select>
                     <button class="badge" style="background:var(--warning); color:black; padding:8px 12px; font-size:13px; font-weight:bold; border-radius:6px; white-space:nowrap; margin-left:auto;" onclick="openSeqModal()">🔢 Edit Seq</button>
+                    <button class="btn-save" id="btnShowNewTrans" style="width:auto; padding:8px 15px; margin:0; white-space:nowrap;" onclick="openNewTransModal()">➕ New Entry</button>
                 </div>
                 <div style="display:flex; gap:8px; flex: 1 1 150px;">
                     <button class="btn-tab active-tab" style="flex: 1; padding: 8px; margin:0;" id="btnShiftM" onclick="setFeedShift('Morning')">🌅 Morning</button>
